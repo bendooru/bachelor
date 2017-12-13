@@ -1,0 +1,4 @@
+build/*
+fig/*
+data/avg_times
+*.swp
