@@ -1,0 +1,13 @@
+#!/bin/bash
+
+awk '
+  NR>1 {
+    arr[$1]   += $2
+    count[$1] += 1
+  }
+  END {
+    for (a in arr) {
+      printf "%i %.3f\n", a, arr[a] / count[a]
+    }
+  }
+' data/all_times > data/avg_times

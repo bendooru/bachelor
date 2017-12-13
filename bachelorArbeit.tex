@@ -1,0 +1,271 @@
+\documentclass[
+  paper=a4,
+  DIV=14,
+  fontsize=12pt,
+  titlepage,
+  bibliography=totoc,
+  pagesize=pdftex
+]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[autostyle=true]{csquotes}
+\usepackage{enumitem}
+\usepackage{mathtools,amsfonts,amssymb,amsthm,mathrsfs}
+\usepackage{lmodern}
+\usepackage{dsfont}
+
+\usepackage[pdftex,hidelinks]{hyperref}
+
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\addbibresource{bachelor.bib}
+
+% serif > sans-serif
+\setkomafont{sectioning}{\rmfamily\bfseries\boldmath}
+\setkomafont{descriptionlabel}{\rmfamily\bfseries\boldmath}
+% prefix all numbers with section
+\numberwithin{figure}{section}
+\numberwithin{equation}{section}
+\numberwithin{table}{section}
+
+% set default numbered list style to (i), (ii), ...
+\setlist[enumerate,1]{label=(\roman*)}
+
+% use mathds instead of mathbb
+\newcommand*\setZ{\mathds{Z}}
+\newcommand*\setR{\mathds{R}}
+\newcommand*\setC{\mathds{C}}
+\newcommand*\setQ{\mathds{Q}}
+\newcommand*\setN{\mathds{N}}
+\newcommand*\setK{\mathds{K}}
+\newcommand*\setP{\mathds{P}}
+\newcommand*\ii{\mathrm{i}}
+
+% number a single equation in unnumbered environment
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+
+% shorthands
+\newcommand*\ideal[1]{\left\langle #1 \right\rangle}
+\newcommand*\puiseux[2]{#1\{\!\{#2\}\!\}}
+\newcommand*\CCt{\puiseux{\setC}{t}}
+
+\let\vec\mathbf
+\let\idealof\trianglelefteq
+
+% operators
+\DeclareMathOperator{\Mat}{Mat}
+\DeclareMathOperator{\lcm}{lcm}
+\DeclareMathOperator{\Trop}{Trop}
+\DeclareMathOperator{\initial}{in}
+
+% use same counters for all environments
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{example}[definition]{Example}
+
+% adjust numbering
+\numberwithin{definition}{section}
+
+\title{Massively Parallel Computation of Tropical Varieties}
+\subtitle{Bachelor's Thesis}
+\author{Dominik Bendle}
+\publishers{supervised by Janko Böhm,\\TU Kaiserslautern}
+\date{\today}
+
+\begin{document}
+\pagestyle{headings}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Overview}
+
+Give general introduction to topic
+
+Describe work done at ITWM and their assistance
+
+Mention $\mathcal G_{3,8}$ which has not been computed prior and give some properties of the
+fan.
+
+Work exposed several memory leaks and small errors in \textsc{Singular} kernel, were able
+to be fixed.
+
+% TODO more motivation
+
+In the second section we will introduce the basic concepts of polyhedral fans, tropical
+varieties, their various interpretations, and Puiseux series rings which we are
+fundamental to our results. In the third section we describe Petri nets as a language to
+formulate parallelizable workflows.
+
+% TODO more here
+
+\section{Computing Tropical Varieties}
+
+Tropical geometry arises in various contexts and allows numerous interpretations, three of
+which are presented here. We then focus on computing tropical varieties in polynomial
+rings over fields with valuations using Newton polygons.
+
+Computing tropical varieties follows the general structure of a fan traversal:
+Interpreting the maximal cones of a polyhedral fan together with their adjacency relations
+as a connected graph, we may realize the fan traversal as a simple graph traversal.
+
+\subsection{Gröbner Fans}
+
+We start off the section with some basic definitions from convex geometry. See for example
+\cite{compGrobFan} and \cite{SturmGBCP}.
+
+\begin{definition}[Polyhedral Cones and Fans]
+  Fix a field $K$ and consider the vector space $K^n$. Recall that a set of the form $C =
+  \{ x \in K^n : Ax \leq b \}$ for some matrix $A \in \Mat(m\times n, K)$ and $b \in K^m$
+  is called a polyhedron or polytope if $C$ is bounded. If on the other hand $b=0$ then
+  $C$ is called a \emph{polyhedral cone}. Equivalently, a polyhedral cone $C$ is the
+  positive span of finitely many vectors in $K^n$.
+  \label{def:polyhedralFan}
+\end{definition}
+Now \ldots
+
+\begin{definition}[Initial Forms and Tropical Varieties]
+  Let $w \in \setR^n$, usually called a \emph{weight vector} and consider a polynomial $f
+  \in K[\vec x]$ of the form $f = \sum_{\alpha \in \setN^n} c_\alpha \cdot \vec x^\alpha$.
+  We define the \emph{initial form} of $f$ with respect to $w$ as
+  \[
+    \initial_w(f) = \sum_{w\alpha + \nu(c_\alpha) \text{ minimal}}
+    \overline{c_\alpha \cdot p^{-\nu(\alpha)}} \cdot x^\alpha
+    \in \mathfrak K[\vec x].
+  \]
+  Given an ideal $I \idealof K[\vec x]$ this naturally leads to the \emph{initial ideal}
+  $\initial_w(I) = \ideal{\initial_w(f) : f\in I}$ of $I$. Finally, we may define the
+  \emph{tropical variety}
+  \[
+    \Trop(I) := \{ w\in \setR^n \mid \initial_w(I) \text{ is monomial-free} \}.
+  \]
+  of $I$.
+  \label{def:tropicalVariety}
+\end{definition}
+
+\subsection{Tropical Prevarieties}
+
+\subsection{Newton Polygon Method}
+
+We focus on a new approach introduced by Yue Ren and Tommy Hofmann which uses Newton
+polygons to compute tropical varieties \cite{tropPointsLinks}. For this we fix an
+algebraically closed field $K$ with non-trivial valuation $v:K\to\setR \cup \{\infty\}$
+and residue field $\mathfrak R$, i.e. $\mathfrak R = R/\mathfrak m_R$ for the local ring
+$R = \{ x \in K : v(x) \geq 0 \}$, with a uniformizing parameter $p\in \mathcal O_K$.
+Denote $K[\vec x] = K[x_1, \ldots, x_n]$.
+
+% TODO
+The definition given in \ref{def:tropicalVariety} is the standard definition of tropical
+varieties used in the general algorithms, however in this thesis we want to consider a
+different formulation of this object. The following result is fundamental to our approach
+to the computation of tropical varieties:
+
+\begin{theorem}[Fundamental Theorem of Tropical Geometry]
+  Let $K$ be an algebraically closed field with non-trivial valuation and $p\in \mathcal
+  O_K$ as above. Then
+  \[
+    \Trop(I) = \overline{v(V(I) \cap (K^\ast)^n)},
+  \]
+  where $\overline{(\cdot)}$ denotes the closure in the Euclidean topology.
+  % TODO
+  \label{thm:fundamentalThmTropicalGeometry}
+\end{theorem}
+
+This together with our results on Newton polygons allows us to determine points in
+$\Trop(I)$ without having to explicitly compute points on $V(I)$. See \cite{compTropVar}.
+
+\subsection{Puiseux Series Rings and Puiseux Expansions}
+
+While we did not specify the field $K$ in the previous subsection, our algorithms
+explicitly deal with the field $K = \CCt$ of Puiseux series in the indeterminate
+$t$. While the computations using Newton polygons only depend on the valuation of ring
+elements, in some rare cases these methods can fail to produce a result, thus requiring us
+to actually compute the variety of a zero-dimensional ideal. Hence we study this field and
+its polynomial rings in greater detail.
+
+First goal: slight refactoring of existing \textsc{Singular} code and removing dependency on
+Magma. Use newly developed procedures for computing Puiseux expansions.
+
+\section{Parallelization}
+
+Use Petri nets as a framework to parallelize the traversal of tropical fans.
+
+\subsection{Petri Nets}
+
+Basically: GPI-Space and Petri nets.
+
+\subsection{Traversing a Fan in Parallel}
+
+We formulate the traversal algorithm into a Petri net.
+
+Standard approach relying on a starting cone procedure and a \emph{neighbour oracle}.
+
+\subsection{Existing Methods for Fan Traversals}
+
+As previously mentioned we heavily rely on work done by Christian Reinbold on GIT-fans.
+\dots
+
+Introduce GIT-fans as similarly structured object
+
+Adapting existing code base
+
+\section{Performance and Scalability}
+
+Benchmark speedup through parallelization.
+
+Compute \enquote{big} examples to get a comparison.
+
+In particular consider important examples of the tropical Grassmanians
+
+\subsection{Tropical Grassmannians}
+
+\begin{definition}[Grassmannians]
+  Let $n \in \setN_{>0}$ and $k \in \setN$ with $0 \leq k \leq n$, then the
+  \emph{Grassmannian} of $k$-planes in $K^n$ is the set of all $k$-dimensional linear
+  subspaces of $K^n$, usually denoted by $G(k, n)$.
+\end{definition}
+
+Our goal is to give these sets the structure of an affine variety which in turn allows us
+to study their tropical variety. This is achieved by embedding a Grassmannian $G(k, n)$
+into $K^{\binom nk}$ via the so-called \emph{Plücker embedding}:
+
+\dots
+% TODO
+
+\begin{definition}[Tropical Grassmannians]
+  By the above a Grassmannian can be viewed as a homogeneous ideal $G(k,n) \idealof K[ p_U
+  : U \subset \{0, \dots, n \}, |U|=k ]$ with Plücker coordinates $p_U$ which defines a
+  determinantal variety $V(G(k, n))$. We write $\mathcal G_{k,n} := \Trop(G(k,n))$.
+\end{definition}
+
+\begin{figure}[htbp]
+  \begin{center}
+    \input{fig/scaling.tex}
+  \end{center}
+  \caption{Running times of computing $\mathcal{G}_{3,8}$}
+  \label{fig:g38scaling}
+\end{figure}
+
+In figure~\ref{fig:g38scaling} we see that \dots and so on.
+
+\begin{figure}[htbp]
+  \begin{center}
+    \input{fig/efficiency.tex}
+  \end{center}
+  \caption{Parallelization efficiency of computing $\mathcal{G}_{3,8}$}
+  \label{fig:g38efficiency}
+\end{figure}
+
+\subsection{Practical Optimizations}
+
+Optimization of certain edge cases
+
+\newpage
+\listoffigures
+\printbibliography
+
+\end{document}
+% vim: spell spelllang=en
