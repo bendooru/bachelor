@@ -57,6 +57,7 @@
 \DeclareMathOperator{\lcm}{lcm}
 \DeclareMathOperator{\Trop}{Trop}
 \DeclareMathOperator{\initial}{in}
+\DeclareMathOperator{\face}{face}
 
 % use same counters for all environments
 \theoremstyle{definition}
@@ -117,19 +118,61 @@ as a connected graph, we may realize the fan traversal as a simple graph travers
 
 \subsection{Gröbner Fans}
 
-We start off the section with some basic definitions from convex geometry. See for example
-\cite{compGrobFan} and \cite{SturmGBCP}.
+One way of looking at the tropical variety of a polynomial ideal $I \idealof K[x_1, \dots,
+x_n]$ is to consider its Gröbner fan. This fan partitions the space $\setR^n$ into
+polyhedral cones which contain all weight vectors $w\in \setR^n$ that define the same
+initial ideal of $I$. While this fan is a highly interesting object of study in and on
+itself, by restricting the fan to those cones which correspond to monomial-free initial
+ideals, we obtain the tropical variety of the given ideal.
 
-\begin{definition}[Polyhedral Cones and Fans]
-  Fix a field $K$ and consider the vector space $K^n$. Recall that a set of the form $C =
-  \{ x \in K^n : Ax \leq b \}$ for some matrix $A \in \Mat(m\times n, K)$ and $b \in K^m$
-  is called a polyhedron or polytope if $C$ is bounded. If on the other hand $b=0$ then
-  $C$ is called a \emph{polyhedral cone}. Equivalently, a polyhedral cone $C$ is the
-  positive span of finitely many vectors in $K^n$.
+We start off this section with some basic definitions from convex geometry which will lead
+to the definition of the Gröbner fan of an ideal. This will then allow us to define
+tropical varieties and demonstrate their connection to the Gröbner fan. For this we mainly
+focus on definitions and results found in \cite{compGrobFan} and \cite{SturmGBCP}. The
+first step towards defining a fan is to understand the very important concept of polyhedra
+and polyhedral cones:
+
+\begin{definition}[Polyhedral Cones]
+  Recall that a set of the form $C = \{ x \in \setR^n : Ax \leq b \}$ for some matrix $A
+  \in \Mat(m\times n, \setR)$ and $b \in \setR^m$ is called a polyhedron and if
+  additionally $C$ is bounded it is called a polytope. If on the other hand $b=0$ then $C$
+  is called a \emph{polyhedral cone}. Equivalently, a polyhedral cone $C$ is the positive
+  span of finitely many vectors in $K^n$.
+  \label{def:polyhedralCone}
+\end{definition}
+
+For a polyhedron $P \subseteq \setR^n$ we further define its dimension as the dimension of
+the smallest affine linear space containing $P$. Consider now an element $w \in \setR^n$,
+then we define the set $\face_w(P) = \{ u \in P : \ideal{w,u} \geq \ideal{w,v} \text{ for
+all } v\in P\}$ where $\ideal{\cdot,\cdot}$ is the standard scalar product on $\setR^n$.
+Surprisingly enough, we call a subset of $P$ of the form $\varnothing$ or $\face_w(P)$ a
+\emph{face} of $P$. For example, the trivial faces of $P$ are $\varnothing$ by definition
+and $P = \face_0(P)$. Clearly, a face of $P$ is a polyhedron itself, so we call it a facet
+if its has dimension exactly one less than $P$. The notion of faces is important for the
+next definition:
+
+\begin{definition}[Polyhedral Fan]
+  Let $\mathcal C$ be a collection of polyhedra in $\setR^n$. We call $\mathcal C$ a
+  \emph{polyhedral complex} if
+  \begin{enumerate}
+    \item all non-empty faces of $P$ are in $\mathcal C$ for all $P \in \mathcal C$ and
+    \item for any $P,Q \in \mathcal C$ the intersection $P\cap Q$ is a face of both $P$
+      and $Q$.
+  \end{enumerate}
+  The support of $\mathcal C$ is $\bigcup_{P\in\mathcal C}P$ and we call $\mathcal C$ a
+  \emph{polyhedral fan} if all polyhedra in $C$ are polyhedral cones. Further, if the
+  support of a polyhedral fan is all of $\setR^n$ we call it \emph{complete}.
   \label{def:polyhedralFan}
 \end{definition}
-Now \ldots
 
+Intuitively, a polyhedral complex is a collection of polyhedra where intersecting
+arbitrary elements does not produce new polyhedra and -- more importantly -- if the
+intersection of two such polyhedra is a non-trivial face of both of them, they only
+\enquote{touch}.
+
+% TODO
+
+% make this more general
 \begin{definition}[Initial Forms and Tropical Varieties]
   Let $w \in \setR^n$, usually called a \emph{weight vector} and consider a polynomial $f
   \in K[\vec x]$ of the form $f = \sum_{\alpha \in \setN^n} c_\alpha \cdot \vec x^\alpha$.
@@ -143,13 +186,15 @@ Now \ldots
   $\initial_w(I) = \ideal{\initial_w(f) : f\in I}$ of $I$. Finally, we may define the
   \emph{tropical variety}
   \[
-    \Trop(I) := \{ w\in \setR^n \mid \initial_w(I) \text{ is monomial-free} \}.
+    \Trop(I) := \{ w \in \setR^n \mid \initial_w(I) \text{ is monomial-free} \}.
   \]
   of $I$.
   \label{def:tropicalVariety}
 \end{definition}
 
 \subsection{Tropical Prevarieties}
+
+See \cite{compTropVar}.
 
 \subsection{Newton Polygon Method}
 
@@ -178,7 +223,7 @@ to the computation of tropical varieties:
 \end{theorem}
 
 This together with our results on Newton polygons allows us to determine points in
-$\Trop(I)$ without having to explicitly compute points on $V(I)$. See \cite{compTropVar}.
+$\Trop(I)$ without having to explicitly compute points on $V(I)$.
 
 \subsection{Puiseux Series Rings and Puiseux Expansions}
 
@@ -198,7 +243,11 @@ Use Petri nets as a framework to parallelize the traversal of tropical fans.
 
 \subsection{Petri Nets}
 
-Basically: GPI-Space and Petri nets.
+Introduce Petri nets theoretically
+
+\subsection{GPI-Space}
+
+Implementation with extensions
 
 \subsection{Traversing a Fan in Parallel}
 
