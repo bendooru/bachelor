@@ -1,6 +1,6 @@
 #!/usr/bin/gnuplot
 
-set terminal epslatex color size 16cm,11cm
+set terminal epslatex color size 15cm,10cm
 set output 'fig/scaling.tex'
 
 set style line 1 lc rgb '#0060ad' pt 7 ps 0.8 lt 1 lw 2 # --- blue
