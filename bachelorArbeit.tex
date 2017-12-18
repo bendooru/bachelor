@@ -179,26 +179,6 @@ intersection of two such polyhedra is a non-trivial face of both of them, they o
 
 % TODO
 
-% make this more general
-\begin{definition}[Initial Forms and Tropical Varieties]
-  Let $w \in \setR^n$, usually called a \emph{weight vector} and consider a polynomial $f
-  \in K[\vec x]$ of the form $f = \sum_{\alpha \in \setN^n} c_\alpha \cdot \vec x^\alpha$.
-  We define the \emph{initial form} of $f$ with respect to $w$ as
-  \[
-    \initial_w(f) = \sum_{w\alpha + \nu(c_\alpha) \text{ minimal}}
-    \overline{c_\alpha \cdot p^{-\nu(\alpha)}} \cdot x^\alpha
-    \in \mathfrak K[\vec x].
-  \]
-  Given an ideal $I \idealof K[\vec x]$ this naturally leads to the \emph{initial ideal}
-  $\initial_w(I) = \ideal{\initial_w(f) : f\in I}$ of $I$. Finally, we may define the
-  \emph{tropical variety}
-  \[
-    \Trop(I) := \{ w \in \setR^n \mid \initial_w(I) \text{ is monomial-free} \}.
-  \]
-  of $I$.
-  \label{def:tropicalVariety}
-\end{definition}
-
 \subsection{Tropical Prevarieties}
 
 See \cite{compTropVar}.
@@ -213,10 +193,31 @@ $R = \{ x \in K : v(x) \geq 0 \}$, with a uniformizing parameter $p\in \mathcal 
 Denote $K[\vec x] = K[x_1, \ldots, x_n]$.
 
 % TODO
-The definition given in \ref{def:tropicalVariety} is the standard definition of tropical
-varieties used in the general algorithms, however in this thesis we want to consider a
-different formulation of this object. The following result is fundamental to our approach
-to the computation of tropical varieties:
+
+\begin{definition}[Initial Forms and Tropical Varieties]
+  Let $w \in \setR^n$, usually called a \emph{weight vector} and consider a polynomial $f
+  \in K[\vec x]$ of the form $f = \sum_{\alpha \in \setN^n} c_\alpha \cdot \vec x^\alpha$.
+  We define the \emph{initial form} of $f$ with respect to $w$ as
+  \[
+    \initial_w(f) = \sum_{w\alpha + \nu(c_\alpha) \text{ minimal}}
+    \overline{c_\alpha \cdot p^{-\nu(c_\alpha)}} \cdot x^\alpha
+    \in \mathfrak K[\vec x].
+  \]
+  Given an ideal $I \idealof K[\vec x]$ this naturally leads to the \emph{initial ideal}
+  $\initial_w(I) = \ideal{\initial_w(f) : f\in I}$ of $I$. Finally, we may define the
+  \emph{tropical variety}
+  \[
+    \Trop(I) := \{ w \in \setR^n \mid \initial_w(I) \text{ is monomial-free} \}.
+  \]
+  of $I$.
+  \label{def:tropicalVarietyVal}
+\end{definition}
+
+% TODO
+The definition given in \ref{def:tropicalVarietyVal} is the standard definition of
+tropical varieties used in the general algorithms, however in this thesis we want to
+consider a different formulation of this object. The following result is fundamental to
+our approach to the computation of tropical varieties:
 
 \begin{theorem}[Fundamental Theorem of Tropical Geometry]
   Let $K$ be an algebraically closed field with non-trivial valuation and $p\in \mathcal
