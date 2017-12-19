@@ -135,9 +135,10 @@ ideals, we obtain the tropical variety of the given ideal.
 We start off this section with some basic definitions from convex geometry which will lead
 to the definition of the Gröbner fan of an ideal. This will then allow us to define
 tropical varieties and demonstrate their connection to the Gröbner fan. For this we mainly
-focus on definitions and results found in \cite{compGrobFan} and \cite{SturmGBCP}. The
-first step towards defining a fan is to understand the very important concept of polyhedra
-and polyhedral cones:
+focus on definitions and results found in \cite{compGrobFan} and \cite{SturmGBCP}. For the
+general introduction to tropical geometry later on we we also rely on
+\cite{sturmMacTrop}. The first step towards defining a fan is to understand the very
+important concept of polyhedra and polyhedral cones:
 
 \begin{definition}[Polyhedral Cones]
   Recall that a set of the form $C = \{ x \in \setR^n : Ax \leq b \}$ for some matrix $A
@@ -291,7 +292,7 @@ be interpreted as projective varieties.
 \end{definition}
 
 Thus, Grassmannians are in some sense a generalization of projective space and for example
-we will later be able to show that in facet $G(1,n) \cong \setP^n$. Our goal now is to
+we will later be able to show that in fact $G(1,n) \cong \setP^n$. Our goal now is to
 give these sets the structure of a projective variety which in turn allows us to study their
 tropical variety which is achieved by embedding a Grassmannian $G(k, n)$ into $\setP^{\binom
 nk}-1$ via the so-called \emph{Plücker embedding}. To this end we want to regard the
