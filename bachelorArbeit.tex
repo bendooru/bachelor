@@ -106,27 +106,63 @@ with parallelization work done using GPI-Space at the ITWM.
 
 % TODO more motivation
 
-In the second section we will introduce the basic concepts of polyhedral fans, tropical
-varieties, their various interpretations, and Puiseux series rings which we are
-fundamental to our results. In the third section we describe Petri nets as a language to
-formulate parallelizable workflows.
+In the second section we will introduce the basic concepts of tropical geometry and
+tropical varieties. We will discuss several different approaches of computing tropical
+varieties, including considering the Gröbner fan of an ideal and the new Newton polygon
+method described in \cite{tropPointsLinks}. Consequently we will take a look at Puiseux
+series rings which are special fields with valuation and fundamental to our results. In
+the third section we describe Petri nets as a language to formulate parallelizable
+workflows.
 
 % TODO more here
 
 \section{Computing Tropical Varieties}
 
-Tropical geometry arises in various contexts and allows numerous interpretations, three of
-which are presented here. We then focus on computing tropical varieties in polynomial
-rings over fields with valuations using Newton polygons.
+Tropical geometry is a relatively new field in mathematics that arises from numerous
+contexts and connects various branches of mathematics in exciting and novel ways. We shall
+provide a basic introduction to this topic while focusing on the computational aspects. In
+particular we will discuss our main interest of this thesis -- the recently developed
+techniques using Newton polygons and valuations.
 
-Computing tropical varieties follows the general structure of a fan traversal:
-Interpreting the maximal cones of a polyhedral fan together with their adjacency relations
-as a connected graph, we may realize the fan traversal as a simple graph traversal.
+\subsection{Basic Tropical Geometry and Tropical Prevarieties}
+
+The standard approach to tropical geometry is to consider the semiring $(\setR \cup
+\{\infty\}, \min, +)$ with the classical addition replaced with taking the minimum and
+classical multiplication replaced with addition. An in-depth introduction to tropical
+geometry and tropical varieties is given by \cite{sturmMacTrop}, similar notions focused
+on computation can be found in \cite{compTropVar}.
+
+We denote by $\oplus$ and $\odot$ the \enquote{addition} and \enquote{multiplication}
+defined above, so -- just to reiterate -- we have that
+\[
+  x \oplus y = \min(x,y)
+  \qquad \text{and} \qquad
+  x \odot y = x+y
+\]
+for elements $x,y\in \setR\cup\{\infty\}$, for example $4\oplus9 = 4$ and $4\odot9 = 13$.
+It is easy to verify that the usual arithmetic laws are still valid: $\oplus$ and $\odot$
+are commutative and satisfy distributivity. Further, there is a unique neutral  element
+for both operations: For all $x\in \setR\cup \{\infty\}$ it is true that
+\[
+  x\oplus \infty = x
+  \qquad \text{and} \qquad
+  x\odot 0 = x.
+\]
+As in proper rings, the neutral element of $\oplus$ has the annihilating property with
+respect to $\odot$, i.e.\ $x\odot \infty = \infty$. An important property of this set is
+that, while elements in $\setR$ admit a multiplicative $\odot$-inverse (the traditional
+additive inverse), there is in general no additive $\oplus$-inverse. For example the
+equation $4\oplus x = 5$ clearly has no solution. In this setting all ring axioms except
+the existence of an additive inverse are satisfied: Sets like this are in fact called
+semirings, hence we call $(\setR\cup \{\infty\}, \oplus, \odot)$ the \emph{tropical
+semiring} and this is sometimes also referred to a as the \emph{min-plus algebra}. By
+replacing taking minima with maxima, we obtain the isomorphic max-plus algebra which is
+also used as the underlying structure in tropical geometry by some authors.
 
 \subsection{Gröbner Fans}
 
 One way of looking at the tropical variety of a polynomial ideal $I \idealof K[x_1, \dots,
-x_n]$ is to consider its Gröbner fan. This fan partitions the space $\setR^n$ into
+x_n]$ is to first consider its Gröbner fan. This fan partitions the space $\setR^n$ into
 polyhedral cones which contain all weight vectors $w\in \setR^n$ that define the same
 initial ideal of $I$. While this fan is a highly interesting object of study in and on
 itself, by restricting the fan to those cones which correspond to monomial-free initial
@@ -135,10 +171,9 @@ ideals, we obtain the tropical variety of the given ideal.
 We start off this section with some basic definitions from convex geometry which will lead
 to the definition of the Gröbner fan of an ideal. This will then allow us to define
 tropical varieties and demonstrate their connection to the Gröbner fan. For this we mainly
-focus on definitions and results found in \cite{compGrobFan} and \cite{SturmGBCP}. For the
-general introduction to tropical geometry later on we we also rely on
-\cite{sturmMacTrop}. The first step towards defining a fan is to understand the very
-important concept of polyhedra and polyhedral cones:
+focus on definitions and results found in \cite{compGrobFan} and \cite{SturmGBCP}.The
+first step towards defining a fan is to understand the very important concept of polyhedra
+and polyhedral cones:
 
 \begin{definition}[Polyhedral Cones]
   Recall that a set of the form $C = \{ x \in \setR^n : Ax \leq b \}$ for some matrix $A
@@ -179,10 +214,6 @@ intersection of two such polyhedra is a non-trivial face of both of them, they o
 \enquote{touch}.
 
 % TODO
-
-\subsection{Tropical Prevarieties}
-
-See \cite{compTropVar}.
 
 \subsection{Newton Polygon Method}
 
@@ -259,6 +290,11 @@ Introduce Petri nets theoretically
 Implementation with extensions
 
 \subsection{Traversing a Fan in Parallel}
+
+Computing tropical varieties in our setting follows the general structure of a fan
+traversal: Interpreting the maximal cones of a polyhedral fan together with their
+adjacency relations as a connected graph, we may realize the fan traversal as a simple
+graph traversal.
 
 We formulate the traversal algorithm into a Petri net.
 
@@ -363,6 +399,8 @@ following definition:
   with Plücker coordinates $p_{i_1,\dots,i_k}$ which defines a determinantal variety $G(k,
   n)$. We write $\mathcal G_{k,n} := \Trop(I(G(k,n)))$.
 \end{definition}
+
+\subsection{Runtime Measurements}
 
 \begin{figure}[htbp]
   \begin{center}
