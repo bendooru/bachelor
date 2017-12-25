@@ -4,6 +4,7 @@
   fontsize=12pt,
   titlepage,
   bibliography=totoc,
+  listof=totoc,
   pagesize=pdftex
 ]{scrartcl}
 \usepackage[utf8]{inputenc}
@@ -21,6 +22,7 @@
   spacing=true
 ]{microtype}
 
+\usepackage{pgf,tikz}
 \usepackage[pdftex,hidelinks]{hyperref}
 
 \usepackage[backend=biber,style=alphabetic]{biblatex}
@@ -120,9 +122,9 @@ workflows.
 
 Tropical geometry is a relatively new field in mathematics that arises from numerous
 contexts and connects various branches of mathematics in exciting and novel ways. We shall
-provide a basic introduction to this topic while focusing on the computational aspects. In
-particular we will discuss our main interest of this thesis -- the recently developed
-techniques using Newton polygons and valuations.
+provide a basic introduction to this topic while focusing on the computational aspects
+which will lead to main interest of this thesis -- the recently developed techniques using
+Newton polygons and valuations.
 
 \subsection{Basic Tropical Geometry and Tropical Prevarieties}
 
@@ -144,9 +146,9 @@ It is easy to verify that the usual arithmetic laws are still valid: $\oplus$ an
 are commutative and satisfy distributivity. Further, there is a unique neutral  element
 for both operations: For all $x\in \setR\cup \{\infty\}$ it is true that
 \[
-  x\oplus \infty = x
+  x \oplus \infty = x
   \qquad \text{and} \qquad
-  x\odot 0 = x.
+  x \odot 0 = x.
 \]
 As in proper rings, the neutral element of $\oplus$ has the annihilating property with
 respect to $\odot$, i.e.\ $x\odot \infty = \infty$. An important property of this set is
@@ -155,9 +157,109 @@ additive inverse), there is in general no additive $\oplus$-inverse. For example
 equation $4\oplus x = 5$ clearly has no solution. In this setting all ring axioms except
 the existence of an additive inverse are satisfied: Sets like this are in fact called
 semirings, hence we call $(\setR\cup \{\infty\}, \oplus, \odot)$ the \emph{tropical
-semiring} and this is sometimes also referred to a as the \emph{min-plus algebra}. By
+semiring} which is sometimes also referred to a as the \emph{min-plus algebra}. By
 replacing taking minima with maxima, we obtain the isomorphic max-plus algebra which is
-also used as the underlying structure in tropical geometry by some authors.
+also used as the underlying structure in tropical geometry by some authors. These special
+operations of addition and multiplication naturally lead to the notion of polynomials over
+the tropical semiring.
+
+\begin{definition}[Tropical Polynomials]
+  Let $x_1, \dots, x_k$ be variables with values in $\setR\cup\{\infty\}$, then due to
+  commutativity we can write arbitrary products of variables as
+  \[
+    x_{i_1} \odot x_{i_2} \odot \cdots \odot x_{i_m}
+    = x_1^{\alpha_1} \cdots x_k^{\alpha_k}
+  \]
+  for suitable $\alpha_1, \dots, \alpha_k \in \setN$. Unsurprisingly we call this a
+  \emph{tropical monomial}. Translating back into the traditional operations shows that
+  the tropical monomials
+  \[
+    x_1^{\alpha_1} \cdots x_k^{\alpha_k} =
+    \underbrace{x_1\odot\cdots\odot x_1}_{\alpha_1 \text{ times}}
+    \odot\cdots\odot
+    \underbrace{x_k\odot\cdots\odot x_k}_{\alpha_k \text{ times}}
+    = \alpha_1x_1 + \cdots \alpha_kx_k
+  \]
+  are just linear polynomials with integer coefficients. A \emph{tropical polynomial} is
+  then just a finite $\setR$-linear combination of tropical monomials:
+  \[
+    p = a_1 \odot x_1^{\alpha_{1,1}}\cdots x_k^{\alpha_{1,k}} \oplus \cdots \oplus
+    a_m \odot x_1^{\alpha_{m,1}}\cdots x_k^{\alpha_{m,k}}
+  \]
+  with exponents $\alpha_{i,j} \in \setN$, $1\leq i \leq m, 1\leq j \leq k$ and real
+  coefficients $a_i \in \setR$. Note that if $a_i = 0$ for some $i$ we have that $a_i\odot
+  x_1^{\alpha_{i,1}}\cdots x_k^{\alpha_{i,k}} = x_1^{\alpha_{i,1}}\cdots
+  x_k^{\alpha_{i,k}}$ so we can omit $0$-coefficients. As usual, we call a monomial in $p$
+  together with its coefficient a \emph{term}.
+  \label{def:tropPoly}
+\end{definition}
+
+\begin{figure}[tbh]
+  \centering
+  \begin{tikzpicture}
+    \draw[->] (-0.1,0) -- (5.5,0) node[right] {$x$};
+    \draw[->] (0,-0.1) -- (0,5.5) node[left] {$p(x)$};
+    \begin{scriptsize}
+      \foreach \x in {1, 2, 3, 4, 5}
+      {
+        \draw (0.1,\x) -- (-0.1,\x) node[left] {$\x$};
+        \draw (\x,0.1) -- (\x,-0.1) node[below] {$\x$};
+      }
+    \end{scriptsize}
+
+    \draw[dashed] (-0.05,-0.1) -- (2.75,5.5);
+    \draw[dashed] (-0.1,1.9) -- (3.5,5.5);
+    \draw[dashed] (-0.1,5) -- (5.5,5);
+    \draw[thick] (-0.05,-0.1) -- (2,4);
+    \draw[thick] (2,4) -- (3,5);
+    \draw[thick] (3,5) -- (5.5,5);
+  \end{tikzpicture}
+  \caption{Graph of the tropical polynomial $p=x^2\oplus 2\odot x \oplus 5$}
+  \label{fig:tropPolyPlot}
+\end{figure}
+
+By again translating back to the traditional operations, evaluating this polynomial at
+elements in $\setR^k$ yields a function
+\[
+  p : \setR^k \to \setR, (x_1, \dots, x_k) \mapsto
+  \min\left\{
+    a_i + \sum_{j=1}^k \alpha_{i,j}x_j : 1 \leq i \leq m
+  \right\}
+\]
+which is continuous, piecewise linear with finitely many pieces and concave, meaning that
+for any $a,b \in \setR^k$ the equality $p(\frac12(a+b)) \geq \frac12(p(a)+p(a))$ holds.
+Consider for example the polynomial $p = x^2 \oplus 2\odot x \oplus 5$ in the single
+variable $x$. As we see in figure~\ref{fig:tropPolyPlot}, each monomial of $p$ corresponds
+to a linear piece of the graph and the function $p$ is in fact concave.
+
+With the newly established notion of tropical polynomials the next step towards defining
+tropical varieties is to consider special sets $X \subset \setR^k$ induced by a tropical
+polynomial. Whereas the main object of study in classical algebraic geometry are the
+roots or vanishing loci of polynomials and -- by extension -- polynomial ideals, being
+zero is not a particularly interesting property of a tropical polynomial. Instead, we use
+the fact that the induced function is piecewise linear:
+
+\begin{definition}[Tropical Hypersurface]
+  Let $p = a_1 \odot x_1^{\alpha_{1,1}}\cdots x_k^{\alpha_{1,k}} \oplus \cdots \oplus
+  \alpha_m \odot x_1^{\alpha_{m,1}}\cdots x_k^{\alpha_{m,k}}$ be a tropical polynomial in the
+  variables $x_1, \dots, x_k$ with induced piecewise linear function $p:\setR^k \to
+  \setR$. For an element $a\in \setR^k$ the value $p(a)$ is the minimum over the terms of
+  $p$; we set
+  \[
+    V(p) = \left\{
+      a \in \setR^k :
+      \text{ the minimum $p(a)$ is attained by at least two terms of $p$}
+    \right\}
+  \]
+  and call it the \emph{tropical hypersurface} of $p$. Equivalently, a point $a\in
+  \setR^k$ lies in $V(p)$ if and only if $p$ is not linear at $a$.
+  \label{def:tropHypersurface}
+\end{definition}
+
+Again looking at the tropical polynomial $p$ plotted in figure~\ref{fig:tropPolyPlot} we
+see that $p$ is not linear at precisely the points $V(p) = \{ 2, 3 \}$. An interesting
+property is that by this definition the tropical hypersurface given by a monomial contains
+no points whatsoever. This will become important later on.
 
 \subsection{Gröbner Fans}
 
@@ -171,7 +273,7 @@ ideals, we obtain the tropical variety of the given ideal.
 We start off this section with some basic definitions from convex geometry which will lead
 to the definition of the Gröbner fan of an ideal. This will then allow us to define
 tropical varieties and demonstrate their connection to the Gröbner fan. For this we mainly
-focus on definitions and results found in \cite{compGrobFan} and \cite{SturmGBCP}.The
+focus on definitions and results found in \cite{compGrobFan} and \cite{SturmGBCP}. The
 first step towards defining a fan is to understand the very important concept of polyhedra
 and polyhedral cones:
 
@@ -426,6 +528,7 @@ Optimization of certain edge cases
 
 \newpage
 \listoffigures
+\newpage
 \printbibliography
 
 \end{document}
