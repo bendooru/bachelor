@@ -69,11 +69,13 @@
 \DeclareMathOperator{\trop}{trop}
 \DeclareMathOperator{\initial}{in}
 \DeclareMathOperator{\face}{face}
+\DeclareMathOperator{\GR}{GR}
 
 % use same counters for all environments
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
 \newtheorem{theorem}[definition]{Theorem}
+\newtheorem{proposition}[definition]{Proposition}
 \newtheorem{example}[definition]{Example}
 \newtheorem{remark}[definition]{Remark}
 
@@ -155,6 +157,7 @@ The homogeneity assumption is necessary since otherwise $f(a)$ being zero is not
 independent from the representative $a$ of $a\in \setP^n$.
 
 \subsection{Basic Tropical Geometry}
+\label{sec:tropIntro}
 
 The standard approach to tropical geometry is to consider the semiring $(\setR \cup
 \{\infty\}, \min, +)$ with the classical addition replaced with taking the minimum and
@@ -206,7 +209,7 @@ the tropical semiring.
     \underbrace{x_1\odot\cdots\odot x_1}_{\alpha_1 \text{ times}}
     \odot\cdots\odot
     \underbrace{x_k\odot\cdots\odot x_k}_{\alpha_k \text{ times}}
-    = \alpha_1x_1 + \cdots \alpha_kx_k
+    = \alpha_1x_1 + \cdots + \alpha_kx_k
   \]
   are just linear polynomials with integer coefficients. A \emph{tropical polynomial} is
   then just a finite $\setR$-linear combination of tropical monomials:
@@ -357,13 +360,14 @@ The most important use case will involve $K'$ being algebraically closed, in par
 usually choose $K'=\setC$.
 
 \subsection{Gröbner Fans}
+\label{sec:grobFan}
 
-One way of looking at the tropical variety of a polynomial ideal $I \idealof K[x_1, \dots,
-x_n]$ is to first consider its Gröbner fan. This fan partitions the space $\setR^n$ into
-polyhedral cones which contain all weight vectors $w\in \setR^n$ that define the same
-initial ideal of $I$. While this fan is a highly interesting object of study in and on
-itself, by restricting the fan to those cones which correspond to monomial-free initial
-ideals, we obtain the tropical variety of the given ideal.
+One way of looking at the tropical variety of a polynomial ideal $I \idealof K[\vec x] :=
+K[x_1, \dots, x_n]$ is to first consider its Gröbner fan. This fan partitions the space
+$\setR^n$ into polyhedral cones which contain all weight vectors $w\in \setR^n$ that
+define the same initial ideal of $I$. While this fan is a highly interesting object of
+study in and on itself, by restricting the fan to those cones which correspond to
+monomial-free initial ideals, we obtain the tropical variety of the given ideal.
 
 We start off this section with some basic definitions from convex geometry which will lead
 to the definition of the Gröbner fan of an ideal. This will then allow us to define
@@ -410,20 +414,114 @@ arbitrary elements does not produce new polyhedra and -- more importantly -- if 
 intersection of two such polyhedra is a non-trivial face of both of them, they only
 \enquote{touch}.
 
+Now, given a polynomial ring $K[\vec x]$ a total \emph{term} or \emph{monomial ordering}
+$\prec$ on the monomials $K[\vec x]$ is an ordering such that $1 \prec \vec x^\alpha =
+x_1^{\alpha_1}\cdots x_n^{\alpha_n}$ for all $\alpha \in \setN^n$ and if $\vec x^\alpha
+\prec \vec x^\beta$ for some $\alpha, \beta \in \setN^n$ then also $\vec x^{\alpha+\gamma}
+\prec \vec x^{\beta+\gamma}$ for all $\gamma \in \setN^n$. Hence we can order the non-zero
+terms of any non-zero polynomial $f \in K[\vec x]$ which defines a unique maximal
+\emph{initial term} $\initial_\prec(f)$. Correspondingly, for an ideal $I \idealof K[\vec
+x]$ we define the \emph{initial ideal} of $I$ as $\initial_\prec(I) = \ideal{\initial_\prec(f)
+: f \in I}$. Initial ideals are used to define one of the most important concepts in
+computer algebra: A finite subset $\mathcal G \subset I$ is called a \emph{Gröbner basis}
+of the ideal $I$ with respect to $\prec$ if its initial terms $\mathcal G' = \{
+\initial_\prec(g) : g \in \mathcal G \}$ generate $\initial_\prec(I)$. Further, if the
+elements of $\mathcal G'$ are irredundant $\mathcal G$ is called \emph{minimal} and if for
+any $g, g' \in \mathcal G$ no terms of $g$ are divisible by $\initial_\prec(g')$ then
+$\mathcal G$ is \emph{reduced}. While there are infinitely many possible term orderings in
+polynomials rings with more than one variable, one can show that for a fixed $I \idealof
+K[\vec x]$ there are only finitely many different initial ideals using the Noetherian
+property of polynomial rings over fields.
+
+Using this argument we are interested in grouping all term orderings into finitely many
+classes, but this first requires a way to identify a given ordering with a more tangible
+description. The idea is to represent term orderings by weight vectors:
+
+\begin{definition}[Initial Forms]
+  Given a $\vec w \in \setR^n$ we define the \emph{initial form} $\initial_{\vec w}(f)$ of
+  $f = \sum_{\alpha\in\setN^n} c_\alpha \vec x^\alpha \in K[\vec x]$ with respect to $\vec
+  w$ to be the sum of all non-zero terms $c_\alpha \vec x^\alpha$ of $f$ where $\vec
+  w\cdot \alpha$ is maximal. Analogously to initial terms this defines an initial ideal
+  $\initial_{\vec w}(I)$ for $I \idealof K[\vec x]$.
+  \label{def:initFormG}
+\end{definition}
+
+Note that initial ideals of this form need not be monomial ideals -- in fact the weight
+vectors for which this is not the case will be of interest later on. If necessary, this
+can be fixed by introducing a \enquote{tie breaker} ordering: Given any total term
+ordering $\prec$ and any weight vector $\vec w\in\setR^n$ with non-negative components we
+may define a new term ordering $\prec_{\vec w}$ by
+\[
+  \vec x^\alpha \prec_{\vec w} \vec x^\beta
+  \quad\iff\quad
+  \vec w \cdot \alpha < \vec w\cdot \beta
+  \text{ or }
+  \left(
+    \vec w \cdot \alpha = \vec w\cdot \beta
+    \text{ and }
+    \vec x^\alpha \prec \vec x^\beta
+  \right)
+\]
+where the non-negativity constraint is required to ensure that $\prec_{\vec w}$ is also a
+total ordering, meaning that 1 will be smaller than any other monomial with respect to
+$\prec_{\vec w}$. Among some other nice properties, the most important result obtained
+from these constructions is the following:
+
+\begin{proposition}[{\cite[Proposition~1.11]{SturmGBCP}}]
+  For any term ordering $\prec$ and any ideal $I \idealof K[\vec x]$ there is a weight
+  vector $\vec w \in \setR^n_{\geq0}$ with $\initial_\prec(I) = \initial_{\vec w}(I)$.
+\end{proposition}
+
+\begin{figure}[tbh]
+  \centering
+  some Gröbner region
+  % TODO
+  \caption{Gröbner region of $\ideal{-}$}
+  \label{fig:gr}
+\end{figure}
+
+Hence it makes sense to only consider initial forms and ideals given by non-negative
+weight vectors $\vec w \in \setR^n_{\geq0}$. Extending this, for a given $I \idealof
+K[\vec x]$ we call
+\[
+  \GR(I) = \left\{
+    \vec w \in \setR^n : \exists \vec w' \in \setR^n_{\geq0} :
+    \initial_{\vec w}(I) = \initial_{\vec w'}(I)
+  \right\}
+\]
+the \emph{Gröbner region} of $I$. From the definition it is clear that $\setR^n_{\geq0}
+\subset \GR(I)$ for any ideal. I general, $\GR(I)$ will be a proper subset of $\setR^n$ as
+we see in figure \ref{fig:gr} for the ideal $I=\ideal{-}$, but under certain conditions we
+get a nice Gröbner region:
+
+\begin{proposition}[{\cite[Proposition~1.12]{SturmGBCP}}]
+  If $I \idealof K[\vec x]$ is a homogeneous ideal with respect to some positive grading,
+  then $\GR(I) = \setR^n$.
+\end{proposition}
+
+This warrants us to pay special attention to homogeneous ideals, in fact in this thesis we
+will limit ourselves to computing tropical varieties of such homogeneous ideals.
+
 % TODO
 
 \subsection{Tropical Prevarieties}
+\label{sec:tropPre}
 
 After this light introduction to tropical arithmetic and some convex geometry we now shift
-our focus to more general polynomials and ideals. We fix a field $K$ which admits a
-usually non-trivial valuation $\nu : K \to \setR \cup \{\infty\}$. The usual setting is to
-consider the \emph{Laurent polynomial} ring $K[\vec x^\pm] = K[x_1^\pm, \dots, x_n^\pm]$
--- the ring of polynomials in $x_1, \dots, x_n$ with integral but not necessarily
-non-negative exponents. Ideals and polynomials in this ring define zero loci much in the
-same manner as for standard polynomial rings, however as monomials are now invertible,
-evaluation at zero is no longer well-defined. As such, we consider the \emph{very affine
-variety} of an ideal $I \idealof K[\vec x^\pm]$ as a subset of the \emph{algebraic torus}
-$\setT^n := {(K^*)}^n = {(K \setminus \{0\})}^n$:
+our focus to more general polynomials and ideals. The idea is to combine the fan structure
+of tropical varieties we derived in section~\ref{sec:grobFan} with our knowledge on
+tropical hypersurfaces from section~\ref{sec:tropIntro}. Here we will introduce the
+general procedure of computing a tropical variety by computing cones in the corresponding
+fan and finding its neighbor cones.
+
+We fix a field $K$ which admits a usually non-trivial valuation $\nu : K \to \setR \cup
+\{\infty\}$. The usual setting is to consider the \emph{Laurent polynomial} ring $K[\vec
+x^\pm] = K[x_1^\pm, \dots, x_n^\pm]$ -- the ring of polynomials in $x_1, \dots, x_n$ with
+integral but not necessarily non-negative exponents. Ideals and polynomials in this ring
+define zero loci much in the same manner as for standard polynomial rings, however as
+monomials are now invertible, evaluation at zero is no longer well-defined. As such, we
+consider the \emph{very affine variety} of an ideal $I \idealof K[\vec x^\pm]$ as a subset
+of the \emph{algebraic torus} $\setT^n := {(K^*)}^n = {(K \setminus \{0\})}^n$:
 \[
   X := V(I) = \left\{ a \in \setT^n : f(a) = 0 \text{ for all $f \in I$} \right\}.
 \]
@@ -432,6 +530,7 @@ initial ideals. To define them in a useful way, we first need to establish a lin
 classical and tropical polynomials and this is where the valuation $\nu:K\to\setR$ will be
 used.
 
+% TODO: initial forms coincide only in max-plus algebra, so change?
 \begin{definition}[Tropicalization and Initial Forms]
   Let $f \in K[\vec x^\pm]$ be a Laurent polynomial and $\nu : K \to \setR$ a valuation as
   in the above setting. Write $f = \sum_{\alpha \in \setZ^n} c_\alpha \vec x^\alpha$. The
@@ -459,14 +558,16 @@ used.
 \subsection{Newton Polygon Method}
 
 We focus on a new approach introduced by Yue Ren and Tommy Hofmann which uses Newton
-polygons to compute tropical varieties \cite{tropPointsLinks}. For this we fix an
-algebraically closed field $K$ with non-trivial valuation $v:K\to\setR \cup \{\infty\}$
-and residue field $\mathfrak R$, i.e. $\mathfrak R = R/\mathfrak m_R$ for the local ring
-$R = \{ x \in K : v(x) \geq 0 \}$, with a uniformizing parameter $p\in \mathcal O_K$.
-Denote $K[\vec x] = K[x_1, \ldots, x_n]$.
+polygons to compute tropical varieties \cite{tropPointsLinks}. While the general traversal
+procedures are given in section~\ref{sec:tropPre}, we now want to study different methods
+for computing non-trivial points in the tropical variety and links between cones in it,
+which allows us to generate a starting and neighbor cones more efficiently. For this we
+again fix an algebraically closed field $K$ with non-trivial valuation $v:K\to\setR \cup
+\{\infty\}$ and residue field $\mathfrak K$ with uniformizing parameter $p$.
 
 % TODO
 
+% TODO already given above: remove
 \begin{definition}[Initial Forms and Tropical Varieties]
   Let $w \in \setR^n$, usually called a \emph{weight vector} and consider a polynomial $f
   \in K[\vec x]$ of the form $f = \sum_{\alpha \in \setN^n} c_\alpha \cdot \vec x^\alpha$.
@@ -506,19 +607,6 @@ our approach to the computation of tropical varieties:
 This together with our results on Newton polygons allows us to determine points in
 $\Trop(I)$ without having to explicitly compute points on $V(I)$.
 
-% TODO move/remove
-\subsection{Puiseux Series Rings and Puiseux Expansions}
-
-While we did not specify the field $K$ in the previous subsection, our algorithms
-explicitly deal with the field $K = \CCt$ of Puiseux series in the indeterminate
-$t$. While the computations using Newton polygons only depend on the valuation of ring
-elements, in some rare cases these methods can fail to produce a result, thus requiring us
-to actually compute the variety of a zero-dimensional ideal. Hence we study this field and
-its polynomial rings in greater detail.
-
-First goal: slight refactoring of existing \textsc{Singular} code and removing dependency on
-Magma. Use newly developed procedures for computing Puiseux expansions.
-
 \section{Parallelization}
 
 Use Petri nets as a framework to parallelize the traversal of tropical fans.
@@ -538,7 +626,8 @@ traversal: Interpreting the maximal cones of a polyhedral fan together with thei
 adjacency relations as a connected graph, we may realize the fan traversal as a simple
 graph traversal.
 
-We formulate the traversal algorithm into a Petri net.
+We formulate the traversal algorithm formulated in section~\ref{sec:tropPre} into a Petri
+net.
 
 Standard approach relying on a starting cone procedure and a \emph{neighbour oracle}.
 
