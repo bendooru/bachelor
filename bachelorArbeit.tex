@@ -550,8 +550,48 @@ used.
     }} \overline {c_\alpha \cdot t^{-\nu(c_\alpha)} } \vec x^\alpha
     \in \mathfrak K[\vec x^\pm].
   \]
+  In other words, $\initial_{\vec w}(f)$ consists of all the terms of $f$ where
+  $\nu(c_\alpha)+\vec w\cdot \alpha$ is minimal.
   \label{def:initialId}
 \end{definition}
+
+We note here that the notations from Definitions~\ref{def:initFormG} and
+\ref{def:initialId} clash. While we chose the minimum-convention for tropical arithmetic
+to stay consistent with the important literature, both notions of initial forms coincide
+in the max-plus algebra and with the trivial valuation $\nu(x) = 0$ for $x\neq-\infty$.
+Since section~\ref{sec:grobFan} is only given for context and the important definitions in
+convex geometry, $\initial(f)$ will always refer to the initial forms defined here.
+
+\dots % TODO
+
+\begin{definition}[Tropical Varieties]
+  bla % TODO
+  \[
+    \Trop(I) = \bigcap_{f \in I} \Trop(f)
+  \]
+  \label{def:tropicalVariety}
+\end{definition}
+
+\dots % TODO
+
+\begin{theorem}[Fundamental Theorem of Tropical Geometry,
+  {\cite[Theorem~3.2.5]{sturmMacTrop}}]
+  Let $K$ be an algebraically closed field with non-trivial valuation, $I \idealof K[\vec
+  x^\pm]$ and $X = V(I) \subset \setT^n$ its very affine variety in the affine torus, then
+  the following three subsets of $\setR^n$ coincide:
+  \begin{enumerate}
+    \item the tropical variety $\Trop(I)$ as defined in
+      definition~\ref{def:tropicalVariety},
+    \item the closure of the set of all $\vec w \in \setR^n$ with $\initial_{\vec w}(I)
+      \neq \ideal1$, i.e.\ the initial ideals which do not contain monomials and
+    \item the set of coordinate-wise valuations of points in $X$
+      \[
+        \nu(X) = \{ (\nu(x_1), \dots, \nu(x_n)) : (x_1, \dots, x_n) \in X \}.
+      \]
+  \end{enumerate}
+  Here, closure is the Euclidean closure in $\setR^n$.
+  \label{thm:fundamentalThm}
+\end{theorem}
 
 % much TODO
 
@@ -566,46 +606,12 @@ again fix an algebraically closed field $K$ with non-trivial valuation $v:K\to\s
 \{\infty\}$ and residue field $\mathfrak K$ with uniformizing parameter $p$.
 
 % TODO
-
-% TODO already given above: remove
-\begin{definition}[Initial Forms and Tropical Varieties]
-  Let $w \in \setR^n$, usually called a \emph{weight vector} and consider a polynomial $f
-  \in K[\vec x]$ of the form $f = \sum_{\alpha \in \setN^n} c_\alpha \cdot \vec x^\alpha$.
-  We define the \emph{initial form} of $f$ with respect to $w$ as
-  \[
-    \initial_w(f) = \sum_{w\alpha + \nu(c_\alpha) \text{ minimal}}
-    \overline{c_\alpha \cdot p^{-\nu(c_\alpha)}} \cdot x^\alpha
-    \in \mathfrak K[\vec x].
-  \]
-  Given an ideal $I \idealof K[\vec x]$ this naturally leads to the \emph{initial ideal}
-  $\initial_w(I) = \ideal{\initial_w(f) : f\in I}$ of $I$. Finally, we may define the
-  \emph{tropical variety}
-  \[
-    \Trop(I) := \{ w \in \setR^n \mid \initial_w(I) \text{ is monomial-free} \}.
-  \]
-  of $I$.
-  \label{def:tropicalVarietyVal}
-\end{definition}
-
-% TODO
-The definition given in \ref{def:tropicalVarietyVal} is the standard definition of
-tropical varieties used in the general algorithms, however in this thesis we want to
-consider a different formulation of this object. The following result is fundamental to
-our approach to the computation of tropical varieties:
-
-\begin{theorem}[Fundamental Theorem of Tropical Geometry]
-  Let $K$ be an algebraically closed field with non-trivial valuation and $p\in \mathcal
-  O_K$ as above. Then
-  \[
-    \Trop(I) = \overline{v(V(I) \cap (K^\ast)^n)},
-  \]
-  where $\overline{(\cdot)}$ denotes the closure in the Euclidean topology.
-  % TODO
-  \label{thm:fundamentalThmTropicalGeometry}
-\end{theorem}
-
-This together with our results on Newton polygons allows us to determine points in
-$\Trop(I)$ without having to explicitly compute points on $V(I)$.
+The definition given in \ref{def:tropicalVariety} is the standard definition of tropical
+varieties used in the general algorithms, however in this thesis we want to consider a
+different formulation of this object. We focus on the interpretations as the
+coordinate-wise image $\nu(V(X))$ as we seen in theorem~\ref{thm:fundamentalThm}. This
+together with our results on Newton polygons allows us to determine points in $\Trop(I)$
+without having to explicitly compute points on $V(I)$.
 
 \section{Parallelization}
 
