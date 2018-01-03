@@ -23,7 +23,13 @@
 \usepackage{pgf,tikz}
 \usepackage[pdftex,hidelinks]{hyperref}
 
-\usepackage[backend=biber,style=alphabetic]{biblatex}
+\usepackage[
+  backend=biber,
+  style=alphabetic,
+  maxnames=5,
+  maxalphanames=5,
+  isbn=false
+]{biblatex}
 \addbibresource{bachelor.bib}
 
 % serif > sans-serif
