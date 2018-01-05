@@ -25,6 +25,7 @@
 ]{microtype}
 
 \usepackage{pgf,tikz}
+\usetikzlibrary{calc}
 \usepackage[pdftex,hidelinks]{hyperref}
 
 \usepackage[
@@ -80,6 +81,8 @@
 \DeclareMathOperator{\face}{face}
 \DeclareMathOperator{\GR}{GR}
 \DeclareMathOperator{\conv}{conv}
+\DeclareMathOperator{\Lin}{Lin}
+\DeclareMathOperator{\codim}{codim}
 
 % use same counters for all environments
 \theoremstyle{definition}
@@ -90,6 +93,7 @@
 \newtheorem{remark}[definition]{Remark}
 \newtheorem{lemma}[definition]{Lemma}
 \newtheorem{algo}[definition]{Algorithm}
+\newtheorem{thmCorollary}[definition]{Theorem \& Corollaries}
 
 % adjust numbering
 \numberwithin{definition}{section}
@@ -140,8 +144,8 @@ workflows.
 Tropical geometry is a relatively new field in mathematics that arises from numerous
 contexts and connects various branches of mathematics in exciting and novel ways. We shall
 provide a basic introduction to this topic while focusing on the computational aspects
-which will lead to main interest of this thesis -- the recently developed techniques using
-Newton polygons and valuations.
+which will lead to the main interest of this thesis -- the recently developed techniques
+using Newton polygons and valuations.
 
 Over the course of this section we need some basic definitions from algebraic geometry: We
 fix a field $K$ which is usually assumed to be algebraically closed: The \emph{affine
@@ -224,7 +228,8 @@ the tropical semiring.
     = \alpha_1x_1 + \cdots + \alpha_kx_k
   \]
   are just linear polynomials with integer coefficients. A \emph{tropical polynomial} is
-  then just a finite $\setR$-linear combination of tropical monomials:
+  then defined as a finite $\setR$-linear combination of tropical monomials with respect
+  to tropical arithmetic:
   \[
     p = a_1 \odot x_1^{\alpha_{1,1}}\cdots x_k^{\alpha_{1,k}} \oplus \cdots \oplus
     a_m \odot x_1^{\alpha_{m,1}}\cdots x_k^{\alpha_{m,k}}
@@ -616,14 +621,15 @@ polygons to compute zero-dimensional tropical varieties \cite{tropPointsLinks}. 
 general traversal procedures are given in section~\ref{sec:tropPre}, we now want to study
 different methods for computing non-trivial points in the tropical variety and links
 between cones in it, which allows us to generate a starting and neighbor cones more
-efficiently. For this we again fix an algebraically closed field $K$ with non-trivial
-valuation $v:K\to\setR \cup \{\infty\}$ and residue field $\mathfrak K$ with uniformizing
-parameter $p$.
+efficiently. In particular, Ren and Hofmann's methods provide local optimizations to the
+algorithms discussed in the previous section. For this we again fix an algebraically
+closed field $K$ with non-trivial valuation $v:K\to\setR \cup \{\infty\}$ and residue
+field $\mathfrak K$ with uniformizing parameter $p$.
 
-While the previously discussed methods dealt with tropical varieties as finite
-intersections of tropical prevarieties or the set of all weight vectors that define
+As opposed to the previously discussed methods which dealt with tropical varieties as
+finite intersections of tropical prevarieties or the set of all weight vectors that define
 monomial-free initial ideals, the focus of this section -- and in fact of the entire
-thesis -- is the interpretations as the coordinate-wise image $\Trop(I) = \nu(V(I))$ as we
+thesis -- is the interpretation as the coordinate-wise image $\Trop(I) = \nu(V(I))$ as we
 have seen in theorem~\ref{thm:fundamentalThm}. The main idea of Ren and Hofmann's results
 is to apply this interpretation to zero-dimensional ideals and their triangular
 decompositions: A set of polynomials $\{ f_1, \dots, f_n \} \subseteq K[x_1, \dots, x_n]$
@@ -685,6 +691,7 @@ The notion of unique Newton polygons helps us to establish a link between valuat
 roots and polynomials evaluated at these roots:
 
 \begin{proposition}
+  \label{prp:expectedNewt}
   For a polynomial $f \in K[x_1, \dots, x_k]$ and a weight $\vec w \in \setR^{k-1}$ the
   following are equivalent:
   \begin{enumerate}
@@ -692,7 +699,6 @@ roots and polynomials evaluated at these roots:
     \item for all $z \in K^{k-1}$ with valuation $\nu(z) = (\nu(z_1), \dots, \nu(z_{k-1}))
       = (w_1, \dots, w_{k-1}) = \vec w$ we have $\Delta(f(z, x_k)) = \Delta_{\vec w}(f)$.
   \end{enumerate}
-  \label{prp:expectedNewt}
 \end{proposition}
 
 In other words if $f$ has a unique Newton polygon we may regard its expected Newton
@@ -701,20 +707,22 @@ polygons becomes apparent with the following lemma which draws the connection be
 valuations of roots and the slopes of the Newton polygons:
 
 \begin{lemma}
-  Let $f \in K[x]$ and $e$ be an edge of the Newton polygon $\Delta(f)$ connecting
-  vertices $(r,x)$ and $(s, y)$ with slope $-m = \frac{y-x}{s-r}$. Then $f$ has exactly
-  $s-r$ roots with valuation $m$.
-  In other words if $f$ has a unique Newton polygon we may regard its expected Newton
-  polygon instead of evaluating $f$ at a partial root and vice versa.
+  Let $f \in K[x]$ be a univariate polynomial and $e$ be an edge of the Newton polygon
+  $\Delta(f)$ connecting vertices $(r,x)$ and $(s, y)$ with slope $-m = \frac{y-x}{s-r}$.
+  Then $f$ has exactly $s-r$ roots with valuation $m$.
   \label{lem:newtPolyRoots}
 \end{lemma}
 
+In other words, if $f$ has a unique Newton polygon we may regard its expected Newton
+polygon instead of evaluating $f$ at a partial root and vice versa.
 Proposition~\ref{prp:expectedNewt} and Lemma~\ref{lem:newtPolyRoots} naturally lead to the
 formulation of the following algorithm to compute tropical varieties of zero-dimensional
 ideals given by a triangular set. By Proposition~\ref{prp:triang} this then enables us to
-compute the tropical variety of any zero-dimensional ideal:
+compute the tropical variety of any zero-dimensional ideal by applying the algorithm to
+each set in the triangular composition:
 
-\begin{algo}[Zero-dimensional tropical varieties] $ $
+\begin{algo}[Zero-dimensional tropical varieties,
+  {\cite[Algorithm~2.10]{tropPointsLinks}}] $ $
   \begin{algorithmic}[1]
     \Require a triangular set $F = \{f_1, \dots, f_n\} \subseteq K[x_1, \dots, x_n]$ with
     zero-dimensional affine variety $V(F) \subseteq \setT^n$.
@@ -733,11 +741,172 @@ compute the tropical variety of any zero-dimensional ideal:
     \EndFor
     \State \textbf{return} $\vec w = (w_1, \dots, w_n)$;
   \end{algorithmic}
+  \label{alg:zeroDimTrop}
 \end{algo}
 
 If, instead of picking a single slope in lines \ref{alg:pick1}, \ref{alg:pick2} and
 \ref{alg:pick3}, we iterate over the entire respective sets of slopes the algorithm will
-compute the entire tropical variety $\Trop(F)$.
+compute the complete tropical variety $\Trop(F)$. The \enquote{else}-case in this
+algorithm is required in the rare case that a polynomials does not admit a unique Newton
+polygon. An example of how such a computation might look like is given as follows:
+
+\begin{example}
+  We consider the triangular set $F = \{ f_1, f_2, f_3 \} \subseteq \CCt[x_1, x_2, x_3]$
+  given by
+  \[
+    f_1 = tx_1^2 + x_1 + 1, \quad
+    f_2 = tx_1x_2^2 + x_1x_2 + 1, \quad
+    f_3 = x_1x_2x_3+1
+  \]
+  then each step in the algorithm allows several choices of unique Newton polygons as
+  illustrated in Figure~\ref{fig:seriesOfNewtonPolygons}. Iterating over all of them
+  yields the tropical variety
+  \[
+    \Trop(F) = \{ (0,0,0), (0,-1,1), (-1,1,0),(-1,-1,2) \}.
+  \]
+\end{example}
+
+\begin{figure}[htbp]
+  \centering
+  insert figure here
+  \caption{Series of Newton polygons of $F$ \cite[Figure~2]{tropPointsLinks}}
+  \label{fig:seriesOfNewtonPolygons}
+\end{figure}
+
+With the ability to efficiently compute tropical varieties of zero-dimensional ideals we
+can now focus on the central elements of fan traversals: Computing non-trivial points on a
+tropical variety to find a starting cone and computing tropical links to determine
+neighboring cones.
+
+Finding non-trivial points on the tropical variety is achieved by intersecting with
+sufficiently generic hyperplanes until the variety is zero-dimensional, allowing us to
+apply Algorithm~\ref{alg:zeroDimTrop}. But when is a point non-trivial? For an ideal $I
+\idealof K[\vec x]$ we define the \emph{homogeneity space} of $I$ to be the set
+\[
+  C_0(I) = \left\{ \vec w \in \setR^n : \initial_{\vec w}(I) = I \right\}.
+\]
+It can be computed easily from any reduced Gröbner basis for $I$ and is trivially included
+in $\Trop(I)$ if $I$ itself contains no monomial. In fact, $C_(I)$ is contained in every
+cone of the tropical variety, so computing a point in the homogeneity space offers no
+useful information for our algorithms. Hence, we call a point $\vec w \in \Trop(I)$
+\emph{non-trivial}, if $\vec w \not\in C_0(I)$. The following proposition formalizes the
+process of intersecting with generic hyperplanes:
+
+\begin{proposition}
+  Let $I \idealof K[\vec x]$ be an ideal of dimension $\dim I = d$ with algebraically
+  independent set $\{x_1, \dots, x_d\}$ and suppose its affine variety $X := V(I)$
+  satisfies $X \cap \setT^n \neq \varnothing$. Then there exists an non-empty Zariski-open
+  subset $U \subseteq \setT^d$ such that for all $\lambda \in U$
+  \[
+    \varnothing \neq X_\lambda :=
+    X \cap V(x_1-\lambda_1, \dots, x_d - \lambda_d) \subseteq \setT^n
+  \]
+  and $\dim X_\lambda = 0$.
+  \label{prp:intersHyperp}
+\end{proposition}
+
+The resulting algorithm then just uses that the maximal cones in the tropical variety have
+the same dimension as the defining ideal and puts Proposition~\ref{prp:intersHyperp} to
+work:
+
+\begin{algo}[Tropical Points {\cite[Algorithm~3.3]{tropPointsLinks}}] $ $
+  \begin{algorithmic}[1]
+    \Require $I \idealof K[\vec x]$,
+    \Ensure $\vec w \in \Trop(I) \setminus C_0(I)$.
+    \State Compute a maximal algebraically independent set, say $\{x_1, \dots, x_d\}$ and
+    the homogeneity space $C_0(I)$.
+    \Repeat
+      \State Pick $\vec w \in \setQ^d$ random with $\{\vec w\} \times \setR^{n-d} \cap
+        C_0(I) = \varnothing$.
+      \State Pick $c \in K^d$ random with $\nu(c) = \vec w$.
+      \State Set $I_c := I|_{x_i = c_i} \idealof K[x_{d+1}, \dots, x_n]$
+    \Until{$\dim(I_c) = 0$ and $V(I_c) \subseteq \setT^{n-d}$}
+    \State Compute a triangular set $F$ with $I_c \subseteq \ideal F$.
+    \State Compute $(w_{d+1}, \dots, w_n) \in \Trop(F)$ using
+      Algorithm~\ref{alg:zeroDimTrop}.
+    \State\textbf{return} $(w_1, \dots, w_d, w_{d+1}, \dots, w_n)$.
+  \end{algorithmic}
+  \label{alg:tropicalPoint}
+\end{algo}
+
+\begin{example}
+  % TODO
+  stuff
+\end{example}
+
+% TODO write differently from source?
+Finally, to conclude this section we want study an alternative method of obtaining
+points in neighboring cones. We cal a tropical variety $\Trop(I)$ a \emph{tropical curve}
+if it is one dimensional and say it is \emph{combinatorially a curve} if
+$\Trop(I)/C_0(I)$ is one-dimensional. Then, for any $\vec u \in \Trop(I)$ sitting in the
+relative interior of a cell of codimension one we call $\Trop(\initial_{\vec u}(I))$ the
+\emph{tropical link} of $I$ around $\vec u$. This set is the support of a polyhedral fan,
+since it is a tropical variety, and also combinatorially a curve which describes
+$\Trop(I)$ locally around $\vec u$. The properties needed for our algorithm are as
+follows:
+
+\begin{thmCorollary} \label{thmc:tropInt}
+  Let $X$ and $X$ be two affine subvarieties. If the intersection $\Trop(X) \cap
+  \Trop(X')$ has codimension $\codim\Trop(X) + \codim\Trop(X')$ in a neighborhood of $\vec
+  w$, then $\vec w \in \Trop(X\cap X')$. In particular:
+  \begin{enumerate}
+    \item Assume $\Trop(I)$ is combinatorially a curve with $\dim C_0(I) = d$ and
+      $C_0(I)\cap \Lin(e_{d+1}, \dots, e_n) = \{0\}$, then for any $c \in \setT^d$ we have
+      \[
+        \Trop(I) \cap \{\nu(c)\} \times \setR^{n-d} = \Trop(I + \ideal{x_1-c_1, \dots,
+        x_d-c_d}),
+      \]
+      and this tropical variety is a tropical curve.
+    \item If $\Trop(I)$ is a polyhedral fan, then for any $c \in K^*$ with
+      $\nu(c)\neq0$ we have
+      \[
+        \Trop(I) \cap \{\nu(c)\} \times \setR^{n-1} = \Trop(I + \ideal{x_1-c_1})
+      \]
+      and this tropical variety is zero-dimensional.
+  \end{enumerate}
+\end{thmCorollary}
+
+% TODO
+
+\begin{algo}
+  \begin{algorithmic}[1]
+    \Require $I \idealof K[\vec x]$ such that $\Trop(I)$ is combinatorially a curve and a
+    polyhedral fan,
+    \Ensure $W \subseteq \setR^n$ such that $\Trop(I) = \bigcup_{\vec w \in W} \vec w
+      \cdot \setR_{\geq0} + C_0(I)$
+    \State Suppose $\dim C_0(I) = d$ and assume w.l.o.g. $C_0(I) \cap \Lin(e_{d+1}, \dots,
+      e_n) = \{0\}$.
+    \State Let $J \idealof K[x_d, \dots, x_n]$ be the image of $I$ under the substitution
+      map
+      \[
+        K[x_1, \dots, x_n] \to K[x_d, \dots, x_n], x_i \mapsto
+        \begin{cases}
+          t, & \text{if } i < d, \\
+          x_i & \text{else},
+        \end{cases}
+      \]
+      where $t \in K$ is a fixed uniformizing parameter.
+    \For{$i = d, \dots, n$}
+      \State Let $J_i^\pm$ be the images of $J$ under the maps $x_i \mapsto t^\pm$
+        respectively,
+      \State Compute $V_i^\pm = \Trop(J_i^\pm)$ using Algorithm~\ref{alg:zeroDimTrop},
+      \State Set
+        \begin{align*}
+          W_i^\pm := \Bigl\{
+            &(1, \dots, 1, w_d, \dots, w_{i-1}, \pm1, w_{i+1}, \dots, w_n) : \\
+            &(w_d, \dots, w_{i-1}, w_{i+1}, \dots, w_n) \in V_i^\pm
+          \Bigr\} \subseteq \setR^n
+        \end{align*}
+      \State Scale elements of $W_i^\pm$ positively until they are primitive in $\setZ^n$.
+    \EndFor
+    \State Set $W = \bigcup_{i=d}^n (W_i^+ \cup W_i^-)$.
+    \State\textbf{return} $W$.
+  \end{algorithmic}
+\end{algo}
+
+% insert into previous section, the reference properly
+This can then be used in Algorithm~??? (\cite[Algorithm~4.8]{compTropVar}) as a
+replacement
 
 \section{Parallelization}
 
@@ -791,20 +960,20 @@ found in \cite{tropGrass}.
   subspaces of $K^n$, usually denoted by $G(k, n)$.
 \end{definition}
 
-Thus, Grassmannians are in some sense a generalization of projective space and for example
-we will later be able to show that in fact $G(1,n) \cong \setP^n$. Our goal now is to
-give these sets the structure of a projective variety which in turn allows us to study their
-tropical variety which is achieved by embedding a Grassmannian $G(k, n)$ into $\setP^{\binom
-nk}-1$ via the so-called \emph{Plücker embedding}. To this end we want to regard the
-corresponding linear spaces as elements of projective space, which first require some
-constructions from commutative algebra.
+Thus, Grassmannians are in some sense a generalization of projective space: for example we
+will later be able to see that in fact $G(1,n) \cong \setP^n$. Our goal now is to give
+these sets the structure of a projective variety which in turn allows us to study their
+tropical variety. This is achieved by embedding a Grassmannian $G(k, n)$ into
+$\setP^{\binom nk}-1$ via the so-called \emph{Plücker embedding}. To this end we want to
+regard the corresponding linear spaces as elements of projective space, which first
+requires some constructions from commutative algebra.
 
 Let $V$ and $W$ be two vector spaces and $k\in\setN$, then a multilinear map $f : V^k \to
 W$ is called \emph{alternating} if for all $v_1, \dots, v_k$ with $v_i=v_j$ for some
 distinct $i,j$ we have that $f(v_1, \dots, v_k) = 0$. In this setting an \emph{alternating
 $k$-fold tensor product} of $V$ is a vector space $T$ together with an alternating map
 $\wedge:V^k\to T, (v_1, \dots, v_k) \mapsto v_1\wedge\cdots\wedge v_k$ such that for any
-other alternating map $f:W\to T$ there is a unique $\tilde f:T\to W$ such that $\tilde f
+other alternating map $f:W\to T$ there is a unique $\tilde f:T\to W$ satisfying $\tilde f
 \circ \wedge = f$. It is easy to prove that such an alternating tensor product always
 exists and is in fact unique up to isomorphism -- the proof is completely analogous to the
 case of standard tensor products. Hence we may write $\bigwedge^k V := T$ for these vector
@@ -822,8 +991,8 @@ spaces which can be proved with basic knowledge of commutative algebra:
           v_{i_1} \wedge \cdots \wedge v_{i_k} : 1\leq i_1 < \cdots < i_k \leq n
         \right\}
       \]
-      will be a basis of $\bigwedge^kV$. In particular we have $\dim\bigwedge^kV = \binom
-      nk$.
+      will be a basis of $\bigwedge^kV$. In particular this vector space is of dimension
+      $\dim\bigwedge^kV = \binom nk$.
     \item For elements $v_1, \dots, v_k \in V$ the \emph{pure tensor} $v_1\wedge \cdots
       \wedge v_k \in \bigwedge^kV$ will be non-zero if and only if $v_1, \dots, v_k$ are
       linearly independent in $V$.
@@ -849,9 +1018,9 @@ v\wedge w$ of rank at most $n-k$. This is equivalent to all $(n-k+1) \times
 coordinates of $\setP^{N-1}$ describing $G(k,n)$, hence it is in fact a projective
 variety.
 
-On an additional note one can cover $G(k,n)$ with copies of $K^{k(n-k)}$ to show that the
-Grassmannian is an irreducible projective variety of dimension $k(n-k)$. This leads to the
-following definition:
+On an additional note one can cover $G(k,n)$ with copies of $\setA^{k(n-k)}$ to show that
+the Grassmannian is an irreducible projective variety of dimension $k(n-k)$. This leads to
+the following definition:
 
 \begin{definition}[Tropical Grassmannians]
   By the above a Grassmannian can be viewed as a projective variety given by a homogeneous
@@ -860,7 +1029,8 @@ following definition:
     I(G(k,n)) \idealof K[ p_{i_1, \dots, i_k} : 1\leq i_1 < \cdots < i_k \leq n ]
   \]
   with Plücker coordinates $p_{i_1,\dots,i_k}$ which defines a determinantal variety $G(k,
-  n)$. We write $\mathcal G_{k,n} := \Trop(I(G(k,n)))$.
+  n)$. This, in turn, defines a tropical variety and we write $\mathcal G_{k,n} :=
+  \Trop(I(G(k,n)))$.
 \end{definition}
 
 \subsection{Runtime Measurements}
