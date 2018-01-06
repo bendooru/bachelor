@@ -79,7 +79,7 @@
 \DeclareMathOperator{\trop}{trop}
 \DeclareMathOperator{\initial}{in}
 \DeclareMathOperator{\face}{face}
-\DeclareMathOperator{\GR}{GR}
+\DeclareMathOperator{\GF}{GF}
 \DeclareMathOperator{\conv}{conv}
 \DeclareMathOperator{\Lin}{Lin}
 \DeclareMathOperator{\codim}{codim}
@@ -491,37 +491,33 @@ from these constructions is the following:
   vector $\vec w \in \setR^n_{\geq0}$ with $\initial_\prec(I) = \initial_{\vec w}(I)$.
 \end{proposition}
 
-\begin{figure}[tbh]
-  \centering
-  some Gröbner region
-  % TODO
-  \caption{Gröbner region of $\ideal{-}$}
-  \label{fig:gr}
-\end{figure}
-
 Hence it makes sense to only consider initial forms and ideals given by non-negative
-weight vectors $\vec w \in \setR^n_{\geq0}$. Extending this, for a given $I \idealof
-K[\vec x]$ we call
+weight vectors $\vec w \in \setR^n_{\geq0}$. The next step is to group these weight
+vectors into classes: For a given $I \idealof K[\vec x]$ we call two weights $\vec w, \vec
+w' \in \setR^n$ \emph{equivalent} if $\initial_{\vec w}(I) = \initial_{\vec w'}(I)$ and it
+is easy to see that this indeed defines an equivalence relation. Denoting the
+corresponding equivalence classes by
 \[
-  \GR(I) = \left\{
-    \vec w \in \setR^n : \exists \vec w' \in \setR^n_{\geq0} :
-    \initial_{\vec w}(I) = \initial_{\vec w'}(I)
-  \right\}
+  C[\vec w] = \left\{
+    \vec w' \in \setR^n : \initial_{\vec w'}(I) = \initial_{\vec w}(I)
+  \right\},
 \]
-the \emph{Gröbner region} of $I$. From the definition it is clear that $\setR^n_{\geq0}
-\subset \GR(I)$ for any ideal. I general, $\GR(I)$ will be a proper subset of $\setR^n$ as
-we see in figure \ref{fig:gr} for the ideal $I=\ideal{-}$, but under certain conditions we
-get a nice Gröbner region:
+\cite[Proposition~2.3]{SturmGBCP} shows that each $C[\vec w]$ is a relatively open convex
+polyhedral cone. This immediately leads to the following definitions:
 
-\begin{proposition}[{\cite[Proposition~1.12]{SturmGBCP}}]
-  If $I \idealof K[\vec x]$ is a homogeneous ideal with respect to some positive grading,
-  then $\GR(I) = \setR^n$.
-\end{proposition}
+\begin{definition}[Gröbner Cones and Fans]
+  Fix an ideal $I \idealof K[\vec x]$. For a weight $\vec w \in \setR^n$ we call the
+  Euclidean closure $C_{\vec w}(I) := \overline{C[\vec w]}$ the \emph{Gröbner cone} of $I$
+  with respect to $\vec w$. The collection of all these cones $\GF(I) := \{ C_{\vec w}(I)
+  : \vec w \in \setR^n \}$ is called the \emph{Gröbner fan} of $I$.
+  \label{def:groebnerConeFan}
+\end{definition}
 
-This warrants us to pay special attention to homogeneous ideals, in fact in this thesis we
-will limit ourselves to computing tropical varieties of such homogeneous ideals.
-
-% TODO
+By \cite[Proposition~2.4]{SturmGBCP}, the Gröbner fan is in fact a fan. The main source
+\cite{SturmGBCP} introduces Newton polytopes as a means to compute the Gröbner fan of an
+ideal which work similarly to what we will introduce in Definition~\ref{def:newtonPoly},
+but no more theory is required for this section. The connection to tropical varieties will
+be drawn in the next section.
 
 \subsection{Tropical Prevarieties}
 \label{sec:tropPre}
@@ -535,12 +531,13 @@ fan and finding its neighbor cones.
 
 We fix a field $K$ which admits a usually non-trivial valuation $\nu : K \to \setR \cup
 \{\infty\}$. The usual setting is to consider the \emph{Laurent polynomial} ring $K[\vec
-x^\pm] = K[x_1^\pm, \dots, x_n^\pm]$ -- the ring of polynomials in $x_1, \dots, x_n$ with
-integral but not necessarily non-negative exponents. Ideals and polynomials in this ring
-define zero loci much in the same manner as for standard polynomial rings, however as
-monomials are now invertible, evaluation at zero is no longer well-defined. As such, we
-consider the \emph{very affine variety} of an ideal $I \idealof K[\vec x^\pm]$ as a subset
-of the \emph{algebraic torus} $\setT^n := {(K^*)}^n = {(K \setminus \{0\})}^n$:
+x^{\pm1}] = K[x_1^{\pm1}, \dots, x_n^{\pm1}]$ -- the ring of polynomials in $x_1, \dots,
+x_n$ with integral but not necessarily non-negative exponents. Ideals and polynomials in
+this ring define zero loci much in the same manner as for standard polynomial rings,
+however as monomials are now invertible, evaluation at zero is no longer well-defined. As
+such, we consider the \emph{very affine variety} of an ideal $I \idealof K[\vec x^{\pm1}]$
+as a subset of the \emph{algebraic torus} $\setT^n := {(K^*)}^n = {(K \setminus
+\{0\})}^n$:
 \[
   X := V(I) = \left\{ a \in \setT^n : f(a) = 0 \text{ for all $f \in I$} \right\}.
 \]
@@ -551,15 +548,15 @@ used.
 
 % TODO: initial forms coincide only in max-plus algebra, so change?
 \begin{definition}[Tropicalization and Initial Forms]
-  Let $f \in K[\vec x^\pm]$ be a Laurent polynomial and $\nu : K \to \setR$ a valuation as
-  in the above setting. Write $f = \sum_{\alpha \in \setZ^n} c_\alpha \vec x^\alpha$. The
-  \emph{tropicalization} $\trop(f)$ of $f$ is then the tropical polynomial
+  Let $f \in K[\vec x^{\pm1}]$ be a Laurent polynomial and $\nu : K \to \setR$ a valuation
+  as in the above setting. Write $f = \sum_{\alpha \in \setZ^n} c_\alpha \vec x^\alpha$,
+  then the \emph{tropicalization} $\trop(f)$ of $f$ is the tropical polynomial
   \[
     \trop(f) = \bigoplus_{\alpha\in\setZ^\alpha} \nu(c_\alpha)
     \odot x_1^{\alpha_1}\odot\cdots \odot x_n^{\alpha_n}
   \]
-  which then defines a function $\trop(f) : \setR^n \to \setR, \vec w \mapsto
-  \trop(f)(\vec w)$. For a weight vector $\vec w \in \setR^n$ we now define the
+  which defines a function $\trop(f) : \setR^n \to \setR, \vec w \mapsto \trop(f)(\vec w)$
+  in the usual manner. For a weight vector $\vec w \in \setR^n$ we now define the
   \emph{initial form} of $f$ with respect to $\vec w$ as
   \[
     \initial_{\vec w}(f) =
@@ -567,10 +564,11 @@ used.
         \alpha \in \setZ^n \\
         \nu(c_\alpha) + \vec w\cdot \alpha = \trop(f)(\vec w)
     }} \overline {c_\alpha \cdot t^{-\nu(c_\alpha)} } \vec x^\alpha
-    \in \mathfrak K[\vec x^\pm].
+    \in \mathfrak K[\vec x^{\pm1}].
   \]
-  In other words, $\initial_{\vec w}(f)$ consists of all the terms of $f$ where
-  $\nu(c_\alpha)+\vec w\cdot \alpha$ is minimal.
+  In other words, $\initial_{\vec w}(f)$ consists of all the terms $c_\alpha\cdot \vec
+  x^\alpha$ of $f$ where $\nu(c_\alpha)+\vec w\cdot \alpha$ is minimal. Again,
+  $\initial_{\vec w}(f)$ need not be a monomial.
   \label{def:initialId}
 \end{definition}
 
@@ -579,7 +577,8 @@ We note here that the notations from Definitions~\ref{def:initFormG} and
 to stay consistent with the important literature, both notions of initial forms coincide
 in the max-plus algebra and with the trivial valuation $\nu(x) = 0$ for $x\neq-\infty$.
 Since section~\ref{sec:grobFan} is only given for context and the important definitions in
-convex geometry, $\initial(f)$ will always refer to the initial forms defined here.
+convex geometry, $\initial_{\vec w}(f)$ will always refer to the initial forms defined
+here.
 
 \dots % TODO
 
@@ -598,8 +597,8 @@ convex geometry, $\initial(f)$ will always refer to the initial forms defined he
 \begin{theorem}[Fundamental Theorem of Tropical Geometry,
   {\cite[Theorem~3.2.5]{sturmMacTrop}}]
   Let $K$ be an algebraically closed field with non-trivial valuation, $I \idealof K[\vec
-  x^\pm]$ and $X = V(I) \subset \setT^n$ its very affine variety in the affine torus, then
-  the following three subsets of $\setR^n$ coincide:
+  x^{\pm1}]$ and $X = V(I) \subset \setT^n$ its very affine variety in the affine torus,
+  then the following three subsets of $\setR^n$ coincide:
   \begin{enumerate}
     \item the tropical variety $\Trop(I)$ as defined in
       definition~\ref{def:tropicalVariety},
