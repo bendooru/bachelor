@@ -445,10 +445,12 @@ of the ideal $I$ with respect to $\prec$ if its initial terms $\mathcal G' = \{
 \initial_\prec(g) : g \in \mathcal G \}$ generate $\initial_\prec(I)$. Further, if the
 elements of $\mathcal G'$ are irredundant $\mathcal G$ is called \emph{minimal} and if for
 any $g, g' \in \mathcal G$ no terms of $g$ are divisible by $\initial_\prec(g')$ then
-$\mathcal G$ is \emph{reduced}. While there are infinitely many possible term orderings in
-polynomials rings with more than one variable, one can show that for a fixed $I \idealof
-K[\vec x]$ there are only finitely many different initial ideals using the Noetherian
-property of polynomial rings over fields.
+$\mathcal G$ is \emph{reduced}. The reduced Gröbner basis of an ideal $I$ with respect to
+$\prec$ can be shown to be unique up to scaling with units, so we denote it by $\mathcal
+G_\prec(I)$. While there are infinitely many possible term orderings in polynomial rings
+with more than one variable, one can show that for a fixed $I \idealof K[\vec x]$ there
+are only finitely many different initial ideals using the Noetherian property of
+polynomial rings over fields.
 
 Using this argument we are interested in grouping all term orderings into finitely many
 classes, but this first requires a way to identify a given ordering with a more tangible
@@ -614,6 +616,82 @@ convex geometry, $\initial(f)$ will always refer to the initial forms defined he
 
 % much TODO
 
+% TODO Maybe move to previous section?
+\begin{algo}[Common Refinement, {\cite[Algorihm~4.4]{compTropVar}}] $ $
+  \label{alg:fanRefinement}
+  \begin{algorithmic}[1]
+    \Require Representations $S_1$, $S_2$ of two polyhedral fans $\mathcal
+      F_1$, $\mathcal F_2$.
+    \Ensure Representation $S$ for common refinement $\mathcal F_1 \wedge \mathcal F_2$.
+    \State $S := \varnothing$
+    \For{$(C_1, C_2) \in S_1 \times S_2$}
+      \State Set $S := S \cup \{ C_1 \cap C_2 \}$.
+    \EndFor
+    \State\textbf{return} $S$
+  \end{algorithmic}
+\end{algo}
+
+\begin{algo}[Tropical Basis of a Curve, {\cite[Algorihm~4.8]{compTropVar}}] $ $
+  \label{alg:tropBasisCurve}
+  \begin{algorithmic}[1]
+    \Require A finite set $\mathcal G$ which generates $I$.
+    \Ensure A tropical basis of $I$.
+    \State TODO
+    % TODO
+  \end{algorithmic}
+\end{algo}
+
+% TODO
+\begin{algo}[Lift] $ $
+  \label{alg:lift}
+  \begin{algorithmic}[1]
+    \Require Reduced Gröbner bases $\mathcal G_{\prec'}(I)$ and $\mathcal G_{\prec_{\vec
+      w}}(\initial_{\vec w}(I))$ where $\vec w \in C_{\prec'}(I)$ for some term orders
+      $\prec$ and $\prec'$.
+    \Ensure Reduced Gröbner basis $\mathcal G_{\prec_{\vec w}}(I)$.
+  \end{algorithmic}
+\end{algo}
+
+% TODO
+
+% FIXME: watch out for possible notational changes above
+\begin{algo}[Neighbors, {\cite[Algorithm~4.10]{compTropVar}}] $ $
+  \label{alg:neighbors}
+  \begin{algorithmic}[1]
+    \Require Pair $(\mathcal G_{\prec_{\vec w}}(\initial_{\vec w}(I)), \mathcal
+      G_{\prec_{\vec w}}(I))$ such that $\initial_{\vec w}(I)$ is monomial-free and
+      $C_{\vec w}(I)$ has dimension $d$.
+    \Ensure The set $N$ of pairs $(\mathcal G_{\prec_{\vec w'}}(\initial_{\vec w'}(I)),
+      \mathcal G_{\prec_{\vec w'}}(I))$ where $\vec w'$ lies in the relative interior of
+      each $d$-dimensional Gröbner cone in $\Trop(I)$ that shares a facet with $C_{\vec
+      w}(I)$.
+    \State Set $N := \varnothing$.
+    \State Compute the set $\mathcal F$ of facets of $C_{\vec w}$.
+    \For{$F \in \mathcal F$}
+      \State Compute initial ideal $J := \initial_{\vec u}(I)$ for a point $\vec u$ in the
+        relative interior of $F$.
+      \State Use Algorithms~\ref{alg:fanRefinement} and \ref{alg:tropBasisCurve} to compute
+        a relative interior point $\vec v$ of each ray in the curve $\Trop(J)$. Denote by
+        $V$ the set of these points.
+        \label{alg:interiorPoints}
+      \For{$\vec v \in V$}
+        \State Compute $(\mathcal G_{\prec_{\vec v}}(\initial_{\vec v}(J)), \mathcal
+          G_{\prec_{\vec v}}(J)) = (\mathcal G_{{\prec_{\vec v}}_{\vec u}}(\initial_{\vec
+          v}(J)), \mathcal G_{{\prec_{\vec v}}_{\vec u}}(J))$.
+        \State Apply Algorithm~\ref{alg:lift} to $\mathcal G_{\prec_{\vec w}}(I)$ and
+          $\mathcal G_{{\prec_{\vec v}}_{\vec u}}(J)$ to get $\mathcal G_{{\prec_{\vec
+          v}}_{\vec u}}(I)$.
+        \State Set $N := N \cup \left\{ (\mathcal G_{{\prec_{\vec v}}_{\vec
+          u}}(\initial_{\vec v}(I)), \mathcal G_{{\prec_{\vec v}}_{\vec u}}(I))
+          \right\}$.
+      \EndFor
+    \EndFor
+    \State\textbf{return} $N$.
+  \end{algorithmic}
+\end{algo}
+
+% TODO
+
 \subsection{Newton Polygon Method}
 
 We focus on a new approach introduced by Yue Ren and Tommy Hofmann which uses Newton
@@ -623,8 +701,8 @@ different methods for computing non-trivial points in the tropical variety and l
 between cones in it, which allows us to generate a starting and neighbor cones more
 efficiently. In particular, Ren and Hofmann's methods provide local optimizations to the
 algorithms discussed in the previous section. For this we again fix an algebraically
-closed field $K$ with non-trivial valuation $v:K\to\setR \cup \{\infty\}$ and residue
-field $\mathfrak K$ with uniformizing parameter $p$.
+closed field $K$ with non-trivial valuation $\nu:K\to\setR \cup \{\infty\}$ and
+residue field $\mathfrak K$ with uniformizing parameter $t$.
 
 As opposed to the previously discussed methods which dealt with tropical varieties as
 finite intersections of tropical prevarieties or the set of all weight vectors that define
@@ -719,7 +797,7 @@ Proposition~\ref{prp:expectedNewt} and Lemma~\ref{lem:newtPolyRoots} naturally l
 formulation of the following algorithm to compute tropical varieties of zero-dimensional
 ideals given by a triangular set. By Proposition~\ref{prp:triang} this then enables us to
 compute the tropical variety of any zero-dimensional ideal by applying the algorithm to
-each set in the triangular composition:
+each set in the triangular decomposition:
 
 \begin{algo}[Zero-dimensional tropical varieties,
   {\cite[Algorithm~2.10]{tropPointsLinks}}] $ $
@@ -747,7 +825,7 @@ each set in the triangular composition:
 If, instead of picking a single slope in lines \ref{alg:pick1}, \ref{alg:pick2} and
 \ref{alg:pick3}, we iterate over the entire respective sets of slopes the algorithm will
 compute the complete tropical variety $\Trop(F)$. The \enquote{else}-case in this
-algorithm is required in the rare case that a polynomials does not admit a unique Newton
+algorithm is required in the rare case that a polynomial does not admit a unique Newton
 polygon. An example of how such a computation might look like is given as follows:
 
 \begin{example}
@@ -868,7 +946,7 @@ follows:
 
 % TODO
 
-\begin{algo}
+\begin{algo}[Tropical Links, {\cite[Algorithm~4.5]{tropPointsLinks}}] $ $
   \begin{algorithmic}[1]
     \Require $I \idealof K[\vec x]$ such that $\Trop(I)$ is combinatorially a curve and a
     polyhedral fan,
@@ -904,9 +982,8 @@ follows:
   \end{algorithmic}
 \end{algo}
 
-% insert into previous section, the reference properly
-This can then be used in Algorithm~??? (\cite[Algorithm~4.8]{compTropVar}) as a
-replacement
+This can then be used in Algorithm~\ref{alg:neighbors} as a replacement for line
+\ref{alg:interiorPoints}.
 
 \section{Parallelization}
 
