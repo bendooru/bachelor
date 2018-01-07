@@ -352,7 +352,7 @@ While there are various fields admitting a non-trivial valuation that
 are suitable for tropical computations, the most important one for our case is the field
 of Puiseux series:
 
-\begin{definition}
+\begin{definition}[Puiseux Series]
   Let $K'$ be a field. The field of \emph{Puiseux series} $K = \puiseux{K'}{t}$ with
   coefficients in $K'$ in the indeterminate $t$ is the set of all formal power series
   \[
@@ -368,13 +368,27 @@ of Puiseux series:
   \label{def:puiseux}
 \end{definition}
 
-By considering the rings of formal Laurent series $K'((t^{\frac1n}))$ for $n \in \setN$ in
-the indeterminate $t^{\frac1n}$, we can see that
+By considering the rings of formal Laurent series $\smash{K'((t^{\frac1n}))}$ for $n \in
+\setN$ in the indeterminate $\smash{t^{\frac1n}}$, we can see that
 \[
   K = \puiseux{K'}t = \bigcup_{n \in \setN} K'((t^{\frac1n})).
 \]
 The most important use case will involve $K'$ being algebraically closed, in particular we
-usually choose $K'=\setC$.
+usually choose $K'=\setC$. This is due to the following theorem:
+
+\begin{theorem}
+  If $K'$ is an algebraically closed field of characteristic 0, then $K :=
+  \puiseux{K'}{t}$ is also algebraically closed. In particular, $K$ is the algebraic
+  closure of the field of formal Laurent series $K'((t))$.
+  \label{thm:puisuexalgclosed}
+\end{theorem}
+
+The proof of this theorem is constructive and -- provided one can compute roots over the
+base field $K'$ -- yields a method to iteratively compute roots of a polynomial in
+$\puiseux{K'}{t}[x]$ up to a given order. As we will see, finite \emph{expansions} of these
+roots will more than suffice for our purposes.
+
+\dots % TODO
 
 \subsection{Gröbner Fans}
 \label{sec:grobFan}
@@ -401,6 +415,10 @@ and polyhedral cones:
   span of finitely many vectors in $\setR^n$.
   \label{def:polyhedralCone}
 \end{definition}
+
+Note that, using Linear Programming, it is possible to assign a unique \emph{canonical}
+set of defining equations to a polyhedral cone. This is important to quickly compare and
+uniquely identify polyhedral cones, especially in computational contexts.
 
 For a polyhedron $P \subseteq \setR^n$ we further define its dimension as the dimension of
 the smallest affine linear space containing $P$. Consider now an element $w \in \setR^n$,
@@ -429,7 +447,10 @@ next definition:
 Intuitively, a polyhedral complex is a collection of polyhedra where intersecting
 arbitrary elements does not produce new polyhedra and -- more importantly -- if the
 intersection of two such polyhedra is a non-trivial face of both of them, they only
-\enquote{touch}.
+\enquote{touch}. To make polyhedral complexes easier to work with we call a collection of
+polyhedra a \emph{representation} of a complex $\mathcal C$ if each polyhedron $P \in
+\mathcal C$ is a face of some $S \in \mathcal S$. In particular, the maximal polyhedra of
+a polyhedral complex define a representation.
 
 Now, given a polynomial ring $K[\vec x]$ a total \emph{term} or \emph{monomial ordering}
 $\prec$ on the monomials $K[\vec x]$ is an ordering such that $1 \prec \vec x^\alpha =
@@ -575,43 +596,70 @@ used.
 We note here that the notations from Definitions~\ref{def:initFormG} and
 \ref{def:initialId} clash. While we chose the minimum-convention for tropical arithmetic
 to stay consistent with the important literature, both notions of initial forms coincide
-in the max-plus algebra and with the trivial valuation $\nu(x) = 0$ for $x\neq-\infty$.
-Since section~\ref{sec:grobFan} is only given for context and the important definitions in
-convex geometry, $\initial_{\vec w}(f)$ will always refer to the initial forms defined
+in the maximum-convention with the trivial valuation $\nu(x) = 0$ for $x\neq-\infty$.
+Since section~\ref{sec:grobFan} is mainly given for context and the important definitions
+in convex geometry, $\initial_{\vec w}(f)$ will always refer to the initial forms defined
 here.
 
-\dots % TODO
+We are now finally able to define tropical varieties, the main object of study of this
+thesis:
 
-\begin{definition}[Tropical Varieties]
-  Let $I \idealof K[\vec x]$ be an ideal, then the \emph{tropical variety} of $I$ is
-  defined as the set
-  \[
-    \Trop(I) = \bigcap_{f \in I} \Trop(f)
-  \]
-  % TODO
+\begin{definition}[Tropical Varieties and Prevarieties]
   \label{def:tropicalVariety}
+  Let $f \in K[\vec x^{\pm1}]$ be a polynomial over a field with valuation as above, then
+  its \emph{tropical hypersurface} is the set
+  \[
+    \Trop(f) = \left\{
+      \vec w \in \setR^n :
+      \text{the minimum $\trop(f)(\vec w)$ is achieved twice}
+    \right\}
+  \]
+  and using Definition~\ref{def:tropHypersurface}, this may be simply written as $\Trop(f)
+  = V(\trop(f))$. A \emph{tropical prevariety} is the finite intersection of tropical
+  hypersurfaces. Finally, for an ideal $I \idealof K[\vec x^{\pm1}]$ the \emph{tropical
+  variety} of $I$ is defined to be the set
+  \[
+    \Trop(I) = \bigcap_{f \in I} \Trop(f).
+  \]
 \end{definition}
+
+The main motivation in \cite{compTropVar} is the fact that each tropical variety is in
+fact a tropical prevariety: A finite set $\{ f_1, \dots, f_r \} \subseteq I \idealof
+K[\vec x^{\pm1}]$ is called a \emph{tropical basis} of $I$ if $I = \ideal{f_1, \dots,
+f_r}$ and $\Trop(I) = \Trop(f_1) \cap \cdots \cap \Trop(f_r)$. It can be shown that any
+ideal admits a tropical basis -- see for example \cite[Theorem~2.9]{compTropVar} -- which
+reduces the problem of computing the tropical variety of an ideal to computing the
+tropical hypersurfaces of its tropical basis.
 
 \dots % TODO
 
 \begin{theorem}[Fundamental Theorem of Tropical Geometry,
-  {\cite[Theorem~3.2.5]{sturmMacTrop}}]
+  {\cite[Theorem~3.2.5]{sturmMacTrop}}] \label{thm:fundamentalThm}
   Let $K$ be an algebraically closed field with non-trivial valuation, $I \idealof K[\vec
   x^{\pm1}]$ and $X = V(I) \subset \setT^n$ its very affine variety in the affine torus,
   then the following three subsets of $\setR^n$ coincide:
   \begin{enumerate}
     \item the tropical variety $\Trop(I)$ as defined in
       definition~\ref{def:tropicalVariety},
-    \item the closure of the set of all $\vec w \in \setR^n$ with $\initial_{\vec w}(I)
-      \neq \ideal1$, i.e.\ the initial ideals which do not contain monomials and
-    \item the set of coordinate-wise valuations of points in $X$
+    \item the set of all $\vec w \in \setR^n$ with $\initial_{\vec w}(I) \neq \ideal1$,
+      i.e.\ the initial ideals which do not contain monomials and
+    \item the Euclidean closure of the set of coordinate-wise valuations of points in $X$
       \[
         \nu(X) = \{ (\nu(x_1), \dots, \nu(x_n)) : (x_1, \dots, x_n) \in X \}.
       \]
   \end{enumerate}
-  Here, closure is the Euclidean closure in $\setR^n$.
-  \label{thm:fundamentalThm}
 \end{theorem}
+
+With these equivalent descriptions of tropical varieties established we have to discuss a
+small technicality. Until now we worked with ideals in the ring $K[\vec x^{\pm1}]$, but we
+may also pass to their corresponding ideals in $K[\vec x]$: Any ideal $I \idealof K[\vec
+x^{\pm1}]$ can be generated by an ideal $I' \idealof K[\vec x] \subseteq K[\vec x^{\pm1}]$
+by multiplying generators of $I$ with suitable monomials. In particular if $\vec w \not\in
+\Trop(I)$, then there exists a polynomial $f \in K[\vec x^{\pm1}]$ such that
+$\initial_{\vec w}(f)$ is a monomial by Theorem~\ref{thm:fundamentalThm}. Hence there
+exists a monomial $m \in K[\vec x]$ such that $mf \in I'$, so $\initial_{\vec w}(mf)$ is
+also a monomial. Thus $\Trop(I) = \Trop(I')$, allowing us to use the much more developed
+Gröbner basis techniques over $K[\vec x]$.
 
 % much TODO
 
@@ -858,7 +906,8 @@ neighboring cones.
 Finding non-trivial points on the tropical variety is achieved by intersecting with
 sufficiently generic hyperplanes until the variety is zero-dimensional, allowing us to
 apply Algorithm~\ref{alg:zeroDimTrop}. But when is a point non-trivial? For an ideal $I
-\idealof K[\vec x]$ we define the \emph{homogeneity space} of $I$ to be the set
+\idealof K[\vec x]$ we define the \emph{homogeneity space} of $I$ to be the linear
+subspace
 \[
   C_0(I) = \left\{ \vec w \in \setR^n : \initial_{\vec w}(I) = I \right\}.
 \]
@@ -886,7 +935,7 @@ The resulting algorithm then just uses that the maximal cones in the tropical va
 the same dimension as the defining ideal and puts Proposition~\ref{prp:intersHyperp} to
 work:
 
-\begin{algo}[Tropical Points {\cite[Algorithm~3.3]{tropPointsLinks}}] $ $
+\begin{algo}[Tropical Points, {\cite[Algorithm~3.3]{tropPointsLinks}}] $ $
   \begin{algorithmic}[1]
     \Require $I \idealof K[\vec x]$,
     \Ensure $\vec w \in \Trop(I) \setminus C_0(I)$.
@@ -912,15 +961,14 @@ work:
 \end{example}
 
 % TODO write differently from source?
-Finally, to conclude this section we want study an alternative method of obtaining
-points in neighboring cones. We cal a tropical variety $\Trop(I)$ a \emph{tropical curve}
-if it is one dimensional and say it is \emph{combinatorially a curve} if
-$\Trop(I)/C_0(I)$ is one-dimensional. Then, for any $\vec u \in \Trop(I)$ sitting in the
-relative interior of a cell of codimension one we call $\Trop(\initial_{\vec u}(I))$ the
-\emph{tropical link} of $I$ around $\vec u$. This set is the support of a polyhedral fan,
-since it is a tropical variety, and also combinatorially a curve which describes
-$\Trop(I)$ locally around $\vec u$. The properties needed for our algorithm are as
-follows:
+Finally, to conclude this section we want study an alternative method of obtaining points
+in neighboring cones. We call a tropical variety $\Trop(I)$ a \emph{tropical curve} if it
+is one dimensional and say it is \emph{combinatorially a curve} if $\Trop(I)/C_0(I)$ is
+one-dimensional. Then, for any $\vec u \in \Trop(I)$ sitting in the relative interior of a
+cell of codimension one we call $\Trop(\initial_{\vec u}(I))$ the \emph{tropical link} of
+$I$ around $\vec u$. This set is the support of a polyhedral fan, since it is a tropical
+variety, and also combinatorially a curve which describes $\Trop(I)$ locally around $\vec
+u$. The properties needed for our algorithm are as follows:
 
 \begin{thmCorollary} \label{thmc:tropInt}
   Let $X$ and $X$ be two affine subvarieties. If the intersection $\Trop(X) \cap
