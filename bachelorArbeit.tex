@@ -346,8 +346,9 @@ A valuation is called \emph{non-trivial} if it is not the constant 0-function on
 K\setminus\{0\}$. Such a field with valuation defines a local ring $R_\nu = \{ x \in K :
 \nu(x) \geq 0 \}$ with unique maximal ideal $\mathfrak m_{R_\nu} = \{ x \in K : \nu(x) > 0
 \}$. The \emph{residue field} of $K$ is then defined to be the residue field $\mathfrak K
-= R_\nu/\mathfrak m_{R_\nu}$ of $R_\nu$.
-% TODO: uniformizing parameter
+= R_\nu/\mathfrak m_{R_\nu}$ of $R_\nu$. Any generator $t \in R_\nu$ of $\mathfrak
+m_{R_\nu}$ is called a \emph{uniformizing parameter}.
+
 While there are various fields admitting a non-trivial valuation that
 are suitable for tropical computations, the most important one for our case is the field
 of Puiseux series:
@@ -408,11 +409,11 @@ first step towards defining a fan is to understand the very important concept of
 and polyhedral cones:
 
 \begin{definition}[Polyhedral Cones]
-  Recall that a set of the form $C = \{ x \in \setR^n : Ax \leq b \}$ for some matrix $A
-  \in \Mat(m\times n, \setR)$ and $b \in \setR^m$ is called a polyhedron and if
-  additionally $C$ is bounded it is called a polytope. If on the other hand $b=0$ then $C$
-  is called a \emph{polyhedral cone}. Equivalently, a polyhedral cone $C$ is the positive
-  span of finitely many vectors in $\setR^n$.
+  Recall that a set of the form $C = \{ \vec x \in \setR^n : A\vec x \leq \vec b \}$ for
+  some matrix $A \in \Mat(m\times n, \setR)$ and $\vec b \in \setR^m$ is called a
+  polyhedron and if additionally $C$ is bounded it is called a polytope. If on the other
+  hand $\vec b=0$ then $C$ is called a \emph{polyhedral cone}. Equivalently, a polyhedral
+  cone $C$ is the positive span of finitely many vectors in $\setR^n$.
   \label{def:polyhedralCone}
 \end{definition}
 
@@ -421,14 +422,14 @@ set of defining equations to a polyhedral cone. This is important to quickly com
 uniquely identify polyhedral cones, especially in computational contexts.
 
 For a polyhedron $P \subseteq \setR^n$ we further define its dimension as the dimension of
-the smallest affine linear space containing $P$. Consider now an element $w \in \setR^n$,
-then we define the set $\face_w(P) = \{ u \in P : \ideal{w,u} \geq \ideal{w,v} \text{ for
-all } v\in P\}$ where $\ideal{\cdot,\cdot}$ is the standard scalar product on $\setR^n$.
-Surprisingly enough, we call a subset of $P$ of the form $\varnothing$ or $\face_w(P)$ a
-\emph{face} of $P$. For example, the trivial faces of $P$ are $\varnothing$ by definition
-and $P = \face_0(P)$. Clearly, a face of $P$ is a polyhedron itself, so we call it a facet
-if it has dimension exactly one less than $P$. The notion of faces is important for the
-next definition:
+the smallest affine linear space containing $P$. Consider now an element $\vec w \in
+\setR^n$, then we define the set $\face_{\vec w}(P) = \{ \vec u \in P : \vec w\cdot \vec u
+\geq \vec w \cdot \vec v \text{ for all } \vec v\in P\}$ where the vector multiplication
+is the standard scalar product on $\setR^n$. Surprisingly enough, we call a subset of $P$
+of the form $\varnothing$ or $\face_{\vec w}(P)$ a \emph{face} of $P$. For example, the
+trivial faces of $P$ are $\varnothing$ by definition and $P = \face_{\vec 0}(P)$. Clearly,
+a face of $P$ is a polyhedron itself, so we call it a facet if it has dimension exactly
+one less than $P$. The notion of faces is important for the next definition:
 
 \begin{definition}[Polyhedral Fan]
   Let $\mathcal C$ be a collection of polyhedra in $\setR^n$. We call $\mathcal C$ a
@@ -510,6 +511,7 @@ from these constructions is the following:
 \begin{proposition}[{\cite[Proposition~1.11]{SturmGBCP}}]
   For any term ordering $\prec$ and any ideal $I \idealof K[\vec x]$ there is a weight
   vector $\vec w \in \setR^n_{\geq0}$ with $\initial_\prec(I) = \initial_{\vec w}(I)$.
+  \label{prp:init}
 \end{proposition}
 
 Hence it makes sense to only consider initial forms and ideals given by non-negative
@@ -525,6 +527,7 @@ corresponding equivalence classes by
 \]
 \cite[Proposition~2.3]{SturmGBCP} shows that each $C[\vec w]$ is a relatively open convex
 polyhedral cone. This immediately leads to the following definitions:
+% true for any vector? Exists counter example
 
 \begin{definition}[Gröbner Cones and Fans]
   Fix an ideal $I \idealof K[\vec x]$. For a weight $\vec w \in \setR^n$ we call the
@@ -538,7 +541,11 @@ By \cite[Proposition~2.4]{SturmGBCP}, the Gröbner fan is in fact a fan. The mai
 \cite{SturmGBCP} introduces Newton polytopes as a means to compute the Gröbner fan of an
 ideal which work similarly to what we will introduce in Definition~\ref{def:newtonPoly},
 but no more theory is required for this section. The connection to tropical varieties will
-be drawn in the next section.
+be drawn in the next section. We may also occasionally need Gröbner cones with respect to
+a given term ordering. By Proposition~\ref{prp:init} for any $I \idealof K[\vec x]$ and
+term order $\prec$ there is a $\vec w \in \setR^n_{\geq0}$ with $\initial_\prec(I) =
+\initial_{\vec w}(I)$. Hence we define the corresponding Gröbner cone to be $C_\prec(I) :=
+C_{\vec w}(I)$.
 
 \subsection{Tropical Prevarieties}
 \label{sec:tropPre}
@@ -568,6 +575,7 @@ classical and tropical polynomials: this is where the valuation $\nu:K\to\setR$ 
 used.
 
 % TODO: initial forms coincide only in max-plus algebra, so change?
+% also TODO: uniformizing parameter
 \begin{definition}[Tropicalization and Initial Forms]
   Let $f \in K[\vec x^{\pm1}]$ be a Laurent polynomial and $\nu : K \to \setR$ a valuation
   as in the above setting. Write $f = \sum_{\alpha \in \setZ^n} c_\alpha \vec x^\alpha$,
