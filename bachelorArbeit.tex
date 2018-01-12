@@ -212,6 +212,7 @@ operations of addition and multiplication naturally lead to the notion of polyno
 the tropical semiring.
 
 \begin{definition}[Tropical Polynomials]
+  \label{def:tropPoly}
   Let $x_1, \dots, x_k$ be variables with values in $\setR\cup\{\infty\}$, then due to
   commutativity we can write arbitrary products of variables as
   \[
@@ -240,7 +241,6 @@ the tropical semiring.
   x_1^{\alpha_{i,1}}\cdots x_k^{\alpha_{i,k}} = x_1^{\alpha_{i,1}}\cdots
   x_k^{\alpha_{i,k}}$ so we can omit $0$-coefficients. As usual, we call a monomial in $p$
   together with its coefficient a \emph{term}.
-  \label{def:tropPoly}
 \end{definition}
 
 \begin{figure}[tbh]
@@ -289,6 +289,7 @@ $\infty$-function, then $p(x)=\infty$ if and only if $x=\infty$. Instead, we use
 that the induced function is piecewise linear:
 
 \begin{definition}[Tropical Hypersurface]
+  \label{def:tropHypersurface}
   Let $p = \bigoplus_{i=1}^k a_i \odot x_1^{\alpha_{i,1}}\cdots x_k^{\alpha_{i,k}}$ be a
   tropical polynomial in the variables $x_1, \dots, x_k$ with induced piecewise linear
   function $p:\setR^k \to \setR$. For an element $a\in \setR^k$ the value $p(a)$ is the
@@ -302,7 +303,6 @@ that the induced function is piecewise linear:
   and call it the \emph{tropical hypersurface} of $p$. Equivalently, a point $a\in
   \setR^k$ lies in $V(p)$ if and only if $p$ is not linear at $a$. With this
   interpretation in mind, the set $V(p)$ is also called the \emph{corner locus} of $p$.
-  \label{def:tropHypersurface}
 \end{definition}
 
 Again looking at the tropical polynomial $p$ plotted in figure~\ref{fig:tropPolyPlot} we
@@ -355,6 +355,7 @@ are suitable for tropical computations, the most important one for our case is t
 of Puiseux series:
 
 \begin{definition}[Puiseux Series]
+  \label{def:puiseux}
   Let $K'$ be a field. The field of \emph{Puiseux series} $K = \puiseux{K'}{t}$ with
   coefficients in $K'$ in the indeterminate $t$ is the set of all formal power series
   \[
@@ -367,7 +368,6 @@ of Puiseux series:
   \]
   with suitable $c'_k \in K'$ for all $k\geq k_0$ and the common denominator $N \in
   \setN$.
-  \label{def:puiseux}
 \end{definition}
 
 By considering the rings of formal Laurent series $\smash{K'((t^{\frac1n}))}$ for $n \in
@@ -379,10 +379,10 @@ The most important use case will involve $K'$ being algebraically closed, in par
 usually choose $K'=\setC$. This is due to the following theorem:
 
 \begin{theorem}
+  \label{thm:puisuexalgclosed}
   If $K'$ is an algebraically closed field of characteristic 0, then $K :=
   \puiseux{K'}{t}$ is also algebraically closed. In particular, $K$ is the algebraic
   closure of the field of formal Laurent series $K'((t))$.
-  \label{thm:puisuexalgclosed}
 \end{theorem}
 
 The proof of this theorem is constructive and -- provided one can compute roots over the
@@ -410,12 +410,12 @@ first step towards defining a fan is to understand the very important concept of
 and polyhedral cones:
 
 \begin{definition}[Polyhedral Cones]
+  \label{def:polyhedralCone}
   Recall that a set of the form $C = \{ \vec x \in \setR^n : A\vec x \leq \vec b \}$ for
   some matrix $A \in \Mat(m\times n, \setR)$ and $\vec b \in \setR^m$ is called a
   polyhedron and if additionally $C$ is bounded it is called a polytope. If on the other
   hand $\vec b=0$ then $C$ is called a \emph{polyhedral cone}. Equivalently, a polyhedral
   cone $C$ is the positive span of finitely many vectors in $\setR^n$.
-  \label{def:polyhedralCone}
 \end{definition}
 
 Note that, using Linear Programming, it is possible to assign a unique \emph{canonical}
@@ -433,6 +433,7 @@ a face of $P$ is a polyhedron itself, so we call it a facet if it has dimension 
 one less than $P$. The notion of faces is important for the next definition:
 
 \begin{definition}[Polyhedral Fan]
+  \label{def:polyhedralFan}
   Let $\mathcal C$ be a collection of polyhedra in $\setR^n$. We call $\mathcal C$ a
   \emph{polyhedral complex} if
   \begin{enumerate}
@@ -443,7 +444,6 @@ one less than $P$. The notion of faces is important for the next definition:
   The support of $\mathcal C$ is $\bigcup_{P\in\mathcal C}P$ and we call $\mathcal C$ a
   \emph{polyhedral fan} if all polyhedra in $C$ are polyhedral cones. Furthermore, if the
   support of a polyhedral fan is all of $\setR^n$ we call it \emph{complete}.
-  \label{def:polyhedralFan}
 \end{definition}
 
 Intuitively, a polyhedral complex is a collection of polyhedra where intersecting
@@ -480,12 +480,12 @@ classes, but this first requires a way to identify a given ordering with a more 
 description. The idea is to represent term orderings by weight vectors:
 
 \begin{definition}[Initial Forms]
+  \label{def:initFormG}
   Given a $\vec w \in \setR^n$ we define the \emph{initial form} $\initial_{\vec w}(f)$ of
   $f = \sum_{\alpha\in\setN^n} c_\alpha \vec x^\alpha \in K[\vec x]$ with respect to $\vec
   w$ to be the sum of all non-zero terms $c_\alpha \vec x^\alpha$ of $f$ where $\vec
   w\cdot \alpha$ is maximal. Analogously to initial terms this defines an initial ideal
   $\initial_{\vec w}(I)$ for $I \idealof K[\vec x]$.
-  \label{def:initFormG}
 \end{definition}
 
 Note that initial ideals of this form need not be monomial ideals -- in fact the weight
@@ -510,10 +510,10 @@ $\prec_{\vec w}$. Among some other nice properties, the most important result ob
 from these constructions is the following:
 
 \begin{proposition}[{\cite[Proposition~1.11]{SturmGBCP}}]
+  \label{prp:init}
   For any global term ordering $\prec$ and any ideal $I \idealof K[\vec x]$ there is a
   weight vector $\vec w \in \setR^n_{\geq0}$ with $\initial_\prec(I) = \initial_{\vec
   w}(I)$.
-  \label{prp:init}
 \end{proposition}
 
 Hence it makes sense to only consider initial forms and ideals given by non-negative
@@ -532,12 +532,12 @@ convex polyhedral cone if the equivalence class contains a strictly positive vec
 immediately leads to the following definitions:
 
 \begin{definition}[Gröbner Cones and Fans]
+  \label{def:groebnerConeFan}
   Fix an ideal $I \idealof K[\vec x]$. For a weight $\vec w \in \setR^n$ with $C[\vec w]
   \cap \setR^n_{>0} \neq \varnothing$ we call the Euclidean closure $C_{\vec w}(I) :=
   \overline{C[\vec w]}$ the \emph{Gröbner cone} of $I$ with respect to $\vec w$. The
   collection of all these cones $\GF(I) := \{ C_{\vec w}(I) : \vec w \in \setR^n_{\geq0}
   \}$ is called the \emph{Gröbner fan} of $I$.
-  \label{def:groebnerConeFan}
 \end{definition}
 
 % TODO change ...
@@ -582,6 +582,7 @@ used.
 
 % TODO: initial forms coincide only in max-plus algebra, so change?
 \begin{definition}[Tropicalization and Initial Forms]
+  \label{def:initialId}
   Let $f \in K[\vec x^{\pm1}]$ be a Laurent polynomial and $\nu : K \to \setR$ a valuation
   as in the above setting. Write $f = \sum_{\alpha \in \setZ^n} c_\alpha \vec x^\alpha$,
   then the \emph{tropicalization} $\trop(f)$ of $f$ is the tropical polynomial
@@ -605,7 +606,6 @@ used.
   w}(f)$ consists of all the terms $c_\alpha\cdot \vec x^\alpha$ of $f$ where
   $\nu(c_\alpha)+\vec w\cdot \alpha$ is minimal. Again, $\initial_{\vec w}(f)$ need not be
   a monomial.
-  \label{def:initialId}
 \end{definition}
 
 We note here that the notations from Definitions~\ref{def:initFormG} and
@@ -1126,10 +1126,10 @@ Petri nets are used as a coordination language in GPI-Space, which allow us to f
 our algorithms without explicitly specifying any parallelization. % TODO
 
 \begin{definition}[Petri net]
+  \label{def:petri}
   A \emph{Petri net} is a triple $N = (P, T, F)$ of two disjoint finite sets $P$ and $T$
   called \emph{places} and \emph{transitions} respectively and a subset $F \subseteq
   (P\times T) \cup (T \times P)$ called the \emph{flow relation} of the net.
-  \label{def:petri}
 \end{definition}
 
 \subsection{GPI-Space}
