@@ -14,7 +14,7 @@
 \usepackage{lmodern}
 \usepackage{dsfont}
 
-\usepackage{algpseudocode}
+\usepackage[noend]{algpseudocode}
 \algrenewcommand\algorithmicrequire{\textbf{Input:}}
 \algrenewcommand\algorithmicensure{\textbf{Output:}}
 
@@ -31,7 +31,7 @@
 \usepackage[
   backend=biber,
   style=alphabetic,
-  maxnames=5,
+  maxnames=10,
   maxalphanames=5,
   isbn=false
 ]{biblatex}
@@ -80,6 +80,7 @@
 \DeclareMathOperator{\initial}{in}
 \DeclareMathOperator{\face}{face}
 \DeclareMathOperator{\GF}{GF}
+\DeclareMathOperator{\GR}{GR}
 \DeclareMathOperator{\conv}{conv}
 \DeclareMathOperator{\Lin}{Lin}
 \DeclareMathOperator{\codim}{codim}
@@ -509,8 +510,9 @@ $\prec_{\vec w}$. Among some other nice properties, the most important result ob
 from these constructions is the following:
 
 \begin{proposition}[{\cite[Proposition~1.11]{SturmGBCP}}]
-  For any term ordering $\prec$ and any ideal $I \idealof K[\vec x]$ there is a weight
-  vector $\vec w \in \setR^n_{\geq0}$ with $\initial_\prec(I) = \initial_{\vec w}(I)$.
+  For any global term ordering $\prec$ and any ideal $I \idealof K[\vec x]$ there is a
+  weight vector $\vec w \in \setR^n_{\geq0}$ with $\initial_\prec(I) = \initial_{\vec
+  w}(I)$.
   \label{prp:init}
 \end{proposition}
 
@@ -525,30 +527,34 @@ corresponding equivalence classes by
     \vec w' \in \setR^n : \initial_{\vec w'}(I) = \initial_{\vec w}(I)
   \right\},
 \]
-\cite[Proposition~2.3]{SturmGBCP} shows that each $C[\vec w]$ is a relatively open convex
-polyhedral cone. This immediately leads to the following definitions:
-% true for any vector? Exists counter example
+In section 2 of \cite{compGrobFan} it is show that each $C[\vec w]$ is a relatively open
+convex polyhedral cone if the equivalence class contains a strictly positive vector. This
+immediately leads to the following definitions:
 
 \begin{definition}[Gröbner Cones and Fans]
-  Fix an ideal $I \idealof K[\vec x]$. For a weight $\vec w \in \setR^n$ we call the
-  Euclidean closure $C_{\vec w}(I) := \overline{C[\vec w]}$ the \emph{Gröbner cone} of $I$
-  with respect to $\vec w$. The collection of all these cones $\GF(I) := \{ C_{\vec w}(I)
-  : \vec w \in \setR^n \}$ is called the \emph{Gröbner fan} of $I$.
+  Fix an ideal $I \idealof K[\vec x]$. For a weight $\vec w \in \setR^n$ with $C[\vec w]
+  \cap \setR^n_{>0} \neq \varnothing$ we call the Euclidean closure $C_{\vec w}(I) :=
+  \overline{C[\vec w]}$ the \emph{Gröbner cone} of $I$ with respect to $\vec w$. The
+  collection of all these cones $\GF(I) := \{ C_{\vec w}(I) : \vec w \in \setR^n_{\geq0}
+  \}$ is called the \emph{Gröbner fan} of $I$.
   \label{def:groebnerConeFan}
 \end{definition}
 
-By \cite[Proposition~2.4]{SturmGBCP}, the Gröbner fan is in fact a fan. The main source
-\cite{SturmGBCP} introduces Newton polytopes as a means to compute the Gröbner fan of an
-ideal which work similarly to what we will introduce in Definition~\ref{def:newtonPoly},
-but no more theory is required for this section. The connection to tropical varieties will
-be drawn in the next section. We may also occasionally need Gröbner cones with respect to
-a given term ordering. By Proposition~\ref{prp:init} for any $I \idealof K[\vec x]$ and
-term order $\prec$ there is a $\vec w \in \setR^n_{\geq0}$ with $\initial_\prec(I) =
-\initial_{\vec w}(I)$. Hence we define the corresponding Gröbner cone to be $C_\prec(I) :=
-C_{\vec w}(I)$.
+% TODO change ...
+In \cite[Theorem~2.19]{compGrobFan} it is shown that the Gröbner fan is in fact a fan.
+Its support $\GR(I) = \{ \vec w \in \setR^n : \exists \vec w' \in
+\setR^n_{\geq0}:\initial_{\vec w}(I) = \initial_{\vec w'}(I)\}$ is called the
+\emph{Gröbner region} of $I$. The main source \cite{SturmGBCP} introduces Newton polytopes
+as a means to compute the Gröbner fan of an ideal which work similarly to what we will
+introduce in Definition~\ref{def:newtonPoly}, but no more theory is required for this
+section. The connection to tropical varieties will be drawn in the next section. We may
+also occasionally need Gröbner cones with respect to a given term ordering. By
+Proposition~\ref{prp:init} for any $I \idealof K[\vec x]$ and term order $\prec$ there is
+a $\vec w \in \setR^n_{\geq0}$ with $\initial_\prec(I) = \initial_{\vec w}(I)$. Hence we
+define the corresponding Gröbner cone to be $C_\prec(I) := C_{\vec w}(I)$.
 
-\subsection{Tropical Prevarieties}
-\label{sec:tropPre}
+\subsection{Tropical Varieties}
+\label{sec:tropVar}
 
 After this light introduction to tropical arithmetic and some convex geometry we now shift
 our focus to more general polynomials and ideals. The idea is to combine the fan structure
@@ -575,7 +581,6 @@ classical and tropical polynomials: this is where the valuation $\nu:K\to\setR$ 
 used.
 
 % TODO: initial forms coincide only in max-plus algebra, so change?
-% also TODO: uniformizing parameter
 \begin{definition}[Tropicalization and Initial Forms]
   Let $f \in K[\vec x^{\pm1}]$ be a Laurent polynomial and $\nu : K \to \setR$ a valuation
   as in the above setting. Write $f = \sum_{\alpha \in \setZ^n} c_\alpha \vec x^\alpha$,
@@ -593,11 +598,13 @@ used.
         \alpha \in \setZ^n \\
         \nu(c_\alpha) + \vec w\cdot \alpha = \trop(f)(\vec w)
     }} \overline {c_\alpha \cdot t^{-\nu(c_\alpha)} } \vec x^\alpha
-    \in \mathfrak K[\vec x^{\pm1}].
+    \in \mathfrak K[\vec x^{\pm1}]
   \]
-  In other words, $\initial_{\vec w}(f)$ consists of all the terms $c_\alpha\cdot \vec
-  x^\alpha$ of $f$ where $\nu(c_\alpha)+\vec w\cdot \alpha$ is minimal. Again,
-  $\initial_{\vec w}(f)$ need not be a monomial.
+  where $\overline{c}$ denotes the image of an element $c \in K$ with $\nu(c)\geq0$ in the
+  residue field $\mathfrak K = R_\nu/\mathfrak m_{R_\nu}$. In other words, $\initial_{\vec
+  w}(f)$ consists of all the terms $c_\alpha\cdot \vec x^\alpha$ of $f$ where
+  $\nu(c_\alpha)+\vec w\cdot \alpha$ is minimal. Again, $\initial_{\vec w}(f)$ need not be
+  a monomial.
   \label{def:initialId}
 \end{definition}
 
@@ -659,20 +666,29 @@ tropical hypersurfaces of its tropical basis.
 \end{theorem}
 
 With these equivalent descriptions of tropical varieties established we have to discuss a
-small technicality. Until now we worked with ideals in the ring $K[\vec x^{\pm1}]$, but we
-may also pass to their corresponding ideals in $K[\vec x]$: Any ideal $I \idealof K[\vec
-x^{\pm1}]$ can be generated by an ideal $I' \idealof K[\vec x] \subseteq K[\vec x^{\pm1}]$
-by multiplying generators of $I$ with suitable monomials. In particular if $\vec w \not\in
-\Trop(I)$, then there exists a polynomial $f \in K[\vec x^{\pm1}]$ such that
-$\initial_{\vec w}(f)$ is a monomial by Theorem~\ref{thm:fundamentalThm}. Hence there
-exists a monomial $m \in K[\vec x]$ such that $mf \in I'$, so $\initial_{\vec w}(mf)$ is
-also a monomial. Thus $\Trop(I) = \Trop(I')$, allowing us to use the much more developed
-Gröbner basis techniques over $K[\vec x]$.
+technical detail relating to the upcoming sections. Until now we worked with ideals in the
+Laurent polynomial ring $K[\vec x^{\pm1}]$. However, we usually want to consider ideals in
+a standard polynomial ring $K[\vec x]$ as these rings are more suited for Gröbner basis
+computations. In fact, starting with an $I \idealof K[\vec x]$,
+Definition~\ref{def:tropicalVariety} and Theorem~\ref{thm:fundamentalThm} work in exactly
+the same way. Considering the ideal $I' \idealof K[\vec x^{\pm1}]$ generated by the
+elements of $I$ it is easy to see that $\Trop(I) = \Trop(I')$: If $\vec w \not\in
+\Trop(I')$ then there is a polynomial $f \in I'$ such that $\initial_{\vec w}(f)$ is a
+monomial. Then there is a monomial $m \in K[\vec x]$ such that $mf \in I$ and
+$\initial_{\vec w}(mf)$ is a monomial as well, so $\vec w \not\in \Trop(I)$. This allows
+us to consider ideals in either $K[\vec x]$ or $K[\vec x^{\pm1}]$ and for most purposes we
+will restrict ourselves to $K[\vec x]$ -- in particular when Gröbner basis computations
+are required.
+
+% TODO move?
+Another problem {\dots} this definition of initial ideal turns Gröbner fan into non-fan
+polyhedral complex in general {\dots} solution, consider over polynomial ring in extra
+variable {\dots} also not a problem as we only consider constant coefficient case
 
 % much TODO
 
 % TODO Maybe move to previous section?
-\begin{algo}[Common Refinement, {\cite[Algorihm~4.4]{compTropVar}}] $ $
+\begin{algo}[Common Refinement, {\cite[Algorithm~4.4]{compTropVar}}] $ $
   \label{alg:fanRefinement}
   \begin{algorithmic}[1]
     \Require Representations $S_1$, $S_2$ of two polyhedral fans $\mathcal
@@ -745,13 +761,58 @@ Gröbner basis techniques over $K[\vec x]$.
   \end{algorithmic}
 \end{algo}
 
+With the ability of computing all neighboring cones of a given maximal Gröbner cone the
+next question is whether we can reach any cone in $\Trop(I)$ via a sequence of maximal
+cones. This is answered by the following connectivity result:
+
+% TODO ridge paths, irreducibility etc
+% TODO perhaps move?
+\begin{theorem}
+  \label{thm:connectedT}
+  Let $I$ be a prime ideal with irreducible tropical variety $\Trop(I)$, then $\Trop(I)$
+  is connected in codimension one. In other words: Any two maximal cones in the
+  corresponding fan are connected by a ridge path.
+\end{theorem}
+
 % TODO
+We now have a method to determine neighboring maximal cones of a given Gröbner cone and
+know by Theorem~\ref{thm:connectedT} that the tropical variety of a prime ideal is
+connected in codimension one, so the method of traversing it becomes painfully obvious. If
+we can determine a maximal starting cone in the tropical variety, then we simply compute
+all neighbors of all unprocessed cones, until no unprocessed cones are left.
+
+\begin{algo}[Traversal of an Irreducible Tropical Variety]\
+  \label{alg:traversal}
+  \begin{algorithmic}[1]
+    \Require A Gröbner cone represented as $(\mathcal G_{\prec_{\vec w}}(\initial_{\vec
+      w}(I)), \mathcal G_{\prec_{\vec w}}(I))$ such that $\initial_{\vec w}(I)$ is
+      monomial free and has dimension $d:=\dim(I)$.
+    \Ensure Collection of pairs $(\mathcal G_{\prec_{\vec w'}}(\initial_{\vec
+      w'}(I)), \mathcal G_{\prec_{\vec w'}}(I))$ where $\vec w'$ are taken from the
+      relative interior of each $d$-dimensional Gröbner cone contained $\Trop(I)$. The
+      union of $C_{\vec w'}(I)$ for all these $\vec w'$ is $\Trop(I)$.
+    \State Set $T = \{ (\mathcal G_{\prec_{\vec w}}(\initial_{\vec
+      w}(I)), \mathcal G_{\prec_{\vec w}}(I)) \}$.
+    \State Set $Old := \varnothing$.
+    \While{$T \neq Old$}
+      \State Set $Old := T$.
+      \State Set $T := T \cup \mathrm{Neighbors}(T)$.
+    \EndWhile
+    \State\textbf{return} $T$.
+  \end{algorithmic}
+\end{algo}
+
+This algorithm suffices to illustrate the method of traversing the tropical variety. In
+the next section we will look at new algorithms to improve our Neighbor-algorithm and
+introduce an algorithm to compute a starting Gröbner cone. In
+section~\ref{sec:traverseParal} we will come back to this traversal algorithm and make it
+more suitable for our parallelization purposes.
 
 \subsection{Newton Polygon Method}
 
 We focus on a new approach introduced by Yue Ren and Tommy Hofmann which uses Newton
 polygons to compute zero-dimensional tropical varieties \cite{tropPointsLinks}. While the
-general traversal procedures are given in section~\ref{sec:tropPre}, we now want to study
+general traversal procedures are given in section~\ref{sec:tropVar}, we now want to study
 different methods for computing non-trivial points in the tropical variety and links
 between cones in it, which allows us to generate a starting and neighbor cones more
 efficiently. In particular, Ren and Hofmann's methods provide local optimizations to the
@@ -765,14 +826,21 @@ monomial-free initial ideals, the focus of this section -- and in fact of the en
 thesis -- is the interpretation as the coordinate-wise image $\Trop(I) = \nu(V(I))$ as we
 have seen in theorem~\ref{thm:fundamentalThm}. The main idea of Ren and Hofmann's results
 is to apply this interpretation to zero-dimensional ideals and their triangular
-decompositions: A set of polynomials $\{ f_1, \dots, f_n \} \subseteq K[x_1, \dots, x_n]$
-is called a \emph{triangular set} if
-\[
-  f_i \in K[x_1, \dots, x_i] / K[x_1, \dots, x_{i-1}]
-\]
-for each $i \in \{1, \dots, n\}$. Zero loci of ideals generated by triangular sets can be
-computed very easily as only univariate methods and substitution are required. It is thus
-important to be able to reduce general zero-dimensional ideals to triangular sets:
+decompositions:
+
+\begin{definition}
+  \label{def:triangSet}
+  A set of polynomials $\{ f_1, \dots, f_n \} \subseteq K[x_1, \dots, x_n]$ is called a
+  \emph{triangular set} if
+  \[
+    f_i \in K[x_1, \dots, x_i] / K[x_1, \dots, x_{i-1}]
+  \]
+  for each $i \in \{1, \dots, n\}$.
+\end{definition}
+
+Zero loci of ideals generated by triangular sets can be computed very easily as only
+univariate methods and substitution are required. It is thus important to be able to
+reduce general zero-dimensional ideals to triangular sets:
 
 \begin{proposition}
   Let $I \idealof K[\vec x]$ be a zero-dimensional ideal, then there exist triangular sets
@@ -828,7 +896,7 @@ roots and polynomials evaluated at these roots:
   For a polynomial $f \in K[x_1, \dots, x_k]$ and a weight $\vec w \in \setR^{k-1}$ the
   following are equivalent:
   \begin{enumerate}
-    \item $f$ has a unique Newton polygon at $\vec w$
+    \item $f$ has a unique Newton polygon at $\vec w$, and
     \item for all $z \in K^{k-1}$ with valuation $\nu(z) = (\nu(z_1), \dots, \nu(z_{k-1}))
       = (w_1, \dots, w_{k-1}) = \vec w$ we have $\Delta(f(z, x_k)) = \Delta_{\vec w}(f)$.
   \end{enumerate}
@@ -1053,13 +1121,14 @@ Introduce Petri nets theoretically
 Implementation with extensions
 
 \subsection{Traversing a Fan in Parallel}
+\label{sec:traverseParal}
 
 Computing tropical varieties in our setting follows the general structure of a fan
 traversal: Interpreting the maximal cones of a polyhedral fan together with their
 adjacency relations as a connected graph, we may realize the fan traversal as a simple
 graph traversal.
 
-We formulate the traversal algorithm formulated in section~\ref{sec:tropPre} into a Petri
+We formulate the traversal algorithm formulated in section~\ref{sec:tropVar} into a Petri
 net.
 
 Standard approach relying on a starting cone procedure and a \emph{neighbour oracle}.
@@ -1092,8 +1161,8 @@ found in \cite{tropGrass}.
   subspaces of $K^n$, usually denoted by $G(k, n)$.
 \end{definition}
 
-Thus, Grassmannians are in some sense a generalization of projective space: for example we
-will later be able to see that in fact $G(1,n) \cong \setP^n$. Our goal now is to give
+Thus, Grassmannians are in some sense a generalization of projective space: for instance
+we will later be able to see that in fact $G(1,n) \cong \setP^n$. Our goal now is to give
 these sets the structure of a projective variety which in turn allows us to study their
 tropical variety. This is achieved by embedding a Grassmannian $G(k, n)$ into
 $\setP^{\binom nk}-1$ via the so-called \emph{Plücker embedding}. To this end we want to
