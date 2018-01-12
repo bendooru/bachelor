@@ -1110,11 +1110,27 @@ This can then be used in Algorithm~\ref{alg:neighbors} as a replacement for line
 
 \section{Parallelization}
 
-Use Petri nets as a framework to parallelize the traversal of tropical fans.
+Our main contribution is the combination of \textsc{Singular}-methods to compute tropical
+varieties with recently developed parallelization efforts at the Fraunhofer ITWM of
+computer algebra software. The first efforts to this end are described in
+\cite{towardsParallel} while we specifically base our work on parallelization algorithms
+by Christian Reinbold to compute GIT-fans (cite???). Parallelization of our procedures is
+taken care of by the GPI-Space environment:
+
+Use Petri nets as a framework to parallelize the traversal of tropical fans. Refer to
+source \cite{towardsParallel}.
 
 \subsection{Petri Nets}
 
-Introduce Petri nets theoretically
+Petri nets are used as a coordination language in GPI-Space, which allow us to formulate
+our algorithms without explicitly specifying any parallelization. % TODO
+
+\begin{definition}[Petri net]
+  A \emph{Petri net} is a triple $N = (P, T, F)$ of two disjoint finite sets $P$ and $T$
+  called \emph{places} and \emph{transitions} respectively and a subset $F \subseteq
+  (P\times T) \cup (T \times P)$ called the \emph{flow relation} of the net.
+  \label{def:petri}
+\end{definition}
 
 \subsection{GPI-Space}
 
