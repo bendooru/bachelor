@@ -1033,7 +1033,105 @@ polygon. An example of how such a computation might look like is given as follow
 
 \begin{figure}[htbp]
   \centering
-  insert figure here
+  \begin{tikzpicture}
+    % first level
+    \fill[blue!20] (-1,2.5) -- (-1,0) -- (0,0) -- (1,1) -- (1,2.5) -- cycle;
+    \draw (-1,2.5) -- (-1,0)
+    (1,1) -- (1,2.5);
+    \draw[thick,black]
+      (-1,0) -- node[above,black,font=\scriptsize] {$0$} (0,0);
+    \draw[thick,black]
+      (0,0) -- node[anchor=south east,xshift=0.1cm,yshift=-0.1cm,black,font=\scriptsize] {$1$} (1,1);
+    \fill (-1,0) circle (0.075cm);
+    \fill (0,0) circle (0.075cm);
+    \fill (1,1) circle (0.075cm);
+    \node[font=\small] at (0,1.75) {$\Delta(f_1)$};
+
+    \draw[->,black] (-1.25,-0.75) --
+      node[left,black,font=\small] {$w_1=0$} ($(-1.25,-0.75)+(-0.75,-1.25)$);
+    \draw[->,black] (1.25,-0.75) --
+      node[right,black,font=\small] {$w_1=-1$} ($(1.25,-0.75)+(0.75,-1.25)$);
+
+    % second level
+    \node (o11) at (-3,-4) {};
+    \fill[blue!20] ($(-1,1.5)+(o11)$) -- ($(-1,0)+(o11)$) -- ($(0,0)+(o11)$)
+      -- ($(1,1)+(o11)$) -- ($(1,1.5)+(o11)$) -- cycle;
+    \draw ($(-1,1.5)+(o11)$) -- ($(-1,0)+(o11)$)
+      ($(1,1)+(o11)$) -- ($(1,1.5)+(o11)$);
+    \draw[thick,black]
+      ($(-1,0)+(o11)$) -- node[above,black,font=\scriptsize] {$0$} ($(0,0)+(o11)$);
+    \draw[thick,black]
+      ($(0,0)+(o11)$) -- node[above,black,font=\scriptsize] {$1$} ($(1,1)+(o11)$);
+    \fill ($(-1,0)+(o11)$) circle (0.075cm);
+    \fill ($(0,0)+(o11)$) circle (0.075cm);
+    \fill ($(1,1)+(o11)$) circle (0.075cm);
+    \node[font=\small] at ($(0,1.75)+(o11)$) {$\Delta_0(f_2)$};
+
+    \draw[->,black] ($(-1.25,-0.75)+(o11)$) --
+      node[left,black,font=\small] {$w_2=0$} ($(-1.25,-0.75)+(-0.25,-1.25)+(o11)$);
+    \draw[->,black] ($(1.25,-0.75)+(o11)$) --
+      node[right,black,font=\small] {$w_2=-1$} ($(1.25,-0.75)+(0.25,-1.25)+(o11)$);
+
+    \node (o12) at (3,-4) {};
+    \fill[blue!20] ($(-1,1.5)+(o12)$) -- ($(-1,0)+(o12)$) -- ($(0,-1) + (o12)$)
+      -- ($(1,0)+(o12)$) -- ($(1,1.5)+(o12)$) -- cycle;
+    \draw ($(-1,1.5)+(o12)$) -- ($(-1,0)+(o12)$)
+      ($(1,0)+(o12)$) -- ($(1,1.5)+(o12)$);
+    \draw[thick,black] ($(-1,0)+(o12)$) --
+      node[above,black,font=\scriptsize,xshift=4pt] {$-1$} ($(0,-1)+(o12)$) --
+      node[above,black,font=\scriptsize] {$1$} ($(1,0)+(o12)$);
+
+    \fill ($(-1,0)+(o12)$) circle (0.075cm);
+    \fill ($(0,-1)+(o12)$) circle (0.075cm);
+    \fill ($(1,0)+(o12)$) circle (0.075cm);
+    \node[font=\small] at ($(0,1.75)+(o12)$) {$\Delta_1(f_2)$};
+
+    \draw[->,black] ($(-1,-1.25)+(o12)$) --
+      node[right,black,font=\small] {$w_2= 1$} ($(-1.5,-0.75)+(0,-1.25)+(o12)$);
+    \draw[->,black] ($(1,-1.25)+(o12)$) --
+      node[right,black,font=\small] {$w_2= -1$} ($(1.5,-0.75)+(0,-1.25)+(o12)$);
+
+    % third level
+    \node (o21) at ($(o11)+(-2,-3.3)$) {};
+    \fill[blue!20] ($(0,0.5)+(o21)$) -- ($(0,0)+(o21)$) -- ($(1,0)+(o21)$) -- ($(1,0.5)+(o21)$) -- cycle;
+    \draw ($(0,0.5)+(o21)$) -- ($(0,0)+(o21)$)
+      ($(1,0)+(o21)$) -- ($(1,0.5)+(o21)$);
+    \draw[thick,black]
+      ($(0,0)+(o21)$) -- node[above,black,font=\scriptsize] {$0$} ($(1,0)+(o21)$);
+    \fill ($(0,0)+(o21)$) circle (0.075cm);
+    \fill ($(1,0)+(o21)$) circle (0.075cm);
+    \node[font=\small] at ($(0.5,0.8)+(o21)$) {$\Delta_{(0,0)}(f_3)$};
+
+    \node (o22) at ($(o11)+(1,-3.3)$) {};
+    \fill[blue!20] ($(0,0.5)+(o22)$) -- ($(0,0)+(o22)$) -- ($(1,-1)+(o22)$) -- ($(1,0.5)+(o22)$) -- cycle;
+    \draw ($(0,0.5)+(o22)$) -- ($(0,0)+(o22)$)
+      ($(1,-1)+(o22)$) -- ($(1,0.5)+(o22)$);
+    \draw[thick,black]
+      ($(0,0)+(o22)$) -- node[above,black,font=\scriptsize,xshift=0.1cm] {$-1$} ($(1,-1)+(o22)$);
+    \fill ($(0,0)+(o22)$) circle (0.075cm);
+    \fill ($(1,-1)+(o22)$) circle (0.075cm);
+    \node[font=\small] at ($(0.5,0.8)+(o22)$) {$\Delta_{(0,-1)}(f_3)$};
+
+    \node (o23) at ($(o12)+(-2,-3.3)$) {};
+    \fill[blue!20] ($(0,0.5)+(o23)$) -- ($(0,0)+(o23)$) -- ($(1,0)+(o23)$) -- ($(1,0.5)+(o23)$) -- cycle;
+    \draw ($(0,0.5)+(o23)$) -- ($(0,0)+(o23)$)
+      ($(1,0)+(o23)$) -- ($(1,0.5)+(o23)$);
+    \draw[thick,black]
+      ($(0,0)+(o23)$) -- node[above,black,font=\scriptsize] {$0$} ($(1,0)+(o23)$);
+    \fill ($(0,0)+(o23)$) circle (0.075cm);
+    \fill ($(1,0)+(o23)$) circle (0.075cm);
+    \node[font=\small] at ($(0.5,0.8)+(o23)$) {$\Delta_{(0,0)}(f_3)$};
+
+    \node (o24) at ($(o12)+(1,-3.3)$) {};
+    \fill[blue!20] ($(0,0.5)+(o24)$) -- ($(0,0)+(o24)$) -- ($(1,-2)+(o24)$) -- ($(1,0.5)+(o24)$) -- cycle;
+    \draw ($(0,0.5)+(o24)$) -- ($(0,0)+(o24)$)
+      ($(1,-2)+(o24)$) -- ($(1,0.5)+(o24)$);
+    \draw[thick,black]
+      ($(0,0)+(o24)$) -- node[above,black,xshift=0.2cm,font=\scriptsize] {$-2$} ($(1,-2)+(o24)$);
+    \fill ($(0,0)+(o24)$) circle (0.075cm);
+    \fill ($(1,-2)+(o24)$) circle (0.075cm);
+    \node[font=\small] at ($(0.5,0.8)+(o24)$) {$\Delta_{(1,1)}(f_3)$};
+  \end{tikzpicture}
   \caption{Series of Newton polygons of $F$ \cite[Figure~2]{tropPointsLinks}}
   \label{fig:seriesOfNewtonPolygons}
 \end{figure}
