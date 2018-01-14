@@ -358,16 +358,16 @@ of Puiseux series:
   \label{def:puiseux}
   Let $K'$ be a field. The field of \emph{Puiseux series} $K = \puiseux{K'}{t}$ with
   coefficients in $K'$ in the indeterminate $t$ is the set of all formal power series
-  \[
+  \begin{equation} \label{eq:puiseux1}
     f = c_1 t^{a_1} + c_2 t^{a_2} + c_3 t^{a_3} + \cdots
-  \]
+  \end{equation}
   with $c_k \in K'$ for all $k \in \setN$ and rational numbers $a_1 < a_2 < a_3 < \cdots$
   that have a common denominator. Hence, the series can be rewritten as
-  \[
+  \begin{equation} \label{eq:puiseux2}
     f = \sum_{k = k_0}^\infty c'_k t^{\frac kN}
-  \]
-  with suitable $c'_k \in K'$ for all $k\geq k_0$ and the common denominator $N \in
-  \setN$.
+  \end{equation}
+  with suitable $c'_k \in K'$ for all $k\geq k_0$, $c_{k_0}\neq0$ and the common
+  denominator $N \in \setN$.
 \end{definition}
 
 By considering the rings of formal Laurent series $\smash{K'((t^{\frac1n}))}$ for $n \in
@@ -387,10 +387,52 @@ usually choose $K'=\setC$. This is due to the following theorem:
 
 The proof of this theorem is constructive and -- provided one can compute roots over the
 base field $K'$ -- yields a method to iteratively compute roots of a polynomial in
-$\puiseux{K'}{t}[x]$ up to a given order. As we will see, finite \emph{expansions} of these
-roots will more than suffice for our purposes.
+$\puiseux{K'}{t}[x]$ up to a given order, see for example the proof of
+\cite[Theorem~2.1.5]{sturmMacTrop}. As we will see, finite \emph{expansions} of these
+roots will more than suffice for our purposes. The proof cited above uses the natural
+valuation $\nu : \puiseux{K'}{t} \to \setR \cup \{\infty\}$ of this field: for an element
+$f \in \puiseux{K'}{t}^*$ we define $\nu(f)$ to be the lowest exponent that appears in a
+non-zero term of $f$, i.e.\ $a_1$ in \eqref{eq:puiseux1} and $k_0/N$ in
+\eqref{eq:puiseux2}.
+
+\begin{example}
+  Let $L$ be any field and fix $K' = \setC$ so $K = \CCt$.
+  \begin{enumerate}
+    \item If we equip $L$ with the trivial valuation $\nu(K^*) = \{0\}$, then we have
+      $R_\nu = K$ and $\mathfrak m_{R_\nu} = \{0\}$, so $\mathfrak K = K$.
+    \item By the definitions it is clear that the residue of the Puiseux series ring
+      $\CCt$ must be $\mathfrak K = \setC$. % TODO
+    \item The Puiseux series $t^{\frac12}, t^{\frac12} + t^{\frac23} + t^2,
+      \sum_{i=1}^\infty \frac1i t^{\frac i2} \in \CCt$ all have valuation $\frac12$.
+    \item % TODO
+    \item We will come back to computing computing finite expansions of roots of
+      univariate polynomials in a later section, see
+      Example~\ref{ex:zeroDimTrop}.\ref{ex:zdt2}.
+  \end{enumerate}
+\end{example}
 
 \dots % TODO
+
+% also need this
+\begin{lemma}[{\cite[Lemma~2.1.15]{sturmMacTrop}}]
+  \label{lem:valSplit}
+  Denote the valuation group of $\nu$ by $\Gamma_\nu = \nu(K^*)$. If $K$ is algebraically
+  closed, then there is a group homomorphism $\psi : \Gamma_\nu \to K^*$ with
+  $\nu(\psi(w)) = w$ for all $w \in \Gamma_\nu$. In other words, the surjection $\nu : K^*
+  \to \Gamma_\nu$ splits.
+\end{lemma}
+
+We will use the notation $t^w$ for the elements $\phi(w) \in K^*$ which is motivated by
+the most important field for our purposes: In the case $K = \CCt$ we have $\Gamma_\nu =
+\setQ$ and the element $t^w$ will be exactly this power of $t$.
+
+While working in polynomial rings over $\CCt$ or similar fields with valuation mainly
+provides theoretical benefits like using Newton polygons to determine valuations of roots
+as in Lemma~\ref{lem:newtPolyRoots}, the iterative method given by
+Theorem~\ref{thm:puisuexalgclosed} will provide a fall-back method of computing
+zero-dimensional affine varieties. To this end we usually consider elements of $\setQ(t)$
+as finite approximations of Puiseux series.
+% mention Santiagos work here?
 
 \subsection{Gröbner Fans}
 \label{sec:grobFan}
@@ -602,10 +644,10 @@ used.
     \in \mathfrak K[\vec x^{\pm1}]
   \]
   where $\overline{c}$ denotes the image of an element $c \in K$ with $\nu(c)\geq0$ in the
-  residue field $\mathfrak K = R_\nu/\mathfrak m_{R_\nu}$. In other words, $\initial_{\vec
-  w}(f)$ consists of all the terms $c_\alpha\cdot \vec x^\alpha$ of $f$ where
-  $\nu(c_\alpha)+\vec w\cdot \alpha$ is minimal. Again, $\initial_{\vec w}(f)$ need not be
-  a monomial.
+  residue field $\mathfrak K = R_\nu/\mathfrak m_{R_\nu}$ and recall
+  lemma~\ref{lem:valSplit} for the notation. In other words, $\initial_{\vec w}(f)$
+  consists of all the terms $c_\alpha\cdot \vec x^\alpha$ of $f$ where $\nu(c_\alpha)+\vec
+  w\cdot \alpha$ is minimal. Again, $\initial_{\vec w}(f)$ need not be a monomial.
 \end{definition}
 
 We note here that the notations from Definitions~\ref{def:initFormG} and
@@ -648,6 +690,24 @@ tropical hypersurfaces of its tropical basis.
 
 \dots % TODO
 
+\begin{theorem}[Kaparanov's Theorem]
+  \label{thm:kapranov}
+  Fix an algebraically closed field with valuation, then for a $f \in K[\vec x^{\pm1}]$
+  the following sets coincide:
+  \begin{enumerate}
+    \item the tropical hypersurface $\Trop(f)$ in $\setR^n$,
+    \item the set $\{ \vec w \in \setR^n : \initial_{\vec w}(f) \text{ is not a
+      monomial}\}$
+    \item the Euclidean closure in $\setR^n$ of the set $\{ (\nu(y_1), \dots, \nu(y_n)) :
+      (y_1,\dots,y_n) \in V(f) \}$.
+  \end{enumerate}
+\end{theorem}
+
+\dots % TODO
+
+Theorem~\ref{thm:kapranov} naturally generalizes to full tropical varieties without having
+to alter the result in any way:
+
 \begin{theorem}[Fundamental Theorem of Tropical Geometry,
   {\cite[Theorem~3.2.5]{sturmMacTrop}}] \label{thm:fundamentalThm}
   Let $K$ be an algebraically closed field with non-trivial valuation, $I \idealof K[\vec
@@ -660,7 +720,7 @@ tropical hypersurfaces of its tropical basis.
       i.e.\ the initial ideals which do not contain monomials and
     \item the Euclidean closure of the set of coordinate-wise valuations of points in $X$
       \[
-        \nu(X) = \{ (\nu(x_1), \dots, \nu(x_n)) : (x_1, \dots, x_n) \in X \}.
+        \nu(X) = \{ (\nu(y_1), \dots, \nu(y_n)) : (y_1, \dots, y_n) \in X \}.
       \]
   \end{enumerate}
 \end{theorem}
@@ -951,20 +1011,24 @@ compute the complete tropical variety $\Trop(F)$. The \enquote{else}-case in thi
 algorithm is required in the rare case that a polynomial does not admit a unique Newton
 polygon. An example of how such a computation might look like is given as follows:
 
-\begin{example}
-  We consider the triangular set $F = \{ f_1, f_2, f_3 \} \subseteq \CCt[x_1, x_2, x_3]$
-  given by
-  \[
-    f_1 = tx_1^2 + x_1 + 1, \quad
-    f_2 = tx_1x_2^2 + x_1x_2 + 1, \quad
-    f_3 = x_1x_2x_3+1
-  \]
-  then each step in the algorithm allows several choices of unique Newton polygons as
-  illustrated in Figure~\ref{fig:seriesOfNewtonPolygons}. Iterating over all of them
-  yields the tropical variety
-  \[
-    \Trop(F) = \{ (0,0,0), (0,-1,1), (-1,1,0),(-1,-1,2) \}.
-  \]
+\begin{example} \label{ex:zeroDimTrop}\
+  \begin{enumerate}
+    \item We consider the triangular set $F = \{ f_1, f_2, f_3 \} \subseteq \CCt[x_1, x_2,
+      x_3]$ given by
+      \[
+        f_1 = tx_1^2 + x_1 + 1, \quad
+        f_2 = tx_1x_2^2 + x_1x_2 + 1, \quad
+        f_3 = x_1x_2x_3+1
+      \]
+      then each step in the algorithm allows several choices of unique Newton polygons as
+      illustrated in Figure~\ref{fig:seriesOfNewtonPolygons}. Iterating over all of them
+      yields the tropical variety
+      \[
+        \Trop(F) = \{ (0,0,0), (0,-1,1), (-1,1,0),(-1,-1,2) \}.
+      \]
+    \item % TODO add fallback method to Puiseux expansions
+      \label{ex:zdt2}
+  \end{enumerate}
 \end{example}
 
 \begin{figure}[htbp]
