@@ -11,8 +11,8 @@ set style line 4 lc rgb 'blue' pt 2 ps 2 lw 3
 set xlabel 'threads'
 set ylabel 'time [min]'
 
-f(x) = 12531.7 / x
-g(x) = 14010.37 / x
+f(x) = 19745.97 / x
+g(x) = 14074.39 / x
 
 set yrange [0:1700]
 set xrange [1:900]
@@ -25,7 +25,7 @@ plot f(x) title 'ideal hyperbolas' with lines linestyle 3, \
 set terminal epslatex color size 14.5cm,10cm
 set output 'fig/efficiency.tex'
 
-constmean(x) = 64*13134.723
+constmean(x) = 64*14486.34
 constone(x) = 1
 
 set yrange [0.8:1.8]
