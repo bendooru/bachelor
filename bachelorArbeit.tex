@@ -1383,10 +1383,12 @@ taken care of by the GPI-Space environment:
 Use Petri nets as a framework to parallelize the traversal of tropical fans. Refer to
 source \cite{towardsParallel}.
 
-\subsection{Petri Nets}
+\subsection{Petri Nets and GPI-Space}
 
 Petri nets are used as a coordination language in GPI-Space, which allow us to formulate
-our algorithms without explicitly specifying any parallelization. % TODO
+our algorithms without explicitly specifying any parallelization. Further, they can be
+expressed as bipartite directed graphs, allowing them to be designed in an intuitive and
+accessible way.
 
 \begin{definition}[Petri net]
   \label{def:petri}
@@ -1395,9 +1397,52 @@ our algorithms without explicitly specifying any parallelization. % TODO
   (P\times T) \cup (T \times P)$ called the \emph{flow relation} of the net.
 \end{definition}
 
-\subsection{GPI-Space}
+This definition establishes the static part of a Petri net which is used to describe the
+overall structure of a program. To describe the dynamic execution of a Petri net we
+introduce the notion of markings:
 
-Implementation with extensions
+\begin{definition}[Marking]
+  \label{def:marking}
+  Given a Petri net $(P,T,F)$ a \emph{marking} $M$ of the net is defined as a function $M
+  : P \to \setN$. If $M(p) = k$ for some $k \in \setN$ then we say that $p$ \emph{holds
+  $k$ tokens under $M$}.
+\end{definition}
+
+As we will be using Petri nets with markings to formulate program flows to parallelize, it
+makes sense to think of transitions as the elementary algorithms with tokens representing
+the data which is passed from and to these algorithms. Thus we will call $p$ an
+\emph{input} to $t$ if $(p,t) \in F$ and analogously an \emph{output} to $t$ if $(t,p) \in
+F$.
+
+We can also describe a marking by its graph $M = \{ (p, M(g)) : p \in P, M(g) \neq 0 \}$
+of non-zero images. Such a marking $M$ is used to define the \emph{state} a Petri net: $M$
+\emph{enables} a transition $t \in T$ if all input places of $t$ hold tokens, meaning that
+$(p,t) \in F$ implies $M(g)>0$. In this case we write $\smash{M
+\overset{t}{\longrightarrow}}$. In a Petri net with marking $M$ a transition $t$ enabled
+by $M$ may be \emph{fired} by consuming a token from each input place of $t$ and adding a
+token to each output place. This leads to a new marking $M'$ given by
+\[
+  M'(p) = M(p) - |\{ (p,t) \} \cap F| + |\{ (t,p) \} \cap F|
+\]
+for all $p \in P$. If $M'$ is defined in this way by the firing of $t$, then we write
+$\smash{M \overset{t}\longrightarrow M'}$ and say that $M'$ is \emph{directly reachable}
+from $M$ by firing $t$. In general we say that a marking $M'$ is \emph{reachable} if there
+is a \emph{firing sequence} $\smash{M \overset{t_1}\longrightarrow M_1
+\overset{t_2}\longrightarrow \cdots \overset{t_{n-1}}\longrightarrow M'}$
+% TODO more on reachabiliy?
+
+A nice property of Petri nets is that their static part given by
+Definition~\ref{def:petri} can by visualized as a directed bipartite graph $G = (S \cup T,
+F)$.
+
+\begin{example}[Parallelisms in Petri Nets]\
+  \begin{enumerate}
+    \item % TODO
+    \item % TODO
+  \end{enumerate}
+\end{example}
+
+Implementation with extensions (GPI)
 
 \subsection{Traversing a Fan in Parallel}
 \label{sec:traverseParal}
@@ -1407,8 +1452,8 @@ traversal: Interpreting the maximal cones of a polyhedral fan together with thei
 adjacency relations as a connected graph, we may realize the fan traversal as a simple
 graph traversal.
 
-We formulate the traversal algorithm formulated in section~\ref{sec:tropVar} into a Petri
-net.
+We formulate the traversal algorithm given in Algorithm~\ref{alg:traversal} into a
+Petri net.
 
 Standard approach relying on a starting cone procedure and a \emph{neighbour oracle}.
 
