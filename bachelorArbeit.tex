@@ -316,14 +316,25 @@ no points whatsoever. This will become important later on.
 
 \begin{figure}[tbh]
   \centering
-  \begin{tikzpicture}[thick]
-    \draw (0,0) -- (2,2);
-    \draw (2,2) -- (2,4.5);
-    \draw (2,2) -- (4.5,2);
+  \begin{tikzpicture}[scale=1.3]
+    \draw[dashed, gray] (-2,0) -- (2,0);
+    \draw[dashed, gray] (0,-1) -- (0,2);
+
+    \draw[thick] (0,0) -- (-1,-1);
+    \draw[thick] (0,0) -- (0,2);
+    \draw[thick] (0,0) -- (2,0);
   \end{tikzpicture}
-  and quadric
-  % TODO
-  \caption{A generic tropical line and quadric in $\setR^2$}
+  \qquad
+  \begin{tikzpicture}[scale=1.3]
+    \draw[dashed, gray] (-2,0) -- (2,0);
+    \draw[dashed, gray] (0,-1) -- (0,2);
+
+    \draw[thick] (-2,-1) -- (-1,0) -- (0,0) -- (1,1) -- (2,1);
+    \draw[thick] (-1,0) -- (-1,2);
+    \draw[thick] (0,0) -- (0,-1);
+    \draw[thick] (1,1) -- (1,2);
+  \end{tikzpicture}
+  \caption{A tropical line and quadric in $\setR^2$}
   \label{fig:tropLineQuad}
 \end{figure}
 
@@ -331,10 +342,11 @@ Since monomials and powers of variables are well-defined, we can assign a \emph{
 a tropical polynomial in the usual sense, hence we may carry over the naming conventions
 for hypersurfaces in standard algebraic geometry: A hypersurface given by a degree 1
 polynomial is called a tropical hyperplane, for degrees 2, 3 and so on they are called
-tropical quadrics and cubics respectively. In figure~\ref{fig:tropLineQuad} we see the
-hypersurfaces given by \dots % TODO
-As a final note, since tropical division is well-defined for non-infinite elements we may
-also consider tropical polynomials in negative exponents later on.
+tropical quadrics and cubics respectively. For instance, in figure~\ref{fig:tropLineQuad}
+we see the tropical line $V(x \oplus y \oplus 0)$ on the left. The tropical quadric on
+the right will be mentioned again later on. As a final note, since tropical division is
+well-defined for non-infinite elements we may also consider tropical polynomials in
+negative exponents later on.
 
 \subsection{Valuations and Puiseux Series}
 
@@ -772,23 +784,9 @@ x]$.
   \end{align*}
   We in particular see that $\initial_{\vec w}(f) = x+y+1 \in \setC[x,y]$ and
   $\initial_{\vec w'}(f) = 1$, so $\vec w \in \Trop(f)$ but $\vec w' \not\in \Trop(I)$.
-  % TODO draw this hyperurface?
+  The corresponding tropical curve $V(1\odot x^2 \oplus x \oplus y \oplus xy \oplus 1)$ is
+  depicted in Figure~\ref{fig:tropLineQuad} on the right.
 \end{example}
-
-\begin{figure}
-  \centering % TODO maybe add coordinates
-  \begin{tikzpicture}[scale=1.3]
-    \draw[dashed, gray] (-2,0) -- (2,0);
-    \draw[dashed, gray] (0,-1) -- (0,2);
-
-    \draw[thick] (-2,-1) -- (-1,0) -- (0,0) -- (1,1) -- (2,1);
-    \draw[thick] (-1,0) -- (-1,2);
-    \draw[thick] (0,0) -- (0,-1);
-    \draw[thick] (1,1) -- (1,2);
-  \end{tikzpicture}
-  \caption{Tropical curve considered in Example~\ref{ex:notFan}}
-  \label{fig:notFan}
-\end{figure}
 
 Theorem~\ref{thm:tropComplexConn} states that a tropical variety is the support of a
 polyhedral complex which in general contains both bounded and unbounded faces. As
