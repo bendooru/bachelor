@@ -411,7 +411,7 @@ $f \in \puiseux{K'}{t}^*$ we define $\nu(f)$ to be the lowest exponent that appe
 non-zero term of $f$, i.e.\ $a_1$ in \eqref{eq:puiseux1} and $k_0/N$ in
 \eqref{eq:puiseux2}.
 
-\begin{example}
+\begin{example} \label{ex:valuations}
   Let $L$ be any field and fix $K' = \setC$ so $K = \CCt$.
   \begin{enumerate}
     \item If we equip $L$ with the trivial valuation $\nu(K^*) = \{0\}$, then we have
@@ -448,7 +448,23 @@ as in Lemma~\ref{lem:newtPolyRoots}, the iterative method given by
 Theorem~\ref{thm:puisuexalgclosed} will provide a fall-back method of computing
 zero-dimensional affine varieties. To this end we usually consider elements of $\setQ(t)$
 as finite approximations of Puiseux series.
-% mention Santiagos work here?
+% TODO mention Santiagos work here?
+
+\begin{example}[$p$-adic Valuation] \label{ex:pAdic}
+  On a closing note we want to take a look at another important class of fields with
+  valuation. Let $K = \setQ$ be the rational numbers and $p\in \setN$ be a prime number.
+  Then for any $z \in \setQ$ there are $m, k \in \setZ$, $n \in \setN_{>0}$ such that $z =
+  p^k \frac mn$ where $p$ does not divide $m$ and $n$. The integer $k$ is unique so we
+  define the \emph{$p$-adic valuation $\nu_p$} by $\nu_p(z) = k$. This is indeed a
+  valuation; for instance we have $\nu_2(2/3) = 1, \nu_3(2/3)=-1$ and $\nu_2(7/16)=2$.
+
+  The local ring $R_{\nu_p}$ is the localization $\setZ_{\ideal p}$ at the prime ideal
+  $\ideal p$ which is the set of rational numbers $\frac mn$ where $p \nmid n$. The
+  maximal ideal $\mathfrak m_{R_{\nu_p}} \idealof R_{\nu_p}$ consists then of these
+  rational numbers where $m$ is additionally divisible by $p$. From this we obtain that
+  the residue field $\mathfrak K = \setZ/p\setZ$ is the finite field with $p$ elements.
+  % TODO
+\end{example}
 
 \subsection{Gröbner Fans}
 \label{sec:grobFan}
@@ -472,8 +488,8 @@ and polyhedral cones:
   Recall that a set of the form $C = \{ \vec x \in \setR^n : A\vec x \leq \vec b \}$ for
   some matrix $A \in \Mat(m\times n, \setR)$ and $\vec b \in \setR^m$ is called a
   polyhedron and if additionally $C$ is bounded it is called a polytope. If on the other
-  hand $\vec b=0$ then $C$ is called a \emph{polyhedral cone}. Equivalently, a polyhedral
-  cone $C$ is the positive span of finitely many vectors in $\setR^n$.
+  hand $\vec b = \vec 0$ then $C$ is called a \emph{polyhedral cone}. Equivalently, a
+  polyhedral cone $C$ is the positive span of finitely many vectors in $\setR^n$.
 \end{definition}
 
 Note that, using Linear Programming, it is possible to assign a unique \emph{canonical}
@@ -514,6 +530,7 @@ polyhedra a \emph{representation} of a complex $\mathcal C$ if each polyhedron $
 \mathcal C$ is a face of some $S \in \mathcal S$. In particular, the maximal polyhedra of
 a polyhedral complex define a representation.
 
+% TODO restructure
 Now, given a polynomial ring $K[\vec x]$ a total \emph{term} or \emph{monomial ordering}
 $\prec$ on the monomials $K[\vec x]$ is an ordering such that $1 \prec \vec x^\alpha =
 x_1^{\alpha_1}\cdots x_n^{\alpha_n}$ for all $\alpha \in \setN^n$ and if $\vec x^\alpha
@@ -669,15 +686,21 @@ used.
 \end{definition}
 
 We note here that the notations from Definitions~\ref{def:initFormG} and
-\ref{def:initialId} clash. While we chose the minimum-convention for tropical arithmetic
-to stay consistent with the important literature, both notions of initial forms coincide
-in the maximum-convention with the trivial valuation $\nu(x) = 0$ for $x\neq-\infty$.
-Since section~\ref{sec:grobFan} is mainly given for context and the important definitions
-in convex geometry, $\initial_{\vec w}(f)$ will always refer to the initial forms defined
-here.
+\ref{def:initialId} clash. However, when working over a field with trivial valuation,
+meaning $\nu(x) = 0$ for all units $x \in K^*$, then they only differ in maximizing and
+minimizing the linear form $\vec w$. In fact, it is common to consider initial ideals
+which maximize $\vec w$ in Gröbner basis theory as they more closely resemble the ones
+given by total term orderings. In the tropical setting however, one usually minimizes
+the weight. While we chose to adhere to the minimum-convention in order to remain
+consistent with the cited literature, it is not difficult to switch between the two
+notions: It suffices to switch all instances of \enquote{minimum} to \enquote{maximum} and
+to alter the definition of tropical arithmetic accordingly. In the following,
+$\initial_{\vec w}(\cdot)$ will always refer to the initial ideals as defined in
+Definition~\ref{def:initialId}.
+% corr. definition of initial term
 
-We are now finally able to define tropical varieties, the main object of study of this
-thesis:
+With this problem out of the way, we are now finally able to define tropical varieties,
+the main object of study of this thesis:
 
 \begin{definition}[Tropical Varieties and Prevarieties]
   \label{def:tropicalVariety}
@@ -802,7 +825,7 @@ reasons it is favorable to work with cones and polyhedral fans. In our case wher
     $\CCt[x_1, \dots, x_n]$ and set $J = I\cap R$. Then \cite[Lemma~1.1]{compTropVar}
     tells us that a weight $\vec w \in \setR^n$ lies in the polyhedral complex $\Trop(I')$
     if and only if the weight $(1,\vec w) \in \setR^{n+1}$ lies in the polyhedral fan
-    $\Trop(I')$. This allows us transform our problems accordingly and to restrict our
+    $\Trop(I')$. This allows us to transform our problems accordingly and to restrict our
     algorithms to working with polyhedral cones and fans.
   % TODO make this more formal?
   % TODO cite library?
@@ -814,6 +837,12 @@ reasons it is favorable to work with cones and polyhedral fans. In our case wher
     way and handles only the \emph{constant coefficient case} for initial ideals. All
     other cases may then be transformed as in the first point.
 \end{enumerate}
+In addition to this, we are also allowed to only consider tropical varieties given by
+homogeneous ideals. Fix an ideal $I\ideal K[x_1, \dots, x_n]$ and a weight $\vec w \in
+\setR^n$, then we consider the \emph{homogenization} $I^h \idealof K[x_0, \dots, x_n]$ of
+$I$. Then \cite[Lemma~2.2]{compTropVar} states that the initial ideal $\initial_{\vec
+w}(I)$ contains a monomial if and only if $\initial_{(0,\vec w)}(^hI)$ contains a
+monomial.
 
 % TODO
 
