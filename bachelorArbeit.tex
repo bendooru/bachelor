@@ -697,10 +697,18 @@ notions: It suffices to switch all instances of \enquote{minimum} to \enquote{ma
 to alter the definition of tropical arithmetic accordingly. In the following,
 $\initial_{\vec w}(\cdot)$ will always refer to the initial ideals as defined in
 Definition~\ref{def:initialId}.
-% corr. definition of initial term
 
-With this problem out of the way, we are now finally able to define tropical varieties,
-the main object of study of this thesis:
+% might cause problems with total orderings?
+To obtain a consistent induced ordering $\prec_{\vec w}$ in this setting, we redefine
+$\prec_{\vec w}$ to be the ordering $\prec_{-\vec w}$ as introduced in
+section~\ref{sec:grobFan}. This ensures that, if $\initial_{\vec w}(f)$ is a monomial for
+some polynomial $f$ and weight $\vec w$, then $\initial_{\prec_{\vec w}}(f)$ one as well
+-- necessarily the same one in fact. Note however, if $\initial_{\vec w}(f)$ is not a
+monomial then $\initial_{\vec w}(f)$ will still be the \emph{maximal} term of
+$\initial_{\vec w}(f)$.
+
+With these potential inconsistencies out of the way, we are now finally able to define
+tropical varieties, the main object of study of this thesis:
 
 \begin{definition}[Tropical Varieties and Prevarieties]
   \label{def:tropicalVariety}
@@ -721,15 +729,19 @@ the main object of study of this thesis:
   \]
 \end{definition}
 
+% change first sentence
 The main motivation in \cite{compTropVar} is the fact that each tropical variety is in
 fact a tropical prevariety: A finite set $\{ f_1, \dots, f_r \} \subseteq I \idealof
 K[\vec x^{\pm1}]$ is called a \emph{tropical basis} of $I$ if $I = \ideal{f_1, \dots,
 f_r}$ and $\Trop(I) = \Trop(f_1) \cap \cdots \cap \Trop(f_r)$. It can be shown that any
 ideal admits a tropical basis -- see for example \cite[Theorem~2.9]{compTropVar} -- which
 reduces the problem of computing the tropical variety of an ideal to computing the
-tropical hypersurfaces of its tropical basis.
-
-\dots % TODO
+tropical hypersurfaces of its tropical basis. However, before we can tackle the problem of
+computing these tropical varieties we want to introduce some additional ways to define
+them. This will then in turn allow us to equip the tropical variety with the structure of
+a polyhedral fan or -- in the more general cases -- of a polyhedral complex. The
+following theorem gives the important characterizations for the easier case of tropical
+hypersurfaces:
 
 \begin{theorem}[Kaparanov's Theorem]
   \label{thm:kapranov}
@@ -737,12 +749,27 @@ tropical hypersurfaces of its tropical basis.
   the following sets coincide:
   \begin{enumerate}
     \item the tropical hypersurface $\Trop(f)$ in $\setR^n$,
+      \label{thm:kap:i}
     \item the set $\{ \vec w \in \setR^n : \initial_{\vec w}(f) \text{ is not a
       monomial}\}$
+      \label{thm:kap:ii}
     \item the Euclidean closure in $\setR^n$ of the set $\{ (\nu(y_1), \dots, \nu(y_n)) :
       (y_1,\dots,y_n) \in V(f) \}$.
   \end{enumerate}
 \end{theorem}
+
+% use \ref instead?
+Proving this and the next more general theorem lies outside the scope of this thesis,
+however it is not hard to see the equality of the sets given by \ref{thm:kap:i} and
+\ref{thm:kap:ii}: Suppose $\vec w \in \Trop(f)$, then there are two terms $c_1 \vec
+x^{\alpha_1}$, $c_2 \vec x^{\alpha_2}$ of $f$ such that
+\[
+  \trop(f)(\vec w) = \nu(c_1) + \vec w \cdot \alpha_1 = \nu(c_2) + \vec w \cdot \alpha_2.
+\]
+But then by Definition~\ref{def:initialId} the two corresponding terms
+$\overline{\nu(c_i)t^{-\nu(c_i)}\vec x^{\alpha_i}}$ for $i=1,2$ occur in the initial form
+$\initial_{\vec w}(f)$, so it cannot be a monomial. This argument works analogously in
+reverse, so the claimed equality is clear.
 
 \dots % TODO
 
@@ -828,21 +855,29 @@ reasons it is favorable to work with cones and polyhedral fans. In our case wher
     $\Trop(I')$. This allows us to transform our problems accordingly and to restrict our
     algorithms to working with polyhedral cones and fans.
   % TODO make this more formal?
-  % TODO cite library?
   \item On the practical side we may also start with an ideal $I \idealof \setC[\vec x]$
     and embed it into $\CCt[\vec x]$ so that our initial ideals behave analogously to
     Definition~\ref{def:initFormG}, thus yielding a polyhedral fan. The properties of the
     field $\CCt$ are then used in the methods described in section~\ref{sec:newtonMethod}.
-    In fact, the current implementation in \texttt{tropicalNewton.lib} is designed in this
-    way and handles only the \emph{constant coefficient case} for initial ideals. All
-    other cases may then be transformed as in the first point.
+    In fact, the current implementation in \texttt{tropicalNewton.lib} \cite{tropNewtLib}
+    is designed in this way and handles only the \emph{constant coefficient case} for
+    initial ideals. All other cases may then be transformed as in the first point.
+    % TODO mention remark from sturmMacTrop on this
 \end{enumerate}
 In addition to this, we are also allowed to only consider tropical varieties given by
 homogeneous ideals. Fix an ideal $I\ideal K[x_1, \dots, x_n]$ and a weight $\vec w \in
 \setR^n$, then we consider the \emph{homogenization} $I^h \idealof K[x_0, \dots, x_n]$ of
 $I$. Then \cite[Lemma~2.2]{compTropVar} states that the initial ideal $\initial_{\vec
 w}(I)$ contains a monomial if and only if $\initial_{(0,\vec w)}(^hI)$ contains a
-monomial.
+monomial. This restriction allows us to utilize techniques specialized to homogeneous
+ideals, which are -- in some sense -- nicer than their general counterparts.
+% empty phrase?
+
+% TODO: define representation of Gröbner cone by std base pair here
+With these simplifications in mind it is clear that a tropical variety is the support of a
+subfan of the Gröbner fan from Definition~\ref{def:groebnerConeFan}. We thus want to
+establish the connection between the Gröbner cones comprising the tropical varieties and
+the Gröbner bases they define.
 
 % TODO
 
@@ -897,14 +932,15 @@ notion of tropical curves will be reintroduced in section~\ref{sec:newtonMethod}
   \end{algorithmic}
 \end{algo}
 
-% TODO citation
-Another important step needed to compute neighbouring cones is to compute Gröbner bases in
-these adjacent Gröbner cones. Generally speaking it would be possible to compute these
-from scratch if we're just given out ideal $I$ and a weight $\vec w$ in the relative
-interior of an adjacent cone. However, the following \emph{lift} algorithm which is a step
-in the \emph{Gröbner walk} (cite sth. ???) greatly simplifies this procedure as we already
-know the reduced Gröbner bases in the original Gröbner cone.
-
+% reformulate last sntnc
+Another important step needed to compute neighbouring cones is computing Gröbner bases in
+these adjacent Gröbner cones. Generally speaking, it would be possible to compute these
+from scratch if we're just given our ideal $I$ and a weight $\vec w$ in the relative
+interior of an adjacent cone. However, the following \emph{lift} algorithm greatly
+simplifies this procedure as we already know the reduced Gröbner bases in the original
+Gröbner cone. It is a step in the \emph{Gröbner walk} \cite{groebWalk}, which transforms
+Gröbner bases with respect to a given ordering to ones of of an ordering of an adjacent
+Gröbner cone.
 % TODO
 % TODO introduce representation of Gröbner cone by pair of red. Gröbner bases
 \begin{algo}[Lift] $ $
@@ -1292,9 +1328,9 @@ process of intersecting with generic hyperplanes:
   \label{prp:intersHyperp}
 \end{proposition}
 
-The resulting algorithm then just uses that the maximal cones in the tropical variety have
-the same dimension as the defining ideal and puts Proposition~\ref{prp:intersHyperp} to
-work:
+The resulting algorithm then just uses that by Theorem~\ref{thm:tropComplexConn} the
+maximal cones in the tropical variety have the same dimension as the defining ideal and
+puts Proposition~\ref{prp:intersHyperp} to work:
 
 \begin{algo}[Tropical Points, {\cite[Algorithm~3.3]{tropPointsLinks}}] $ $
   \begin{algorithmic}[1]
@@ -1334,7 +1370,8 @@ one-dimensional. Then, for any $\vec u \in \Trop(I)$ sitting in the relative int
 cell of codimension one we call $\Trop(\initial_{\vec u}(I))$ the \emph{tropical link} of
 $I$ around $\vec u$. This set is the support of a polyhedral fan, since it is a tropical
 variety, and also combinatorially a curve which describes $\Trop(I)$ locally around $\vec
-u$. The properties needed for our algorithm are as follows:
+u$. This was shown in the proof of the correctness of \cite[Algorithm~4.10]{compTropVar}.
+The properties needed for our algorithm are as follows:
 
 \begin{thmCorollary} \label{thmc:tropInt}
   Let $X$ and $X$ be two affine subvarieties. If the intersection $\Trop(X) \cap
@@ -1348,16 +1385,19 @@ u$. The properties needed for our algorithm are as follows:
         x_d-c_d}),
       \]
       and this tropical variety is a tropical curve.
-    \item If $\Trop(I)$ is a polyhedral fan, then for any $c \in K^*$ with
+      \label{thmc:i}
+    \item If $\Trop(I)$ is a one-dimensional polyhedral fan, then for any $c \in K^*$ with
       $\nu(c)\neq0$ we have
       \[
         \Trop(I) \cap \{\nu(c)\} \times \setR^{n-1} = \Trop(I + \ideal{x_1-c_1})
       \]
       and this tropical variety is zero-dimensional.
+      \label{thmc:ii}
   \end{enumerate}
 \end{thmCorollary}
 
-% TODO
+Finally, the structure of the tropical combinatorial curves $\Trop(\initial_{\vec w}(I))$ together
+with the above corollaries culminate in the following algorithm:
 
 \begin{algo}[Tropical Links, {\cite[Algorithm~4.5]{tropPointsLinks}}] $ $
   \begin{algorithmic}[1]
@@ -1377,9 +1417,11 @@ u$. The properties needed for our algorithm are as follows:
         \end{cases}
       \]
       where $t \in K$ is a fixed uniformizing parameter.
+      \label{alg:links:cut}
     \For{$i = d, \dots, n$}
       \State Let $J_i^\pm$ be the images of $J$ under the maps $x_i \mapsto t^\pm$
         respectively,
+        \label{alg:links:curve}
       \State Compute $V_i^\pm = \Trop(J_i^\pm)$ using Algorithm~\ref{alg:zeroDimTrop},
       \State Set
         \begin{align*}
@@ -1395,8 +1437,15 @@ u$. The properties needed for our algorithm are as follows:
   \end{algorithmic}
 \end{algo}
 
-This can then be used in Algorithm~\ref{alg:neighbors} as a replacement for line
-\ref{alg:interiorPoints}.
+Indeed, the steps above are just applying the Corollaries~\ref{thmc:tropInt} for every
+remaining dimension: In line~\ref{alg:links:cut} we cut the combinatorial curve down to an
+actual tropical curve by Corollary~\ref{thmc:tropInt}.\ref{thmc:i}. Then in
+line~\ref{alg:links:curve} we consider the respective zero-dimensional varieties described
+in \ref{thmc:tropInt}.\ref{thmc:ii}.
+% FIXME why is this ok?
+This can then be used in line \ref{alg:interiorPoints}
+of Algorithm~\ref{alg:neighbors} as a replacement for the methods concerning
+prevarieties.
 
 \section{Parallelization}
 
@@ -1605,7 +1654,7 @@ In figure~\ref{fig:g38scaling} we see that \dots and so on.
   \label{fig:g38efficiency}
 \end{figure}
 
-\subsection{Practical Optimizations}
+\subsection{Practical Optimizations and Secondary Results}
 
 Optimization of certain edge cases
 
