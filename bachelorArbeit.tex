@@ -28,8 +28,10 @@
 ]{microtype}
 \microtypecontext{spacing=nonfrench}
 
+\usepackage{subcaption}
+
 \usepackage{pgf,tikz}
-\usetikzlibrary{calc}
+\usetikzlibrary{calc,shapes,automata,petri}
 \usepackage[pdftex,hidelinks]{hyperref}
 
 \usepackage[
@@ -316,24 +318,33 @@ no points whatsoever. This will become important later on.
 
 \begin{figure}[tbh]
   \centering
-  \begin{tikzpicture}[scale=1.3]
-    \draw[dashed, gray] (-2,0) -- (2,0);
-    \draw[dashed, gray] (0,-1) -- (0,2);
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \begin{tikzpicture}[scale=1.3]
+      \draw[dashed, gray] (-2,0) -- (2,0);
+      \draw[dashed, gray] (0,-1) -- (0,2);
 
-    \draw[thick] (0,0) -- (-1,-1);
-    \draw[thick] (0,0) -- (0,2);
-    \draw[thick] (0,0) -- (2,0);
-  \end{tikzpicture}
-  \qquad
-  \begin{tikzpicture}[scale=1.3]
-    \draw[dashed, gray] (-2,0) -- (2,0);
-    \draw[dashed, gray] (0,-1) -- (0,2);
+      \draw[thick] (0,0) -- (-1,-1);
+      \draw[thick] (0,0) -- (0,2);
+      \draw[thick] (0,0) -- (2,0);
+    \end{tikzpicture}
+    \caption{Tropical line}
+    \label{fig:trop:line}
+  \end{subfigure}
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \begin{tikzpicture}[scale=1.3]
+      \draw[dashed, gray] (-2,0) -- (2,0);
+      \draw[dashed, gray] (0,-1) -- (0,2);
 
-    \draw[thick] (-2,-1) -- (-1,0) -- (0,0) -- (1,1) -- (2,1);
-    \draw[thick] (-1,0) -- (-1,2);
-    \draw[thick] (0,0) -- (0,-1);
-    \draw[thick] (1,1) -- (1,2);
-  \end{tikzpicture}
+      \draw[thick] (-2,-1) -- (-1,0) -- (0,0) -- (1,1) -- (2,1);
+      \draw[thick] (-1,0) -- (-1,2);
+      \draw[thick] (0,0) -- (0,-1);
+      \draw[thick] (1,1) -- (1,2);
+    \end{tikzpicture}
+    \caption{Tropical quadric}
+    \label{fig:trop:quad}
+  \end{subfigure}
   \caption{A tropical line and quadric in $\setR^2$}
   \label{fig:tropLineQuad}
 \end{figure}
@@ -342,11 +353,11 @@ Since monomials and powers of variables are well-defined, we can assign a \emph{
 a tropical polynomial in the usual sense, hence we may carry over the naming conventions
 for hypersurfaces in standard algebraic geometry: A hypersurface given by a degree 1
 polynomial is called a tropical hyperplane, for degrees 2, 3 and so on they are called
-tropical quadrics and cubics respectively. For instance, in figure~\ref{fig:tropLineQuad}
-we see the tropical line $V(x \oplus y \oplus 0)$ on the left. The tropical quadric on
-the right will be mentioned again later on. As a final note, since tropical division is
-well-defined for non-infinite elements we may also consider tropical polynomials in
-negative exponents later on.
+tropical quadrics and cubics respectively. For instance, in
+figure~\ref{fig:trop:line} we see the tropical line $V(x \oplus y
+\oplus 0)$. The tropical quadric on the right will be mentioned again later on. As a final
+note, since tropical division is well-defined for non-infinite elements we may also
+consider tropical polynomials in negative exponents later on.
 
 \subsection{Valuations and Puiseux Series}
 
@@ -758,7 +769,6 @@ hypersurfaces:
   \end{enumerate}
 \end{theorem}
 
-% use \ref instead?
 Proving this and the next more general theorem lies outside the scope of this thesis,
 however it is not hard to see the equality of the sets given by \ref{thm:kap:i} and
 \ref{thm:kap:ii}: Suppose $\vec w \in \Trop(f)$, then there are two terms $c_1 \vec
@@ -786,7 +796,8 @@ to alter the result in any way:
       definition~\ref{def:tropicalVariety},
     \item the set of all $\vec w \in \setR^n$ with $\initial_{\vec w}(I) \neq \ideal1$,
       i.e.\ the initial ideals which do not contain monomials and
-    \item the Euclidean closure of the set of coordinate-wise valuations of points in $X$
+    \item \label{thm:fund:val}
+      the Euclidean closure of the set of coordinate-wise valuations of points in $X$
       \[
         \nu(X) = \{ (\nu(y_1), \dots, \nu(y_n)) : (y_1, \dots, y_n) \in X \}.
       \]
@@ -835,7 +846,7 @@ x]$.
   We in particular see that $\initial_{\vec w}(f) = x+y+1 \in \setC[x,y]$ and
   $\initial_{\vec w'}(f) = 1$, so $\vec w \in \Trop(f)$ but $\vec w' \not\in \Trop(I)$.
   The corresponding tropical curve $V(1\odot x^2 \oplus x \oplus y \oplus xy \oplus 1)$ is
-  depicted in Figure~\ref{fig:tropLineQuad} on the right.
+  depicted in Figure~\ref{fig:trop:quad}.
 \end{example}
 
 Theorem~\ref{thm:tropComplexConn} states that a tropical variety is the support of a
@@ -856,22 +867,24 @@ reasons it is favorable to work with cones and polyhedral fans. In our case wher
     algorithms to working with polyhedral cones and fans.
   % TODO make this more formal?
   \item On the practical side we may also start with an ideal $I \idealof \setC[\vec x]$
-    and embed it into $\CCt[\vec x]$ so that our initial ideals behave analogously to
-    Definition~\ref{def:initFormG}, thus yielding a polyhedral fan. The properties of the
-    field $\CCt$ are then used in the methods described in section~\ref{sec:newtonMethod}.
-    In fact, the current implementation in \texttt{tropicalNewton.lib} \cite{tropNewtLib}
-    is designed in this way and handles only the \emph{constant coefficient case} for
-    initial ideals. All other cases may then be transformed as in the first point.
+    or -- more generally -- an ideal over a subring of $K$ on which $\nu$ is trivial and
+    embed it into $\CCt[\vec x]$ respectively $K$ so that our initial ideals behave
+    analogously to Definition~\ref{def:initFormG}, thus yielding a polyhedral fan. The
+    properties of the field $\CCt$ are then used in the methods described in
+    section~\ref{sec:newtonMethod}. In fact, the current implementation in
+    \texttt{tropicalNewton.lib} \cite{tropNewtLib} is designed in this way and handles
+    only the \emph{constant coefficient case} for initial ideals. All other cases may then
+    be transformed as in the first point.
     % TODO mention remark from sturmMacTrop on this
 \end{enumerate}
 In addition to this, we are also allowed to only consider tropical varieties given by
-homogeneous ideals. Fix an ideal $I\ideal K[x_1, \dots, x_n]$ and a weight $\vec w \in
+homogeneous ideals. Fix an ideal $I\idealof K[x_1, \dots, x_n]$ and a weight $\vec w \in
 \setR^n$, then we consider the \emph{homogenization} $I^h \idealof K[x_0, \dots, x_n]$ of
 $I$. Then \cite[Lemma~2.2]{compTropVar} states that the initial ideal $\initial_{\vec
 w}(I)$ contains a monomial if and only if $\initial_{(0,\vec w)}(^hI)$ contains a
 monomial. This restriction allows us to utilize techniques specialized to homogeneous
 ideals, which are -- in some sense -- nicer than their general counterparts.
-% empty phrase?
+% FIXME empty phrase?
 
 % TODO: define representation of Gröbner cone by std base pair here
 With these simplifications in mind it is clear that a tropical variety is the support of a
@@ -881,17 +894,18 @@ the Gröbner bases they define.
 
 % TODO
 
-While not quite as important to our purposes, we still want to look at how to
-\enquote{intersect} to polyhedral fans. Given such fans $\mathcal F_1, \mathcal F_2$ we
-define their \emph{common refinement} to be $\mathcal F_1 \wedge \mathcal F_2 := \{ C_1
-\cap C_2 : C_1 \in \mathcal F_1, C_2 \in \mathcal F_2 \}$. This is again a fan and clearly
-the support of $\mathcal F_1 \wedge \mathcal F_2$ is the intersection of the supports of
-$\mathcal F_1$ and $\mathcal F_2$ respectively. Also, by considering representations of
-the respective fans we obtain a representation of the common refinement in the following
-way, and note that in practice we canonicalize the resulting intersection cones, allowing
-us to easily check for duplicates:
+While our final modified versions of Algorithms~\ref{alg:neighbors} and \ref{alg:traversal}
+will not involve intersecting tropical hypersurfaces or any other tropical varieties, it
+is still interesting how this can be achieved. Given two tropical varieties
+represented by fans $\mathcal F_1, \mathcal F_2$ we define their \emph{common refinement}
+to be $\mathcal F_1 \wedge \mathcal F_2 := \{ C_1 \cap C_2 : C_1 \in \mathcal F_1, C_2 \in
+\mathcal F_2 \}$. This is again a fan and clearly the support of $\mathcal F_1 \wedge
+\mathcal F_2$ is the intersection of the supports of $\mathcal F_1$ and $\mathcal F_2$
+respectively. Also, by considering representations of the respective fans we obtain a
+representation of the common refinement in the following way, and note that in practice we
+canonicalize the resulting intersection cones, allowing us to easily check for duplicates:
 
-\begin{algo}[Common Refinement, {\cite[Algorithm~4.4]{compTropVar}}] $ $
+\begin{algo}[Common Refinement, {\cite[Algorithm~4.4]{compTropVar}}]\
   \label{alg:fanRefinement}
   \begin{algorithmic}[1]
     \Require Representations $S_1$, $S_2$ of two polyhedral fans $\mathcal
@@ -956,7 +970,7 @@ Gröbner cone.
 % TODO
 
 % FIXME: watch out for possible notational changes above
-\begin{algo}[Neighbors, {\cite[Algorithm~4.10]{compTropVar}}] $ $
+\begin{algo}[Neighbors, {\cite[Algorithm~4.10]{compTropVar}}]\
   \label{alg:neighbors}
   \begin{algorithmic}[1]
     \Require Pair $(\mathcal G_{\prec_{\vec w}}(\initial_{\vec w}(I)), \mathcal
@@ -996,7 +1010,7 @@ We now have a method to determine neighboring maximal cones of a given Gröbner 
 know by Theorem~\ref{thm:tropComplexConn} that the tropical variety of a prime ideal is
 connected in codimension one, so the method of traversing it becomes painfully obvious. If
 we can determine a maximal starting cone in the tropical variety, then we simply compute
-all neighbors of all unprocessed cones, until no unprocessed cones are left.
+all neighbors of all unprocessed cones until we do not obtain any more new neighbors.
 
 \begin{algo}[Traversal of an Irreducible Tropical Variety]\
   \label{alg:traversal}
@@ -1071,12 +1085,13 @@ reduce general zero-dimensional ideals to triangular sets:
   \label{prp:triang}
 \end{proposition}
 
-In particular $V(I) = V(F_1) \dotcup \cdots \dotcup V(F_s)$ for a triangular decomposition
-$F_1, \dots, F_s$ which allows us to easily determine roots of a zero-dimensional ideal
-$I$. Moreover, we are actually only interested in the valuations of the roots of
-univariate polynomials over $K$. Luckily, there is a way to determine these without
-needing to explicitly compute any roots. For this, we study the Newton polygon of a
-polynomial:
+In particular, we have $V(I) = V(F_1) \dotcup \cdots \dotcup V(F_s)$ for a triangular
+decomposition $F_1, \dots, F_s$, allowing us to easily determine roots of a
+zero-dimensional ideal $I$. Moreover, we are actually only interested in the valuations of
+the roots of univariate polynomials over $K$ due to
+Theorem~\ref{thm:fundamentalThm}.\ref{thm:fund:val}. Luckily, there is a way to determine
+these without needing to explicitly compute any roots. For this, we study the Newton
+polygon of a polynomial:
 
 \begin{definition}[Newton Polyon]
   Let $f \in K[x_k]$ be a univariate polynomial of the form $f = \sum_{i=0}^d c_i x_k^i$
@@ -1106,8 +1121,10 @@ polynomial:
   \label{def:newtonPoly}
 \end{definition}
 
-The notion of unique Newton polygons helps us to establish a link between valuations of
-roots and polynomials evaluated at these roots:
+Note that these polygons are similar to the Newton \emph{polytopes} studied to compute
+tropical hypersurfaces, but are not the same construction. The notion of unique Newton
+polygons helps us to establish a link between valuations of roots and polynomials
+evaluated at these roots:
 
 \begin{proposition}
   \label{prp:expectedNewt}
@@ -1510,6 +1527,50 @@ is a \emph{firing sequence} $\smash{M \overset{t_1}\longrightarrow M_1
 A nice property of Petri nets is that their static part given by
 Definition~\ref{def:petri} can by visualized as a directed bipartite graph $G = (S \cup T,
 F)$.
+
+% TODO make styles global
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \begin{tikzpicture}[node distance=1.4cm]
+      \tikzstyle{place}=[circle,minimum size=6mm,draw]
+      \tikzstyle{transition}=[rectangle,minimum size=6mm,draw]
+      % petri net
+      \begin{scope}
+        \node [place]      (in)                {$i$};
+        \node [transition] (f)   [right of=in] {$f$} edge [pre] (in);
+        \node [place]      (out) [right of=f]  {$o$} edge [pre] (f);
+      \end{scope}
+    \end{tikzpicture}
+    \caption{Data parallelism}
+    \label{fig:petri:datapar}
+  \end{subfigure}
+  \begin{subfigure}{.59\textwidth}
+    \centering
+    \begin{tikzpicture}[node distance=1.4cm]
+      \tikzstyle{place}=[circle,minimum size=6mm,draw]
+      \tikzstyle{transition}=[rectangle,minimum size=6mm,draw]
+      \node [place] (in) {$i$};
+      \node [transition] (s)  [right of=in] {$s$} edge [pre] (in);
+
+      \node [place]      (su) [above right of=s] {}    edge [pre] (s);
+      \node [transition] (f)  [right of=su]      {$f$} edge [pre] (su);
+      \node [place]      (l)  [right of=f]       {$l$} edge [pre] (f);
+
+      \node [place]      (sd) [below right of=s] {}    edge [pre] (s);
+      \node [transition] (g)  [right of=sd]      {$g$} edge [pre] (sd);
+      \node [place]      (r)  [right of=g]       {$r$} edge [pre] (g);
+
+      \node [transition] (j)  [below right of=l] {$j$} edge [pre] (l) edge [pre] (r);
+      \node [place]      (o)  [right of=j]       {$o$} edge [pre] (j);
+    \end{tikzpicture}
+    \caption{Task parallelism}
+    \label{fig:petrie:taskpar}
+  \end{subfigure}
+  \caption{Petri nets illustrating parallelisms}
+  \label{fig:petriEx}
+\end{figure}
 
 \begin{example}[Parallelisms in Petri Nets]\
   \begin{enumerate}
