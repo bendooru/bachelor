@@ -11,6 +11,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
+% FIXME REMOVE LATER
+%\usepackage[displaymath,mathlines]{lineno}
+% FIXME END
 \usepackage[autostyle=true]{csquotes}
 \usepackage{enumitem}
 \usepackage{mathtools,amsfonts,amssymb,amsthm,mathrsfs}
@@ -32,6 +35,11 @@
 
 \usepackage{pgf,tikz}
 \usetikzlibrary{calc,shapes,automata,petri}
+\tikzset{%
+  transition/.style={rectangle,minimum size=6mm,draw},
+  place/.style={circle,minimum size=6mm,draw}
+}
+
 \usepackage[pdftex,hidelinks]{hyperref}
 
 \usepackage[
@@ -71,6 +79,7 @@
 \newcommand*\dotcup{\mathbin{\dot{\cup}}}
 
 % shorthands
+\newcommand*\vectRR[2]{\begin{pmatrix} #1 \\ #2 \end{pmatrix}}
 \newcommand*\ideal[1]{\left\langle #1 \right\rangle}
 \newcommand*\puiseux[2]{#1\{\!\{#2\}\!\}}
 \newcommand*\CCt{\puiseux{\setC}{t}}
@@ -90,6 +99,8 @@
 \DeclareMathOperator{\conv}{conv}
 \DeclareMathOperator{\Lin}{Lin}
 \DeclareMathOperator{\codim}{codim}
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\Grass}{Grass}
 
 % use same counters for all environments
 \theoremstyle{definition}
@@ -119,6 +130,8 @@
 \tableofcontents
 \newpage
 
+% FIXME REMOVE LATER
+%\linenumbers
 \section{Overview}
 
 Give general introduction to topic
@@ -517,7 +530,7 @@ trivial faces of $P$ are $\varnothing$ by definition and $P = \face_{\vec 0}(P)$
 a face of $P$ is a polyhedron itself, so we call it a facet if it has dimension exactly
 one less than $P$. The notion of faces is important for the next definition:
 
-\begin{definition}[Polyhedral Fan]
+\begin{definition}[Polyhedral Complexes and Fans]
   \label{def:polyhedralFan}
   Let $\mathcal C$ be a collection of polyhedra in $\setR^n$. We call $\mathcal C$ a
   \emph{polyhedral complex} if
@@ -541,7 +554,39 @@ polyhedra a \emph{representation} of a complex $\mathcal C$ if each polyhedron $
 \mathcal C$ is a face of some $S \in \mathcal S$. In particular, the maximal polyhedra of
 a polyhedral complex define a representation.
 
-% TODO restructure
+\begin{example}\
+  \begin{enumerate}
+    \item For any $n \in \setN$ we have $\setR^n = \{ \vec x \in \setR^n : 0 \cdot \vec x
+      \leq 0 \}$, so the entire ambient space is a polyhedral cone. Further it is clear
+      that $\face_{\vec w}(\setR^n) = \varnothing$ for any $0\neq\vec w \in \setR^n$, so
+      the only faces of $\setR^n$ are $\varnothing$ and the whole space itself. Thus $\{
+      \varnothing, \setR^n\}$ is a pure and complete polyhedral fan, albeit an
+      uninteresting one.
+    \item Consider the four quadrants
+      \begin{align*}
+        C_0 &= \{ \vec x \in \setR^2 : x_1 \geq 0, x_2 \geq 0 \}, &
+        C_1 &= \{ \vec x \in \setR^2 : x_1 \leq 0, x_2 \geq 0 \}, \\
+        C_2 &= \{ \vec x \in \setR^2 : x_1 \geq 0, x_2 \leq 0 \}, &
+        C_3 &= \{ \vec x \in \setR^2 : x_1 \leq 0, x_2 \leq 0 \}
+      \end{align*}
+      of the real plane $\setR^2$, then they are evidently polyhedral cones. Each of them
+      has two out of the coordinate rays spanned by the unit vectors in the four positive
+      and negative coordinate directions
+      \[
+        r_0 = \vectRR10 \cdot \setR,
+        r_1 = \vectRR01 \cdot \setR,
+        r_2 = \vectRR{-1}0 \cdot \setR
+        \text{ and }
+        r_3 = \vectRR0{-1} \cdot \setR
+      \]
+      as facets. Further, $\{0\}$ is a facet of each ray and thus a face of each quadrant,
+      so we get the polyhedral fan $\{ \varnothing, \{0\}, r_0, \dots, r_3, C_0, \dots,
+      C_3 \}$ which is again pure and complete. The set of quadrant is a representation of
+      this fan.
+  \end{enumerate}
+\end{example}
+
+% TODO maybe restructure
 Now, given a polynomial ring $K[\vec x]$ a total \emph{term} or \emph{monomial ordering}
 $\prec$ on the monomials $K[\vec x]$ is an ordering such that $1 \prec \vec x^\alpha =
 x_1^{\alpha_1}\cdots x_n^{\alpha_n}$ for all $\alpha \in \setN^n$ and if $\vec x^\alpha
@@ -778,8 +823,8 @@ x^{\alpha_1}$, $c_2 \vec x^{\alpha_2}$ of $f$ such that
 \]
 But then by Definition~\ref{def:initialId} the two corresponding terms
 $\overline{\nu(c_i)t^{-\nu(c_i)}\vec x^{\alpha_i}}$ for $i=1,2$ occur in the initial form
-$\initial_{\vec w}(f)$, so it cannot be a monomial. This argument works analogously in
-reverse, so the claimed equality is clear.
+$\initial_{\vec w}(f)$, so it cannot be a monomial. This argument works analogously in the
+reverse direction, so the claimed equality is clear.
 
 \dots % TODO
 
@@ -946,7 +991,7 @@ notion of tropical curves will be reintroduced in section~\ref{sec:newtonMethod}
   \end{algorithmic}
 \end{algo}
 
-% reformulate last sntnc
+% TODO reformulate last sntnc
 Another important step needed to compute neighbouring cones is computing Gröbner bases in
 these adjacent Gröbner cones. Generally speaking, it would be possible to compute these
 from scratch if we're just given our ideal $I$ and a weight $\vec w$ in the relative
@@ -955,7 +1000,7 @@ simplifies this procedure as we already know the reduced Gröbner bases in the o
 Gröbner cone. It is a step in the \emph{Gröbner walk} \cite{groebWalk}, which transforms
 Gröbner bases with respect to a given ordering to ones of of an ordering of an adjacent
 Gröbner cone.
-% TODO
+
 % TODO introduce representation of Gröbner cone by pair of red. Gröbner bases
 \begin{algo}[Lift] $ $
   \label{alg:lift}
@@ -967,9 +1012,13 @@ Gröbner cone.
   \end{algorithmic}
 \end{algo}
 
-% TODO
+As we will see later again the tropical curves $\Trop(\initial_{\vec w}(I))$ for weights
+$\vec w$ in the relative interior of some facet $F$ provide local descriptions of the full
+tropical variety $\Trop(I)$, with each ray pointing towards a maximal Gröbner cone which
+has $F$ as a facet. Combining this fact with the lift algorithm yields the following
+algorithm to determine all neighboring maximal Gröbner cones of some given cone in the
+tropical variety:
 
-% FIXME: watch out for possible notational changes above
 \begin{algo}[Neighbors, {\cite[Algorithm~4.10]{compTropVar}}]\
   \label{alg:neighbors}
   \begin{algorithmic}[1]
@@ -981,7 +1030,7 @@ Gröbner cone.
       each $d$-dimensional Gröbner cone in $\Trop(I)$ that shares a facet with $C_{\vec
       w}(I)$.
     \State Set $N := \varnothing$.
-    \State Compute the set $\mathcal F$ of facets of $C_{\vec w}$.
+    \State Compute the set $\mathcal F$ of facets of $C_{\vec w}(I)$.
     \For{$F \in \mathcal F$}
       \State Compute initial ideal $J := \initial_{\vec u}(I)$ for a point $\vec u$ in the
         relative interior of $F$.
@@ -1005,7 +1054,6 @@ Gröbner cone.
   \end{algorithmic}
 \end{algo}
 
-% TODO
 We now have a method to determine neighboring maximal cones of a given Gröbner cone and
 know by Theorem~\ref{thm:tropComplexConn} that the tropical variety of a prime ideal is
 connected in codimension one, so the method of traversing it becomes painfully obvious. If
@@ -1056,7 +1104,7 @@ As opposed to the previously discussed methods which dealt with tropical varieti
 finite intersections of tropical prevarieties or the set of all weight vectors that define
 monomial-free initial ideals, the focus of this section -- and in fact of the entire
 thesis -- is the interpretation as the coordinate-wise image $\Trop(I) = \nu(V(I))$ as we
-have seen in theorem~\ref{thm:fundamentalThm}. The main idea of Ren and Hofmann's results
+have seen in Theorem~\ref{thm:fundamentalThm}. The main idea of Ren and Hofmann's results
 is to apply this interpretation to zero-dimensional ideals and their triangular
 decompositions:
 
@@ -1142,7 +1190,7 @@ polygon instead of evaluating $f$ at a partial root and vice versa. Now, the use
 polygons becomes apparent with the following lemma which draws the connection between
 valuations of roots and the slopes of the Newton polygons:
 
-\begin{lemma}
+\begin{lemma}[{\cite[Proposition~II.6.3]{neuAlg}}]
   Let $f \in K[x]$ be a univariate polynomial and $e$ be an edge of the Newton polygon
   $\Delta(f)$ connecting vertices $(r,x)$ and $(s, y)$ with slope $-m = \frac{y-x}{s-r}$.
   Then $f$ has exactly $s-r$ roots with valuation $m$.
@@ -1376,19 +1424,20 @@ relative interior will yield a suitable starting cone.
 
 \begin{example}
   % TODO
-  stuff
+  We now apply this procedure to find a non-trivial point of \dots% TODO
 \end{example}
 
 % TODO write differently from source?
-Finally, to conclude this section we want study an alternative method of obtaining points
-in neighboring cones. We call a tropical variety $\Trop(I)$ a \emph{tropical curve} if it
-is one dimensional and say it is \emph{combinatorially a curve} if $\Trop(I)/C_0(I)$ is
+To conclude this section we want study an alternative method of obtaining points in
+neighboring cones. We call a tropical variety $\Trop(I)$ a \emph{tropical curve} if it is
+one dimensional and say it is \emph{combinatorially a curve} if $\Trop(I)/C_0(I)$ is
 one-dimensional. Then, for any $\vec u \in \Trop(I)$ sitting in the relative interior of a
-cell of codimension one we call $\Trop(\initial_{\vec u}(I))$ the \emph{tropical link} of
-$I$ around $\vec u$. This set is the support of a polyhedral fan, since it is a tropical
-variety, and also combinatorially a curve which describes $\Trop(I)$ locally around $\vec
-u$. This was shown in the proof of the correctness of \cite[Algorithm~4.10]{compTropVar}.
-The properties needed for our algorithm are as follows:
+cell of codimension one, that is, a facet of some maximal cone, we call
+$\Trop(\initial_{\vec u}(I))$ the \emph{tropical link} of $I$ around $\vec u$. This set is
+the support of a polyhedral fan, since it is a tropical variety, and also combinatorially
+a curve which describes $\Trop(I)$ locally around $\vec u$. This was shown in the proof of
+the correctness of \cite[Algorithm~4.10]{compTropVar}. The properties needed for our
+algorithm are as follows, mainly due to \cite{ossTropLift}
 
 \begin{thmCorollary} \label{thmc:tropInt}
   Let $X$ and $X$ be two affine subvarieties. If the intersection $\Trop(X) \cap
@@ -1403,8 +1452,8 @@ The properties needed for our algorithm are as follows:
       \]
       and this tropical variety is a tropical curve.
       \label{thmc:i}
-    \item If $\Trop(I)$ is a one-dimensional polyhedral fan, then for any $c \in K^*$ with
-      $\nu(c)\neq0$ we have
+    \item If $\Trop(I)$ is a one-dimensional polyhedral fan, then for any $c \in K^* =
+      \setT^1$ with $\nu(c)\neq0$ we have
       \[
         \Trop(I) \cap \{\nu(c)\} \times \setR^{n-1} = \Trop(I + \ideal{x_1-c_1})
       \]
@@ -1416,7 +1465,8 @@ The properties needed for our algorithm are as follows:
 Finally, the structure of the tropical combinatorial curves $\Trop(\initial_{\vec w}(I))$ together
 with the above corollaries culminate in the following algorithm:
 
-\begin{algo}[Tropical Links, {\cite[Algorithm~4.5]{tropPointsLinks}}] $ $
+\begin{algo}[Tropical Links, {\cite[Algorithm~4.5]{tropPointsLinks}}]\
+  \label{alg:tropLinks}
   \begin{algorithmic}[1]
     \Require $I \idealof K[\vec x]$ such that $\Trop(I)$ is combinatorially a curve and a
     polyhedral fan,
@@ -1458,11 +1508,11 @@ Indeed, the steps above are just applying the Corollaries~\ref{thmc:tropInt} for
 remaining dimension: In line~\ref{alg:links:cut} we cut the combinatorial curve down to an
 actual tropical curve by Corollary~\ref{thmc:tropInt}.\ref{thmc:i}. Then in
 line~\ref{alg:links:curve} we consider the respective zero-dimensional varieties described
-in \ref{thmc:tropInt}.\ref{thmc:ii}.
-% FIXME why is this ok?
-This can then be used in line \ref{alg:interiorPoints}
-of Algorithm~\ref{alg:neighbors} as a replacement for the methods concerning
-prevarieties.
+in \ref{thmc:tropInt}.\ref{thmc:ii}. Note that, since the tropical curves are the supports
+of tropical fans in this setting, they are necessarily collections of rays, hence the
+representation as $\bigcup_{w \in W} w\cdot \setR_{\geq0} + C_0(I)$ is justified. This can
+then be used in line \ref{alg:interiorPoints} of Algorithm~\ref{alg:neighbors} as a
+replacement for the methods concerning prevarieties.
 
 \section{Parallelization}
 
@@ -1475,6 +1525,7 @@ taken care of by the GPI-Space environment:
 
 Use Petri nets as a framework to parallelize the traversal of tropical fans. Refer to
 source \cite{towardsParallel}.
+% TODO write more introduction
 
 \subsection{Petri Nets and GPI-Space}
 
@@ -1521,37 +1572,40 @@ for all $p \in P$. If $M'$ is defined in this way by the firing of $t$, then we 
 $\smash{M \overset{t}\longrightarrow M'}$ and say that $M'$ is \emph{directly reachable}
 from $M$ by firing $t$. In general we say that a marking $M'$ is \emph{reachable} if there
 is a \emph{firing sequence} $\smash{M \overset{t_1}\longrightarrow M_1
-\overset{t_2}\longrightarrow \cdots \overset{t_{n-1}}\longrightarrow M'}$
+\overset{t_2}\longrightarrow \cdots \overset{t_{n-1}}\longrightarrow M'}$. It is important
+to note that the firing of enabled places is a local process, that is, it does not block
+other enabled transitions from firing as well. This is the most important property
+allowing parallelisms.
 % TODO more on reachabiliy?
 
 A nice property of Petri nets is that their static part given by
-Definition~\ref{def:petri} can be visualized as a directed bipartite graph $G = (S \cup T,
-F)$.
+Definition~\ref{def:petri} can be visualized as a directed bipartite graph. Recall that a
+directed graph $G = (V,E)$ is \emph{bipartite} is there is some partition $V = V_1 \dotcup
+V_2$ of the node set such that $E \subseteq (V_1 \times V_2) \cup (V_2 \cup V_2)$, meaning
+no arc connects nodes lying in the same set $V_i$. But by definition of the Petri net
+$(P,T,F)$ this clearly holds for the graph $G = (P \cup T, F)$ where we interpret places
+and transitions as nodes and their flow relations as arcs. This will be illustrated in the
+upcoming examples, see for instance Figure~\ref{fig:petriEx}. Usually, places will be
+represented by circles and transitions as boxes, while tokens held by places will be drawn
+as points in the corresponding place. We will also mark places or transitions with letters
+if necessary.
 
-% TODO make styles global
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}{.4\textwidth}
+  \begin{subfigure}{.35\textwidth}
     \centering
     \begin{tikzpicture}[node distance=1.4cm]
-      \tikzstyle{place}=[circle,minimum size=6mm,draw]
-      \tikzstyle{transition}=[rectangle,minimum size=6mm,draw]
-      % petri net
-      \begin{scope}
-        \node [place]      (in)                {$i$};
-        \node [transition] (f)   [right of=in] {$f$} edge [pre] (in);
-        \node [place]      (out) [right of=f]  {$o$} edge [pre] (f);
-      \end{scope}
+      \node [place]      (in)                {$i$};
+      \node [transition] (f)   [right of=in] {$f$} edge [pre] (in);
+      \node [place]      (out) [right of=f]  {$o$} edge [pre] (f);
     \end{tikzpicture}
     \caption{Data parallelism}
     \label{fig:petri:datapar}
   \end{subfigure}
-  \begin{subfigure}{.59\textwidth}
+  \begin{subfigure}{.64\textwidth}
     \centering
     \begin{tikzpicture}[node distance=1.4cm]
-      \tikzstyle{place}=[circle,minimum size=6mm,draw]
-      \tikzstyle{transition}=[rectangle,minimum size=6mm,draw]
-      \node [place] (in) {$i$};
+      \node [place]      (in) {$i$};
       \node [transition] (s)  [right of=in] {$s$} edge [pre] (in);
 
       \node [place]      (su) [above right of=s] {}    edge [pre] (s);
@@ -1566,20 +1620,47 @@ F)$.
       \node [place]      (o)  [right of=j]       {$o$} edge [pre] (j);
     \end{tikzpicture}
     \caption{Task parallelism}
-    \label{fig:petrie:taskpar}
+    \label{fig:petri:taskpar}
   \end{subfigure}
   \caption{Petri nets illustrating parallelisms}
   \label{fig:petriEx}
 \end{figure}
 
-\begin{example}[Parallelisms in Petri Nets]\
-  \begin{enumerate}
-    \item % TODO
-    \item % TODO
+\begin{example}[Parallelisms in Petri Nets]
+  \label{ex:petriPar}
+  We now want to look at how different kinds of parallelisms can be realized in Petri
+  nets.
+  \begin{enumerate}[label=(\alph*)]
+    \item First consider the Petri net $\Psi = (P,T,F)$ given by $P = \{i, o\}$, $T =
+      \{f\}$ and $T = \{ (i,f), (f,o) \}$ whose graph is depicted in
+      Figure~\ref{fig:petri:datapar}. Let $M=M_0 = \{ (i, n) \}$ be the initial marking
+      for some $n>1$, then the transition $f$ is enabled. Firing $f$ once yields the new
+      marking $M_1 = \{ (i, n-1), (o, 1) \}$, so $t$ is still enabled. Hence $f$ may fire
+      $n-1$ more times, yielding the marking $M' = M_n = \{ (o,n) \}$, which we usually
+      denote by $\smash{M \overset{t^n}{\longrightarrow} M'}$. As there is no
+      interdependence between the tokens held in $i$ the transition $f$ may fire for each
+      one at the same time. This form of parallelism is then used in GPI-Space, as firing
+      transitions will not be an immediate change in most real world applications.
+      Applying a function or procedure to several inputs is precisely \emph{data
+      parallelism}: We may regard each token in $i$ as a part of a larger chunk of data
+      that is fed to $f$. Note that we will introduce tokens which hold actual data later
+      on.
+      % TODO
+    \item Consider now the Petri net given by the graph depicted in
+      Figure~\ref{fig:petri:taskpar}. If we are given the marking $M = \{ (i,1) \}$, then
+      firing $s$ will enable both $f$ and $g$. Both of these transitions may thus fire in
+      parallel.
+      % TODO
   \end{enumerate}
 \end{example}
 
-Implementation with extensions (GPI)
+To summarize, Petri nets contain information about \emph{all} activities that may be
+executed at any given time, making it possible to exploit the maximum amount of
+parallelism.
+
+As was hinted at above, Petri nets in the form given above, while offering exceptional
+parallelization possibilities, are not yet suitable to model algorithms together with
+the data they produce as they arise from real world applications.
 
 \subsection{Traversing a Fan in Parallel}
 \label{sec:traverseParal}
@@ -1587,12 +1668,98 @@ Implementation with extensions (GPI)
 Computing tropical varieties in our setting follows the general structure of a fan
 traversal: Interpreting the maximal cones of a polyhedral fan together with their
 adjacency relations as a connected graph, we may realize the fan traversal as a simple
-graph traversal.
+graph traversal. To this end we want to formulate the version of
+Algorithm~\ref{alg:traversal} enhanced with Algorithm~\ref{alg:tropLinks} into a Petri
+net. Indeed on first glance an implementation looks quite simple: After determining a
+starting cone using Algorithm~\ref{alg:tropicalPoint} we construct a set of
+\emph{unprocessed} and \emph{processed} cones respectively. However, these steps alone do
+not suffice quite yet: Recall that transitions do not in general fire instantaneously, so
+there might be situations where the set of unprocessed cones might be empty, while some
+transitions still process data. It is thus important to devise proper termination
+conditions to properly stop the execution of the net.
 
-We formulate the traversal algorithm given in Algorithm~\ref{alg:traversal} into a
-Petri net.
+However, before we can tackle this problem we must consider some implementation details
+first that will be reflected in the description of our algorithm.
+\begin{enumerate}[label=\arabic*.]
+  \item We must first decide how to store and represent input and intermediate results.
+    Each Gröbner cone is represented by a pair of Gröbner bases and usually we add the
+    actual cone obtained from them to the data as well. Further, we require the ambient
+    polynomial ring in which the corresponding ideals live as they contain the information
+    about the term ordering. Also, it is not possible to store an ideal without also
+    storing its ambient ring in \textsc{Singular}. As it turns out, the inbuilt storage
+    solutions in the GPI-Space environment are not suitable to handle the amount of data
+    that is exchanged between processes. Instead % TODO
+    % TODO formulation etc
+  \item We previously noted that it is necessary to be able to test two given Gröbner
+    cones for equality. While we may compare the given initial ideals as they cannot
+    differ by definition, it is faster to instead consider the actual cones. If they are
+    given in canonical form, we may associate a \emph{unique point} to each of them. It is
+    then sufficient to compare the unique points with each other. The unique point may
+    then also be used as a \emph{key} for storage purposes.
+    % TODO more?
+  \item Finally, in the context of tropical varieties it is desirable to consider the
+    corresponding polyhedral fan modulo symmetry. More precisely, for a polyhedral fan
+    $\mathcal F$ in $\setR^n$ we want to find a subgroup of permutations $S \leq S_n$
+    that acts trivially on $\mathcal F$ but produces non-trivial cone orbits.
+\end{enumerate}
+From now on, we want to successively construct a Petri net describing our traversal
+algorithm. However, Algorithm~\ref{alg:traversal} is not yet formulated in a way that is
+suitable to parallelize. We give a slight reformulation and add the computation of a
+starting pair of Gröbner bases.
 
-Standard approach relying on a starting cone procedure and a \emph{neighbour oracle}.
+\begin{algo}[Traversal (Modified)]\
+  \label{alg:traversalMod}
+  \begin{algorithmic}[1]
+    \Require A (homogeneous) prime ideal $I \idealof K[\vec x]$ and a symmetry group $G$
+      as above.
+    \Ensure The set of maximal Gröbner cones of the polyhedral fan whose support is
+      $\Trop(I)$ (resp.\ the corresponding pairs of Gröbner bases).
+    \State Compute a $\vec w \in \Trop(I) \setminus C_0(I)$ using
+      Algorithm~\ref{alg:tropicalPoint}.
+    \State Compute the pair $c_0 := (\mathcal G_{\prec_{\vec w}}(\initial_{\vec w}(I)),
+      \mathcal G_{\prec_{\vec w}}(I))$ from $I$ and $\vec w$.
+    \State Set $U = \{ c_0 \}$ and $P = \varnothing$.
+    \While{$U \neq \varnothing$}
+      \State Pick a pair of Gröbner bases $c \in U$.
+      \If{$c \not\in P$} \label{alg:line:coneExists}
+        \State Compute $N = \mathrm{Neighbors}(c)$ using Algorithm~\ref{alg:neighbors}
+          enhanced by Algorithm~\ref{alg:tropLinks}.
+        \State Set $U = U \setminus \{ c \} \cup N$, $P = P \cup \{ c \}$.
+      \EndIf
+    \EndWhile
+    \State\textbf{return} $P$.
+  \end{algorithmic}
+\end{algo}
+
+Note that we check in line~\ref{alg:line:coneExists} for existence with respect to the
+symmetry group $G$, so if $\{ \id \} \lneq G$ it is possible that we discard cones which
+were not found yet themselves, but lie in the orbit of some cone in $P$. This will become
+important later on again when we further refine this algorithm.
+
+\begin{figure}[tbhp]
+  \centering
+  \begin{tikzpicture}[node distance=1.4cm]
+    \node [place] (in) {$I$};
+    \node [transition] (init) [right of=in] {$iC$} edge [pre] (in);
+
+    \node [place] (unpList) [right of=init] {$uL$} edge [pre] (init);
+    \node [transition] (split) [below of=unpList] {$sL$}
+      edge [pre, bend left]   (unpList)
+      edge [post, bend right] (unpList);
+    \node [place] (cone) [right of=split] {$c$}
+      edge [pre] (split);
+    \node [transition] (neigh) [right of=unpList] {$n$}
+      edge [pre] (cone)
+      edge [post] (unpList);
+    \node [transition] (e) [above of=unpList] {$e$} edge [pre] (unpList);
+  \end{tikzpicture}
+  \caption{Naive approach to traversing a polyhedral fan}
+  \label{fig:naive}
+\end{figure}
+
+In Figure~\ref{fig:naive} we see a first sketch of what a possible formulation could look
+like.
+% TODO
 
 \subsection{Existing Methods for Fan Traversals}
 
@@ -1603,11 +1770,27 @@ Introduce GIT-fans as similarly structured object
 
 Adapting existing code base
 
+Make in particular use of termination logic -- not trivial!
+
 \section{Performance and Scalability}
 
-Benchmark speedup through parallelization.
+In this section we want to apply our implemented algorithms to real world examples in
+order to examine how efficient they parallelize. The idea is to consider examples which
+are \enquote{big} enough to provide reliable parallelization timings. An important class
+of (tropical) varieties already considered in \cite{tropPointsLinks} and \cite{tropGrass}
+are the so-called \emph{tropical Grassmannians} which can be parameterized to arbitrary
+dimensions. We want to compare the single-threaded computing times of the
+\textsc{Singular}-only version of our algorithm with the parallel version by considering
+the tropical Grassmannian $\mathcal G_{3,7}$. While this tropical variety is sufficiently
+small to be computed successfully on any private machine, we also want to consider
+examples which have not been computed in their entirety before. An example for this is the
+much larger tropical Grassmannian $\mathcal G_{3,8}$.
 
-Compute \enquote{big} examples to get a comparison.
+Our running time test were executed on the cluster computing provided by Fraunhofer ITWM
+in Kaiserslautern. This cluster is comprised of 192 computing nodes each fitted with 16
+Intel Xeon E5-2670 processor cores running at 2.6 GHz with 64\,GB memory. The GPI-Space
+engine uses these cores without hyperthreading, meaning we may run a maximum of 16 jobs
+per node. The nodes are connected via FDR Infiniband.
 
 \subsection{Tropical Grassmannians}
 
@@ -1619,13 +1802,13 @@ found in \cite{tropGrass}.
 \begin{definition}[Grassmannians]
   Let $n \in \setN_{>0}$ and $k \in \setN$ with $0 \leq k \leq n$, then the
   \emph{Grassmannian} of $k$-planes in $K^n$ is the set of all $k$-dimensional linear
-  subspaces of $K^n$, usually denoted by $G(k, n)$.
+  subspaces of $K^n$, usually denoted by $\Grass(k, n)$.
 \end{definition}
 
 Thus, Grassmannians are in some sense a generalization of projective space: for instance
-we will later be able to see that in fact $G(1,n) \cong \setP^n$. Our goal now is to give
-these sets the structure of a projective variety which in turn allows us to study their
-tropical variety. This is achieved by embedding a Grassmannian $G(k, n)$ into
+we will later be able to see that in fact $\Grass(1,n) \cong \setP^n$. Our goal now is to
+give these sets the structure of a projective variety which in turn allows us to study
+their tropical variety. This is achieved by embedding a Grassmannian $\Grass(k, n)$ into
 $\setP^{\binom nk}-1$ via the so-called \emph{Plücker embedding}. To this end we want to
 regard the corresponding linear spaces as elements of projective space, which first
 requires some constructions from commutative algebra.
@@ -1667,35 +1850,55 @@ spaces which can be proved with basic knowledge of commutative algebra:
 
 Consider now our setting where $V=K^n$ and let $N = \binom nk$ be the number of basis
 elements in $\bigwedge^kK^n$. We may identify a $k$-dimensional linear subspace $X \in
-G(k,n)$ of $V$ with a pure tensor in $\bigwedge^kV \cong K^N$ uniquely up to scalar
-multiplication which -- by definition -- makes the corresponding embedding $G(k,n) \to
-\setP^{N-1}$, called the \emph{Plücker embedding}, injective. Hence we can regard $G(k,n)$
-as a subset of this projective space. Finally, to equip $G(k,n)$ with the structure of a
-projective variety, we need this fact: For non-zero $w\in \bigwedge^kK^n$ the rank of the
-$K$-linear map $f:K^n \to \bigwedge^{k+1}K^n, v \mapsto v \wedge w$ is at least $n-k$ and
-equality holds if and only if $w$ is a pure tensor. Thus, using the above embedding,
-$G(k,n)$ consists entirely of pure tensors $w\in G(k,n)$ which all define maps $v\mapsto
-v\wedge w$ of rank at most $n-k$. This is equivalent to all $(n-k+1) \times
-(n-k+1)$-minors of these maps vanishing which induces polynomial equations in the Plücker
-coordinates of $\setP^{N-1}$ describing $G(k,n)$, hence it is in fact a projective
-variety.
+\Grass(k,n)$ of $V$ with a pure tensor in $\bigwedge^kV \cong K^N$ uniquely up to scalar
+multiplication which -- by definition -- makes the corresponding embedding $\Grass(k,n)
+\to \setP^{N-1}$, called the \emph{Plücker embedding}, injective. Hence we can regard
+$\Grass(k,n)$ as a subset of this projective space. Finally, to equip $\Grass(k,n)$ with
+the structure of a projective variety, we need this fact: For non-zero $w\in
+\bigwedge^kK^n$ the rank of the $K$-linear map $f:K^n \to \bigwedge^{k+1}K^n, v \mapsto v
+\wedge w$ is at least $n-k$ and equality holds if and only if $w$ is a pure tensor. Thus,
+using the above embedding, $\Grass(k,n)$ consists entirely of pure tensors $w\in
+\Grass(k,n)$ which all define maps $v\mapsto v\wedge w$ of rank at most $n-k$. This is
+equivalent to all $(n-k+1) \times (n-k+1)$-minors of these maps vanishing which induces
+polynomial equations in the Plücker coordinates of $\setP^{N-1}$ describing $\Grass(k,n)$,
+hence it is in fact a projective variety.
 
-On an additional note one can cover $G(k,n)$ with copies of $\setA^{k(n-k)}$ to show that
-the Grassmannian is an irreducible projective variety of dimension $k(n-k)$. This leads to
-the following definition:
+On an additional note one can cover $\Grass(k,n)$ with copies of $\setA^{k(n-k)}$ to show
+that the Grassmannian is an irreducible projective variety of dimension $k(n-k)$. This
+leads to the following definition:
 
 \begin{definition}[Tropical Grassmannians]
   By the above a Grassmannian can be viewed as a projective variety given by a homogeneous
   ideal
   \[
-    I(G(k,n)) \idealof K[ p_{i_1, \dots, i_k} : 1\leq i_1 < \cdots < i_k \leq n ]
+    I(\Grass(k,n)) \idealof K[ p_{i_1, \dots, i_k} : 1\leq i_1 < \cdots < i_k \leq n ]
   \]
-  with Plücker coordinates $p_{i_1,\dots,i_k}$ which defines a determinantal variety $G(k,
-  n)$. This, in turn, defines a tropical variety and we write $\mathcal G_{k,n} :=
-  \Trop(I(G(k,n)))$.
+  with Plücker coordinates $p_{i_1,\dots,i_k}$ which defines a determinantal variety
+  $\Grass(k, n)$. This, in turn, defines a tropical variety and we write $\mathcal G_{k,n}
+  := \Trop(I(\Grass(k,n)))$.
 \end{definition}
 
+\begin{example}
+  As we clearly have $\Grass(0,n) \cong \Grass(n,n) \cong K^n$ and $\Grass(1,n) \cong
+  \Grass(n-1, n) \cong \setP_K^{n-1}$, the first \enquote{non-trivial} Grassmannian is
+  $\Grass(2,4)$. By the process described above one easily finds that $\Grass(2,4)$ is
+  given by the ideal
+  \[
+    I_{2,4} := \ideal{ x_{i,j} \phi : 1 \leq i < j \leq 4 }
+    \idealof K[x_{1,2}, \dots, x_{3,4}].
+  \]
+  for $\phi = x_{1,2}x_{3,4} - x_{1,3}x_{2,4} + x_{1,4}x_{2,3}$, but $\dim I_{2,4} = 5$,
+  so it defines a hypersurface in $\setP^5$. It can be shown that in fact $\sqrt{I_{2,4}}
+  = \ideal \phi$, so $\Grass(2,4) = V(\phi)$ as one would expect. Hence the polyhedral fan
+  corresponding to the tropical variety $\mathcal G_{2,4}$ has maximal 5-dimensional cones
+  living in $\setR^6$.
+  % TODO
+\end{example}
+
 \subsection{Runtime Measurements}
+
+We come to timing our computations and comparing them to the pure implementation in
+\textsc{Singular}.
 
 \begin{figure}[htbp]
   \begin{center}
