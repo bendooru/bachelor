@@ -370,7 +370,8 @@ tropical quadrics and cubics respectively. For instance, in
 figure~\ref{fig:trop:line} we see the tropical line $V(x \oplus y
 \oplus 0)$. The tropical quadric on the right will be mentioned again later on. As a final
 note, since tropical division is well-defined for non-infinite elements we may also
-consider tropical polynomials in negative exponents later on.
+consider tropical polynomials in negative exponents later on, in particular to make sense
+of the tropicalization in Laurent polynomial rings.
 
 \subsection{Valuations and Puiseux Series}
 
@@ -554,6 +555,7 @@ polyhedra a \emph{representation} of a complex $\mathcal C$ if each polyhedron $
 \mathcal C$ is a face of some $S \in \mathcal S$. In particular, the maximal polyhedra of
 a polyhedral complex define a representation.
 
+% TODO? illustrate?
 \begin{example}\
   \begin{enumerate}
     \item For any $n \in \setN$ we have $\setR^n = \{ \vec x \in \setR^n : 0 \cdot \vec x
@@ -581,8 +583,8 @@ a polyhedral complex define a representation.
       \]
       as facets. Further, $\{0\}$ is a facet of each ray and thus a face of each quadrant,
       so we get the polyhedral fan $\{ \varnothing, \{0\}, r_0, \dots, r_3, C_0, \dots,
-      C_3 \}$ which is again pure and complete. The set of quadrant is a representation of
-      this fan.
+      C_3 \}$ which is again pure and complete. The set of quadrants is a representation
+      of this fan.
   \end{enumerate}
 \end{example}
 
@@ -994,7 +996,7 @@ notion of tropical curves will be reintroduced in section~\ref{sec:newtonMethod}
 % TODO reformulate last sntnc
 Another important step needed to compute neighbouring cones is computing Gröbner bases in
 these adjacent Gröbner cones. Generally speaking, it would be possible to compute these
-from scratch if we're just given our ideal $I$ and a weight $\vec w$ in the relative
+from scratch if we only have access to our ideal $I$ and a weight $\vec w$ in the relative
 interior of an adjacent cone. However, the following \emph{lift} algorithm greatly
 simplifies this procedure as we already know the reduced Gröbner bases in the original
 Gröbner cone. It is a step in the \emph{Gröbner walk} \cite{groebWalk}, which transforms
@@ -1187,7 +1189,7 @@ evaluated at these roots:
 
 In other words if $f$ has a unique Newton polygon we may regard its expected Newton
 polygon instead of evaluating $f$ at a partial root and vice versa. Now, the use of Newton
-polygons becomes apparent with the following lemma which draws the connection between
+polygons becomes apparent with the following lemma, which draws the connection between
 valuations of roots and the slopes of the Newton polygons:
 
 \begin{lemma}[{\cite[Proposition~II.6.3]{neuAlg}}]
@@ -1250,7 +1252,16 @@ polygon. An example of how such a computation might look like is given as follow
       \[
         \Trop(F) = \{ (0,0,0), (0,-1,1), (-1,1,0),(-1,-1,2) \}.
       \]
-    \item % TODO add fallback method to Puiseux expansions
+    \item While the first example can be solved entirely using Newton polygons, there are
+      still some triangular sets which do not admit a series of unique Newton polygons. In
+      these cases we have to explicitly find points on the (very) affine variety of the
+      corresponding ideal. In our applications we will usually work over the field of
+      complex formal Puiseux series $\CCt$ where we may apply the method used to prove
+      Theorem~\ref{thm:puisuexalgclosed} to successively obtain finite approximations to
+      the generally infinite solutions. In particular, the intermediate results will
+      usually be elements of $\setQ(t)$ or $\setQ(a)(t)$ for some algebraic extension
+      $\setQ(a)$ of $\setQ$. Consider now the triangular set \dots% TODO
+      % TODO add fallback method to Puiseux expansions
       \label{ex:zdt2}
   \end{enumerate}
 \end{example}
@@ -1374,10 +1385,10 @@ subspace
   C_0(I) = \left\{ \vec w \in \setR^n : \initial_{\vec w}(I) = I \right\}.
 \]
 It can be computed easily from any reduced Gröbner basis for $I$ and is trivially included
-in $\Trop(I)$ if $I$ itself contains no monomial. In fact, $C_(I)$ is contained in every
+in $\Trop(I)$ if $I$ itself contains no monomial. In fact, $C_0(I)$ is contained in every
 cone of the tropical variety, so computing a point in the homogeneity space offers no
 useful information for our algorithms. Hence, we call a point $\vec w \in \Trop(I)$
-\emph{non-trivial}, if $\vec w \not\in C_0(I)$. The following proposition formalizes the
+\emph{non-trivial} if $\vec w \not\in C_0(I)$. The following proposition formalizes the
 process of intersecting with generic hyperplanes:
 
 \begin{proposition}
@@ -1508,11 +1519,12 @@ Indeed, the steps above are just applying the Corollaries~\ref{thmc:tropInt} for
 remaining dimension: In line~\ref{alg:links:cut} we cut the combinatorial curve down to an
 actual tropical curve by Corollary~\ref{thmc:tropInt}.\ref{thmc:i}. Then in
 line~\ref{alg:links:curve} we consider the respective zero-dimensional varieties described
-in \ref{thmc:tropInt}.\ref{thmc:ii}. Note that, since the tropical curves are the supports
-of tropical fans in this setting, they are necessarily collections of rays, hence the
-representation as $\bigcup_{w \in W} w\cdot \setR_{\geq0} + C_0(I)$ is justified. This can
-then be used in line \ref{alg:interiorPoints} of Algorithm~\ref{alg:neighbors} as a
-replacement for the methods concerning prevarieties.
+in \ref{thmc:tropInt}.\ref{thmc:ii}. Note that, since a tropical curve is the support
+of a tropical fan in this setting, it is necessarily a collection of rays. Hence the
+representation as $\bigcup_{w \in W} w\cdot \setR_{\geq0} + C_0(I)$ is justified. This
+algorithm can then be used in line \ref{alg:interiorPoints} of
+Algorithm~\ref{alg:neighbors} as a replacement for the methods concerning prevarieties. As
+the timings in \cite{tropPointsLinks} show, this offers a considerable speedup in general.
 
 \section{Parallelization}
 
@@ -1647,7 +1659,7 @@ if necessary.
       on.
       % TODO
     \item Consider now the Petri net given by the graph depicted in
-      Figure~\ref{fig:petri:taskpar}. If we are given the marking $M = \{ (i,1) \}$, then
+      Figure~\ref{fig:petri:taskpar}. If we start with the marking $M = \{ (i,1) \}$, then
       firing $s$ will enable both $f$ and $g$. Both of these transitions may thus fire in
       parallel.
       % TODO
@@ -1688,7 +1700,8 @@ first that will be reflected in the description of our algorithm.
     about the term ordering. Also, it is not possible to store an ideal without also
     storing its ambient ring in \textsc{Singular}. As it turns out, the inbuilt storage
     solutions in the GPI-Space environment are not suitable to handle the amount of data
-    that is exchanged between processes. Instead % TODO
+    that is exchanged between processes. Instead we use a separate storage solution that
+    will be accessed by the GPI-Space environment.
     % TODO formulation etc
   \item We previously noted that it is necessary to be able to test two given Gröbner
     cones for equality. While we may compare the given initial ideals as they cannot
@@ -1699,7 +1712,7 @@ first that will be reflected in the description of our algorithm.
     % TODO more?
   \item Finally, in the context of tropical varieties it is desirable to consider the
     corresponding polyhedral fan modulo symmetry. More precisely, for a polyhedral fan
-    $\mathcal F$ in $\setR^n$ we want to find a subgroup of permutations $S \leq S_n$
+    $\mathcal F$ in $\setR^n$ we want to find a subgroup of permutations $G \leq S_n$
     that acts trivially on $\mathcal F$ but produces non-trivial cone orbits.
 \end{enumerate}
 From now on, we want to successively construct a Petri net describing our traversal
@@ -1742,8 +1755,8 @@ important later on again when we further refine this algorithm.
     \node [place] (in) {$I$};
     \node [transition] (init) [right of=in] {$iC$} edge [pre] (in);
 
-    \node [place] (unpList) [right of=init] {$uL$} edge [pre] (init);
-    \node [transition] (split) [below of=unpList] {$sL$}
+    \node [place] (unpList) [right of=init] {$uS$} edge [pre] (init);
+    \node [transition] (split) [below of=unpList] {$sS$}
       edge [pre, bend left]   (unpList)
       edge [post, bend right] (unpList);
     \node [place] (cone) [right of=split] {$c$}
@@ -1758,7 +1771,45 @@ important later on again when we further refine this algorithm.
 \end{figure}
 
 In Figure~\ref{fig:naive} we see a first sketch of what a possible formulation could look
-like.
+like but note that no termination logic has been included yet. The net is executed as
+follows:
+\begin{itemize}
+  \item It is initialized with a single token on the place $I$ which holds the pair $(I,
+    G)$ for the prime ideal $I$ and its symmetry group $G$.
+  \item The transition $iC$ consumes this token and computes an initial starting cone
+    given as a triple
+    \[
+      c_{\vec w} = (
+        \mathcal G_{\prec_{\vec w}}(\initial_{\vec w}(I)),
+        \mathcal G_{\prec_{\vec w}}(I),
+        C_{\vec w}(I)
+      )
+    \]
+    of reduced Gröbner bases and their corresponding Gröbner cone. Afterwards, $iC$
+    produces a token holding the datum $\{c_{\vec w}\}$.
+  \item The place $uS$ holds tokens with \emph{sets} (or lists) of these triples as their
+    data, which we interpret as the \emph{unprocessed} cones. For a token in $uS$ there is
+    two cases for the set $\mathcal C$ it holds: It is the empty set or it contains a
+    non-zero amount of Gröbner cone triples:
+    \begin{itemize}
+      \item If the token holds the empty set, then it will be consumed by the transition
+        $e$ which does nothing else.
+      \item Otherwise we may pick a $c_{\vec w} \in \mathcal C$. The transition $sS$
+        consumes the token holding $\mathcal C$, pushes back $\mathcal C\setminus \{
+        c_{\vec w}\}$ to $uS$ and pushes $c_{\vec w}$ to the place $c$.
+    \end{itemize}
+    In short, the transition $sS$ processes sets of triples into tokens of single triples.
+  \item Finally, the transition $n$ consumes tokens from $c$ which holds the Gröbner cone
+    triples and applies the modified neighbor algorithm to them. Accordingly it produces
+    sets of such triples which are then pushed to $uS$.
+\end{itemize}
+Note that for this to make sense we have to assume that the transition $n$ stores and has
+access to the processed Gröbner cones and thus only pushes \enquote{new} cones onto the
+place $uS$. As said above this net does not contain any termination logic and is thus not
+complete. One way to properly terminate if and only if no more neighbors can be found is
+to keep track of the number of all tokens that hold unprocessed cones, including those
+that are being processed. If this number drops to zero while all the places $sS$ and $c$
+hold no tokens then the algorithm can terminate.
 % TODO
 
 \subsection{Existing Methods for Fan Traversals}
@@ -1848,18 +1899,18 @@ spaces which can be proved with basic knowledge of commutative algebra:
   \end{enumerate}
 \end{remark}
 
-Consider now our setting where $V=K^n$ and let $N = \binom nk$ be the number of basis
-elements in $\bigwedge^kK^n$. We may identify a $k$-dimensional linear subspace $X \in
-\Grass(k,n)$ of $V$ with a pure tensor in $\bigwedge^kV \cong K^N$ uniquely up to scalar
-multiplication which -- by definition -- makes the corresponding embedding $\Grass(k,n)
-\to \setP^{N-1}$, called the \emph{Plücker embedding}, injective. Hence we can regard
-$\Grass(k,n)$ as a subset of this projective space. Finally, to equip $\Grass(k,n)$ with
-the structure of a projective variety, we need this fact: For non-zero $w\in
-\bigwedge^kK^n$ the rank of the $K$-linear map $f:K^n \to \bigwedge^{k+1}K^n, v \mapsto v
-\wedge w$ is at least $n-k$ and equality holds if and only if $w$ is a pure tensor. Thus,
-using the above embedding, $\Grass(k,n)$ consists entirely of pure tensors $w\in
-\Grass(k,n)$ which all define maps $v\mapsto v\wedge w$ of rank at most $n-k$. This is
-equivalent to all $(n-k+1) \times (n-k+1)$-minors of these maps vanishing which induces
+Consider now our setting where $V=K^n$ and let $N = \smash{\binom nk}$ be the number of
+basis elements in $\bigwedge^kK^n$. We may identify a $k$-dimensional linear subspace $X
+\in \Grass(k,n)$ of $V$ with a pure tensor in $\bigwedge^kV \cong K^N$ uniquely up to
+scalar multiplication which -- by definition -- makes the corresponding embedding
+$\Grass(k,n) \to \setP^{N-1}$, called the \emph{Plücker embedding}, injective. Hence we
+can regard $\Grass(k,n)$ as a subset of this projective space. Finally, to equip
+$\Grass(k,n)$ with the structure of a projective variety, we need this fact: For non-zero
+$w\in \bigwedge^kK^n$ the rank of the $K$-linear map $f:K^n \to \bigwedge^{k+1}K^n, v
+\mapsto v \wedge w$ is at least $n-k$ and equality holds if and only if $w$ is a pure
+tensor. Thus, using the above embedding, $\Grass(k,n)$ consists entirely of pure tensors
+$w\in \Grass(k,n)$ which all define maps $v\mapsto v\wedge w$ of rank at most $n-k$. This
+is equivalent to all $(n-k+1) \times (n-k+1)$-minors of these maps vanishing which induces
 polynomial equations in the Plücker coordinates of $\setP^{N-1}$ describing $\Grass(k,n)$,
 hence it is in fact a projective variety.
 
@@ -1869,7 +1920,7 @@ leads to the following definition:
 
 \begin{definition}[Tropical Grassmannians]
   By the above a Grassmannian can be viewed as a projective variety given by a homogeneous
-  ideal
+  prime ideal
   \[
     I(\Grass(k,n)) \idealof K[ p_{i_1, \dots, i_k} : 1\leq i_1 < \cdots < i_k \leq n ]
   \]
@@ -1878,21 +1929,52 @@ leads to the following definition:
   := \Trop(I(\Grass(k,n)))$.
 \end{definition}
 
-\begin{example}
-  As we clearly have $\Grass(0,n) \cong \Grass(n,n) \cong K^n$ and $\Grass(1,n) \cong
-  \Grass(n-1, n) \cong \setP_K^{n-1}$, the first \enquote{non-trivial} Grassmannian is
-  $\Grass(2,4)$. By the process described above one easily finds that $\Grass(2,4)$ is
-  given by the ideal
-  \[
-    I_{2,4} := \ideal{ x_{i,j} \phi : 1 \leq i < j \leq 4 }
-    \idealof K[x_{1,2}, \dots, x_{3,4}].
-  \]
-  for $\phi = x_{1,2}x_{3,4} - x_{1,3}x_{2,4} + x_{1,4}x_{2,3}$, but $\dim I_{2,4} = 5$,
-  so it defines a hypersurface in $\setP^5$. It can be shown that in fact $\sqrt{I_{2,4}}
-  = \ideal \phi$, so $\Grass(2,4) = V(\phi)$ as one would expect. Hence the polyhedral fan
-  corresponding to the tropical variety $\mathcal G_{2,4}$ has maximal 5-dimensional cones
-  living in $\setR^6$.
-  % TODO
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[thick]
+    \foreach \x in {0, 1, ..., 4}
+    {
+      \fill ({\x*72+90}:1) circle (3pt);
+      \fill ({\x*72+90}:2) circle (3pt);
+      \draw ({\x*72+90}:1) -- ({\x*72+90}:2);
+      \draw ({\x*72+90}:1) -- ({\x*72+234}:1);
+      \draw ({\x*72+90}:2) -- ({\x*72+162}:2);
+    }
+  \end{tikzpicture}
+  \caption{Petersen graph illustrating connectivity of $\mathcal G_{2,5}$}
+  \label{fig:petersen}
+\end{figure}
+
+\begin{example}\
+  \begin{enumerate}
+    \item As we clearly have $\Grass(0,n) \cong \Grass(n,n) \cong K^n$ and $\Grass(1,n)
+      \cong \Grass(n-1, n) \cong \setP_K^{n-1}$, the first \enquote{non-trivial}
+      Grassmannian is $\Grass(2,4)$. By the process described above one easily finds that
+      $\Grass(2,4)$ is given by the ideal
+      \[
+        I_{2,4} := \ideal{ x_{i,j} \phi : 1 \leq i < j \leq 4 }
+        \idealof K[x_{1,2}, \dots, x_{3,4}].
+      \]
+      for $\phi = x_{1,2}x_{3,4} - x_{1,3}x_{2,4} + x_{1,4}x_{2,3}$, but $\dim I_{2,4} =
+      5$, so it defines a hypersurface in $\setP^5$. It can be shown that in fact
+      $\sqrt{I_{2,4}} = \ideal \phi$, so $\Grass(2,4) = V(\phi)$ as one would expect.
+      Hence the polyhedral fan corresponding to the tropical variety $\mathcal G_{2,4}$
+      has maximal five-dimensional cones living in $\setR^6$.
+
+      Computations show that $\mathcal G_{2,4}$ consists of three five-dimensional cones
+      with four-dimensional homogeneity-space as their common facet. In particular,
+      $\mathcal G_{2,4}$ is combinatorially a curve and $\mathcal G_{2,4}/C_0(\phi)$ is a
+      tropical line consisting of three rays from the origin.
+    \item The next non-trivial Grassmannian $\Grass(2,5)$ is given by five similar
+      quadrics from the polynomial ring $K[x_{1,2}, \dots, x_{4,5}]$ in ten variables. Its
+      tropical variety $\mathcal G_{2,5}$ is given by a seven-dimensional fan consisting
+      of ten seven-dimensional cones and fifteen six-dimensional cones. Each maximal cone
+      has three of the fifteen six-dimensional cones as facets. The homogeneity space
+      $C_0(I_{2,5})$ is five-dimensional. Intersecting $\mathcal G_{2,5}/C_0(I_{2,5})$
+      with the unit sphere in $\setR^{10}$ yields a polyhedral complex which can be
+      interpreted as the \emph{Petersen graph} in ten nodes and fifteen vertices. It is
+      illustrated in Figure~\ref{fig:petersen}.
+  \end{enumerate}
 \end{example}
 
 \subsection{Runtime Measurements}
