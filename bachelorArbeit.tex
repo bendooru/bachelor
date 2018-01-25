@@ -37,7 +37,11 @@
 \usetikzlibrary{calc,shapes,automata,petri}
 \tikzset{%
   transition/.style={rectangle,minimum size=6mm,draw},
-  place/.style={circle,minimum size=6mm,draw}
+  place/.style={circle,minimum size=6mm,draw},
+  database/.style={% props to Christian
+    minimum width=2cm,minimum height=1cm,cylinder,
+    shape border rotate=90,aspect=0.2,draw
+  }
 }
 
 \usepackage[pdftex,hidelinks]{hyperref}
@@ -116,11 +120,24 @@
 % adjust numbering
 \numberwithin{definition}{section}
 
+\subject{Bachelor's Thesis}
 \title{Massively Parallel Computation of Tropical Varieties}
-\subtitle{Bachelor's Thesis}
 \author{Dominik Bendle}
-\publishers{supervised by Janko Böhm,\\Technische Universität Kaiserslautern}
-\date{\today}
+% hacky
+\publishers{%
+  \begin{tabular}{ll}
+    First corrector:  & Dr.\ Janko Böhm \\
+    Second corrector: & Prof.\ Dr.\ Andreas Gathmann \\
+                      & \\
+    Supervisors:      & Dr.\ Janko Böhm \\
+                      & Dr.\ Mirko Rahn
+  \end{tabular}\\[3em]
+  Fachbereich Mathematik\\
+  Arbeitsgruppe Computeralgebra und Geometrie\\[1em]
+  \includegraphics[scale=1.5]{fig/TUKL.eps}
+}
+
+\date{Kaiserslautern, \today}
 
 \begin{document}
 \pagestyle{headings}
@@ -1761,8 +1778,8 @@ of our algorithm.
     storing its ambient ring in \textsc{Singular}. As it turns out, the inbuilt storage
     solutions in the GPI-Space environment are not suitable to handle the amount of data
     that is exchanged between processes. Instead we use a separate storage solution that
-    will be accessed by the GPI-Space environment.
-    % TODO formulation etc
+    will be accessed by the GPI-Space environment. We will discuss implementation details
+    hereof in the next section.
   \item We previously noted that it is necessary to be able to test two given Gröbner
     cones for equality. While we may compare the given initial ideals as they cannot
     differ by definition, it is faster to instead consider the actual cones. If they are
@@ -1874,12 +1891,67 @@ complete. One way to properly terminate if and only if no more neighbors can be 
 to keep track of the number of all tokens that hold unprocessed cones, including those
 that are being processed. If this number drops to zero while all the places $sS$ and $c$
 hold no tokens then the algorithm can terminate.
+
+% TODO explain read only ports
+\begin{figure}[tbhp]
+  \centering
+  \begin{tikzpicture}[node distance=1.4cm]
+    \node [place,tokens=1] (ctrl) {};
+    \node [transition] (init) [right of=ctrl] {$iC$} edge [pre] (ctrl);
+
+    \node [place] (unproc) [right of=init] {$u$} edge [pre] (init);
+    \node [transition] (insert) [right of=unproc] {$i$} edge [pre] (unproc);
+    \node [transition] (neighbors) [above of=unproc] {$n$} edge [post] (unproc);
+    \node [place] (unprocCones) [above of=neighbors] {$u$} edge [post] (neighbors);
+    \node [transition] (get) [right of=unprocCones] {$g$} edge [post] (unprocCones);
+
+    \node [place] (enabled) [below of=get] {$e$}
+      edge [post,bend right] (get)
+      edge [pre,bend left] (get)
+      edge [post,bend right] (insert)
+      edge [pre,bend left] (insert);
+
+    \node [database] (stor) [right of=enabled,xshift=1cm] {storage}
+      edge [bend right,dotted,post] (get)
+      edge [bend left,dotted,pre] (insert);
+
+    \node [place] (data) [above of=init] {$d$}
+      edge [post,dashed] (init)
+      edge [post,dashed] (neighbors);
+  \end{tikzpicture}
+  \caption{Slightly less naive approach incorporating external storage}
+  \label{fig:naive:storage}
+\end{figure}
+
+Note that the algorithm given above is just a general graph traversal algorithm where $iC$
+provides the starting node and $n$ provides neighboring nodes. Before we want to exploit
+some properties specific to tropical varieties we have to incorporate the above storage
+plans into our Petri net. This new version is depicted in Figure~\ref{fig:naive:storage}
+and works much in the same way:
+\begin{itemize}
+  \item The transition $iC$ and $n$ are unchanged, take the same input and produce the
+    same output as before, with one exception:
+  \item The place $d$ holds the data $(I, G)$ and is read-only. Hence $iC$ fires by
+    consuming the control token that was added. By initializing this place with exactly
+    one token, we ensure that the initial Gröbner cone is computed exactly once. In the
+    previous Petri net we implicitly assumed that $G$ is part of the tokens that are fed
+    to $n$.
+  \item Similarly, $u$ holds sets the unprocessed Gröbner cone triples produced by $iC$
+    and $n$.
+  \item The $i$ and $g$ transitions \emph{insert} and \emph{get} tokens of Gröbner cone
+    sets respectively. For this they call retrieval and insertion operations provided by
+    the external storage interface. Note that, as we may insert sets, this removes the
+    need for the splitting operations by $sS$ in the previous net.
+    % TODO!!!
+\end{itemize}
+
 % TODO
 
 \subsection{Adaptation and Implementation Details}
 
-As previously mentioned we heavily rely on work done by Christian Reinbold on GIT-fans.
-\cite{reinboldGitFan} \dots % TODO
+As was previously mentioned we heavily rely on work done by Christian Reinbold on
+GIT-fans \cite{reinboldGitFan}. His work, in turn, relies on work done by Lukas Ristau to
+enable a seamless integration into a GPI-Space project.
 
 Introduce GIT-fans as similarly structured object
 
