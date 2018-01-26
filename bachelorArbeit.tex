@@ -398,14 +398,19 @@ of the tropicalization in Laurent polynomial rings.
 \subsection{Valuations and Puiseux Series}
 
 Most of the following definitions and algorithms will make use of fields equipped with a
-non-trivial valuation: We fix a field $K$ and recall that a \emph{valuation} is a map
-$\nu:K\to \setR \cup \{\infty\}$ that satisfies the following properties: For any $a, b
-\in K$ we have
-\begin{enumerate}
-  \item $\nu(a) = \infty$ if and only if $a=0$,
-  \item $\nu(ab) = \nu(a)+\nu(b)$ and
-  \item $\nu(a+b) \geq \min\{\nu(a), \nu(b)\}$ with equality if $a\neq b$.
-\end{enumerate}
+non-trivial valuation:
+
+\begin{definition} \label{def:val}
+  We fix a field $K$ and recall that a \emph{valuation} is a map $\nu:K\to \setR \cup
+  \{\infty\}$ that satisfies the following properties: For any $a, b \in K$ we have
+  \begin{enumerate}
+    \item $\nu(a) = \infty$ if and only if $a=0$,
+    \item $\nu(ab) = \nu(a)+\nu(b)$ and
+    \item $\nu(a+b) \geq \min\{\nu(a), \nu(b)\}$ with equality if $a\neq b$.
+      \label{def:val:eq}
+  \end{enumerate}
+\end{definition}
+
 A valuation is called \emph{non-trivial} if it is not the constant 0-function on $K^* =
 K\setminus\{0\}$. Such a field with valuation defines a local ring $R_\nu = \{ x \in K :
 \nu(x) \geq 0 \}$ with unique maximal ideal $\mathfrak m_{R_\nu} = \{ x \in K : \nu(x) > 0
@@ -860,7 +865,7 @@ a polyhedral fan or -- in the more general cases -- of a polyhedral complex. The
 following theorem gives the important characterizations for the easier case of tropical
 hypersurfaces:
 
-\begin{theorem}[Kaparanov's Theorem]
+\begin{theorem}[Kapranov's Theorem]
   \label{thm:kapranov}
   Fix an algebraically closed field with valuation, then for a $f \in K[\vec x^{\pm1}]$
   the following sets coincide:
@@ -872,23 +877,41 @@ hypersurfaces:
       \label{thm:kap:ii}
     \item the Euclidean closure in $\setR^n$ of the set $\{ (\nu(y_1), \dots, \nu(y_n)) :
       (y_1,\dots,y_n) \in V(f) \}$.
+      \label{thm:kap:iii}
   \end{enumerate}
+  \begin{proof}
+    We want to sketch the \enquote{easy} parts of this proof: Suppose $\vec w \in
+    \Trop(f)$, then there are two terms $c_1 \vec x^{\alpha_1}$, $c_2 \vec x^{\alpha_2}$
+    of $f$ such that
+    \[
+      \trop(f)(\vec w) = \nu(c_1) + \vec w \cdot \alpha_1 = \nu(c_2) + \vec w \cdot \alpha_2.
+    \]
+    But then by Definition~\ref{def:initialId} the two corresponding terms
+    $\overline{\nu(c_i)t^{-\nu(c_i)}\vec x^{\alpha_i}}$ for $i=1,2$ occur in the initial
+    form $\initial_{\vec w}(f)$, so it cannot be a monomial. Similarly, if we take $\vec
+    w$ from set \ref{thm:kap:ii}, then $\initial_{\vec w}(f)$ is not a monomial and by
+    definition the minimum $\trop(f)(\vec w)$ is achieved twice. Thus sets \ref{thm:kap:i}
+    and \ref{thm:kap:ii} agree.
+
+    We show one of the remaining inclusions: \ref{thm:kap:iii} $\subseteq$
+    \ref{thm:kap:i}. As $\Trop(f)$ is a closed set, we only need to show the inclusion for
+    $\vec w \in \nu(V(f))$. Suppose $\vec w \in \nu(V(f))$ with some $\vec y \in \setT^n$
+    such that $f(\vec y) = 0$, where $f = \sum_{\alpha \in \setZ^n} c_\alpha \vec
+    x^\alpha$. Then
+    \[
+      \nu \left( \sum_{\alpha \in \setZ^n} c_\alpha \vec y^\alpha \right) = \nu(0) =
+      \infty > \nu(c_\alpha \vec y^\alpha)
+    \]
+    for all $\alpha \in \setZ^n$ with $c_\alpha \neq 0$. By iteratively applying
+    Definition~\ref{def:val}.\ref{def:val:eq} this implies that at least two terms
+    $c_\alpha \vec y^\alpha$ have the same valuation. Hence the minimum $\trop(f)(\vec w)$
+    is achieved by the two corresponding terms, so $\vec w \in \Trop(f)$. The reverse
+    inclusion is quite a bit more involved and is proved in
+    \cite[Proposition~3.1.5]{sturmMacTrop}.
+  \end{proof}
 \end{theorem}
 
-Proving this and the next more general theorem lies outside the scope of this thesis,
-however it is not hard to see the equality of the sets given by \ref{thm:kap:i} and
-\ref{thm:kap:ii}: Suppose $\vec w \in \Trop(f)$, then there are two terms $c_1 \vec
-x^{\alpha_1}$, $c_2 \vec x^{\alpha_2}$ of $f$ such that
-\[
-  \trop(f)(\vec w) = \nu(c_1) + \vec w \cdot \alpha_1 = \nu(c_2) + \vec w \cdot \alpha_2.
-\]
-But then by Definition~\ref{def:initialId} the two corresponding terms
-$\overline{\nu(c_i)t^{-\nu(c_i)}\vec x^{\alpha_i}}$ for $i=1,2$ occur in the initial form
-$\initial_{\vec w}(f)$, so it cannot be a monomial. This argument works analogously in the
-reverse direction, so the claimed equality is clear.
-
-\dots % TODO
-
+% TODO? anything else needed
 Theorem~\ref{thm:kapranov} naturally generalizes to full tropical varieties without having
 to alter the result in any way:
 
@@ -940,7 +963,7 @@ with a prime ideal $I \idealof K[\vec x]$ then the ideal generates over $K[\vec 
 will also be prime. Hence the above theorem is still applicable if we start in $K[\vec
 x]$. Not that \enquote{connected in codimension one} means that for any two maximal
 polyhedra $P, Q$ in the corresponding complex there is a sequence of maximal polyhedra $P
-= P_0, P_1, \dots, P_r = Q$ such that $P_{i+1}$ and $P_i$ share a facet for all $i = 1,
+= P_0, P_1, \dots, P_r = Q$ such that $P_{i-1}$ and $P_i$ share a facet for all $i = 1,
 \dots, r$. This important fact ensures that, by simply successively computing neighboring
 polyhedra we will eventually find all maximal ones.
 
