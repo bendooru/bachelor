@@ -120,7 +120,7 @@
 % adjust numbering
 \numberwithin{definition}{section}
 
-\subject{Bachelor's Thesis}
+\subtitle{Bachelor's Thesis}
 \title{Massively Parallel Computation of Tropical Varieties}
 \author{Dominik Bendle}
 % hacky
@@ -134,7 +134,11 @@
   \end{tabular}\\[3em]
   Fachbereich Mathematik\\
   Arbeitsgruppe Algebra, Geometrie und Computeralgebra\\[1em]
-  \includegraphics[scale=1.5]{fig/TUKL.eps}
+  \includegraphics[scale=1.5]{fig/TUKL.eps}\\[1em]
+  {\small
+    in cooperation with\\
+    Fraunhofer-Institut für Techno- und Wirtschaftsmathematik
+  }
 }
 
 \date{Kaiserslautern, \today}
@@ -745,7 +749,6 @@ components lie in $I$.
     \initial_{\vec w}(f_{i_s})$. Since these initial forms lie in $\initial_{\vec w'}(I)$
     by the above, we have $\initial_{\vec w}(I) \subseteq \initial_{\vec w'}(I)$. The same
     argument with $\vec w$ and $\vec w'$ exchanged shows the reverse inclusion.
-    % TODO let's actually do this
   \end{proof}
 \end{proposition}
 
@@ -774,6 +777,16 @@ as a subset of the \emph{algebraic torus} $\setT^n := {(K^*)}^n = {(K \setminus
 \[
   X := V(I) = \left\{ a \in \setT^n : f(a) = 0 \text{ for all $f \in I$} \right\}.
 \]
+Note that we may turn $K[\vec x^{\pm1}]$ into a standard polynomial quotient ring by
+considering $K[x_1,x_1^{-1}, \dots, x_n,x_n^{-1}]$, where $x_i, x_i^{-1}$ are unrelated
+ring variables and mod out the relations $x_i\cdot x_i^{-1} = 1$ for all $i=1,\dots,n$.
+In other words, for the ideal
+\[
+  I = \ideal{ x_ix_i^{-1}-1 : i = 1, \dots, n}
+\]
+we have $K[\vec x^{\pm1}] \cong K[x_1,x_1^{-1}, \dots, x_n,x_n^{-1}]/I$ and hence $\setT^n
+\cong V(I) \subseteq \setA^{2n}$ may be viewed as an affine variety.
+
 In this setting -- although not limited to Laurent polynomials -- we now want to study
 initial ideals. To define them in a useful way, we first need to establish a link between
 classical and tropical polynomials: this is where the valuation $\nu:K\to\setR$ will be
@@ -949,6 +962,11 @@ will restrict ourselves to $K[\vec x]$ -- in particular when Gröbner basis comp
 are required.
 
 % much TODO
+Since the corner locus of a single tropical polynomial is the union of (bounded)
+intersections of affine hyperplanes, it not hard to imagine that a tropical variety comes
+equipped with polyhedral structures. The following theorem makes this intuition more
+formal and finally allows us to tackle the problem of computing tropical varieties with
+polyhedral methods:
 
 \begin{theorem}[{\cite[Theorem~3.5.1]{sturmMacTrop}}]
   \label{thm:tropComplexConn}
@@ -1075,7 +1093,7 @@ polynomials $f_1, \dots, f_r$ where the corresponding hypersurfaces are known, t
 applying Algorithm~\ref{alg:fanRefinement} $r-1$ times will yield a representation of the
 fan whose support is $\Trop(I)$.
 
-% TODO
+% TODO redundancy here
 
 % TODO sounds weird?
 As we noted already, the main idea to compute tropical varieties in \cite{compTropVar} is
@@ -1105,7 +1123,6 @@ Gröbner cone. It is a step in the \emph{Gröbner walk} \cite{groebWalk}, which 
 Gröbner bases with respect to a given ordering to ones of of an ordering of an adjacent
 Gröbner cone.
 
-% TODO introduce representation of Gröbner cone by pair of red. Gröbner bases
 \begin{algo}[Lift] $ $
   \label{alg:lift}
   \begin{algorithmic}[1]
@@ -1629,23 +1646,49 @@ the timings in \cite{tropPointsLinks} show, this offers a considerable speedup i
 
 \section{Parallelization}
 
-Our main contribution is the combination of \textsc{Singular}-methods to compute tropical
-varieties with recently developed parallelization efforts at the Fraunhofer ITWM of
-computer algebra software. The first efforts to this end are described in
-\cite{towardsParallel} while we specifically base our work on parallelization algorithms
-by Christian Reinbold to compute GIT-fans (cite???). Parallelization of our procedures is
-taken care of by the GPI-Space environment:
+% TODO cite some stuff
+In this section we want to discuss our main contribution for this thesis: the combination
+of \textsc{Singular}-methods to compute tropical varieties with recently developed
+parallelization efforts at the Fraunhofer ITWM for computer algebra software. The first
+efforts to this end are described in \cite{towardsParallel} while we specifically base our
+work on parallelization algorithms by Christian Reinbold to compute GIT-fans
+\cite{reinboldGitFan}. The basic algorithms described in the previous section are
+implemented in the \textsc{Singular} library \texttt{tropicalNewton.lib}
+\cite{tropNewtLib} and parallelization of our procedures is taken care of by the GPI-Space
+environment. The objective is to speed up computation of tropical varieties by exploiting
+concurrency and running on as many machines as possible. To this end it it necessary to
+identify such components where this concurrency may be exploited as well as those
+components which are inherently sequential.
 
-Use Petri nets as a framework to parallelize the traversal of tropical fans. Refer to
-source \cite{towardsParallel}.
-% TODO write more introduction
+% TODO meh
+In the following we will give a brief overview over the GPI-Space environment which is
+used to formulate and run our algorithms in parallel. In particular we will discuss Petri
+nets and their extensions, which are used as the coordination language in GPI-Space.
+We will then begin to reformulate our algorithm as a Petri net and finally look into some
+implementation details to illustrate some of the choices made.
 
 \subsection{Petri Nets and GPI-Space}
+
+GPI-Space is a workflow management system developed at the Fraunhofer Institut für
+Wirtschafts- und Technomathematik which was designed to allow execution of arbitrarily
+large or complex workflows on large scale computing systems \cite{gpispace}. It consists
+of three main components \cite[Section~4.1]{reinboldGitFan}:
+\begin{enumerate}[label=\arabic*.]
+  \item The distributed run-time engine (DRTS) which constructs and manages worker
+    topologies based on the available computing resources and is responsible for resource
+    management and job scheduling. Hardware changes during exchanges, caused by failing
+    components or dynamic addition of hardware, are also supported.
+  \item The workflow engine (WE) which tracks the state of the workflow and identifies
+    activities that can be executed. It then collects input data and active transitions
+    into jobs which are sent to the DTRS for scheduling.
+  \item A virtual memory layer that allows different activities and external programs to
+    communicate and share data.
+\end{enumerate}
 
 Petri nets are used as a coordination language in GPI-Space, which allow us to formulate
 our algorithms without explicitly specifying any parallelization. Further, they can be
 expressed as bipartite directed graphs, allowing them to be designed in an intuitive and
-accessible way.
+accessible way. During execution they are interpreted by the workflow engine.
 
 \begin{definition}[Petri net]
   \label{def:petri}
@@ -1689,7 +1732,34 @@ firing $t$. In general we say that a marking $M'$ is \emph{reachable} if there i
 to note that the firing of enabled places is a local process, that is, it does not block
 other enabled transitions from firing as well. This is the most important property
 allowing parallelisms.
-% TODO more on reachabiliy?
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[node distance=1.4cm]
+    \begin{scope}
+      \node [place,tokens=2] (in)                {};
+      \node [place,tokens=3] (in2) [above of=in] {};
+      \node [transition]     (f)   [right of=in,yshift=0.7cm] {}
+        edge [pre] (in)
+        edge [pre] (in2);
+      \node [place]          (out) [right of=f]  {} edge [pre] (f);
+    \end{scope}
+
+    \begin{scope}[xshift=7cm]
+      \node [place]          (in')                {};
+      \node [place,tokens=1] (in2') [above of=in'] {};
+      \node [transition]     (f')   [right of=in',yshift=0.7cm] {}
+        edge [pre] (in')
+        edge [pre] (in2');
+      \node [place,tokens=2] (out') [right of=f']  {} edge [pre] (f');
+    \end{scope}
+
+    \draw [->,thick] ([xshift=5mm]out -| out) -- ([xshift=-5mm]f' -| in')
+      node[above=1mm,midway,text centered] {\footnotesize firing two times};
+  \end{tikzpicture}
+  \caption{Transition firing until it is disabled}
+  \label{fig:firing}
+\end{figure}
 
 A nice property of Petri nets is that their static part given by
 Definition~\ref{def:petri} can be visualized as a directed bipartite graph. Recall that a
@@ -1698,10 +1768,10 @@ V_2$ of the node set such that $E \subseteq (V_1 \times V_2) \cup (V_2 \cup V_2)
 no arc connects nodes lying in the same set $V_i$. But by definition of the Petri net
 $(P,T,F)$ this clearly holds for the graph $G = (P \cup T, F)$ where we interpret places
 and transitions as nodes and their flow relations as arcs. This will be illustrated in the
-upcoming examples, see for instance figure~\ref{fig:petriEx}. Usually, places will be
-represented by circles and transitions as boxes, while tokens held by places will be drawn
-as points in the corresponding place. We will also mark places or transitions with letters
-if necessary.
+upcoming examples, see for instance figures~\ref{fig:firing} and \ref{fig:petriEx}.
+Usually, places will be represented by circles and transitions as boxes, while tokens held
+by places will be drawn as points in the corresponding place. We will also mark places or
+transitions with letters if necessary.
 
 \begin{figure}[htbp]
   \centering
@@ -1762,8 +1832,11 @@ if necessary.
     \item Consider now the Petri net given by the graph depicted in
       figure~\ref{fig:petri:taskpar}. If we start with the marking $M = \{ (i,1) \}$, then
       firing $s$ will enable both $f$ and $g$. Both of these transitions may thus fire in
-      parallel.
-      % TODO
+      parallel. Constructions like this arise when different functions are applied to
+      parts of some data and have no interdependence. As above, if $i$ contains multiple
+      tokens, then $s$ and hence also $f$ and $g$ may fire multiple times in parallel,
+      potentially leading to a situation where all named transitions are enabled at the
+      same time.
   \end{enumerate}
 \end{example}
 
@@ -1771,9 +1844,163 @@ To summarize, Petri nets contain information about \emph{all} activities that ma
 executed at any given time, making it possible to exploit the maximum amount of
 parallelism. But as was hinted at above, Petri nets in the current form are not yet
 suitable to model algorithms together with the data they produce as they arise from real
-world applications.
+world applications. Another problem is the lack of conditional execution:
 
-% TODO GPI-Space
+\begin{definition}[Conflicts]
+  \label{def:conflict}
+  Let $(P,T,F)$ be a Petri net with a marking $M$ such that some transitions $t_1$ and
+  $t_2$ are enabled. Then $t_1$ and $t_2$ are in \emph{conflict} if firing $t_1$ disables
+  $t_2$ or vice versa.
+\end{definition}
+
+More precisely, conflicts arise when a place does not hold enough tokens to fire all
+transitions it enables, see for example figure~\ref{fig:conflict}. This implies that the
+execution of the Petri net is dependent on the choice of which transition to fire, which
+in general is undesirable.
+
+\begin{figure}[htb]
+  \centering
+  \begin{tikzpicture}[node distance=1.4cm]
+    \begin{scope}
+      \node [place,tokens=2] (i01) {};
+      \node [place,tokens=1] (i02) [below of=i01] {};
+      \node [place,tokens=2] (i03) [below of=i02] {};
+
+      \node [transition] (t01) [right of=i01,yshift=-0.7cm] {$t_1$}
+        edge [pre] (i01)
+        edge [pre] (i02);
+      \node [transition] (t02) [below of=t01] {$t_2$}
+        edge [pre] (i02)
+        edge [pre] (i03);
+
+      \node [place] (o01) [right of=t01] {} edge [pre] (t01);
+      \node [place] (o02) [right of=t02] {} edge [pre] (t02);
+    \end{scope}
+
+    \begin{scope}[xshift=7cm,yshift=2cm]
+      \node [place,tokens=1] (i11) {};
+      \node [place] (i12) [below of=i11] {};
+      \node [place,tokens=2] (i13) [below of=i12] {};
+
+      \node [transition] (t11) [right of=i11,yshift=-0.7cm] {$t_1$}
+        edge [pre] (i11)
+        edge [pre] (i12);
+      \node [transition] (t12) [below of=t11] {$t_2$}
+        edge [pre] (i12)
+        edge [pre] (i13);
+
+      \node [place,tokens=1] (o11) [right of=t11] {} edge [pre] (t11);
+      \node [place] (o12) [right of=t12] {} edge [pre] (t12);
+    \end{scope}
+
+    \begin{scope}[xshift=7cm,yshift=-2cm]
+      \node [place,tokens=2] (i21) {};
+      \node [place] (i22) [below of=i21] {};
+      \node [place,tokens=1] (i23) [below of=i22] {};
+
+      \node [transition] (t21) [right of=i21,yshift=-0.7cm] {$t_1$}
+        edge [pre] (i21)
+        edge [pre] (i22);
+      \node [transition] (t22) [below of=t21] {$t_2$}
+        edge [pre] (i22)
+        edge [pre] (i23);
+
+      \node [place] (o21) [right of=t21] {} edge [pre] (t21);
+      \node [place,tokens=1] (o22) [right of=t22] {} edge [pre] (t22);
+    \end{scope}
+
+    \path ([xshift=5mm]i02 -| o01) edge [thick,post,out=0,in=180]
+      node [pos=0.6,above=0.8cm] {firing $t_1$} ([xshift=-5mm]i12 -| i12);
+    \path ([xshift=5mm]i02 -| o01) edge [thick,post,out=0,in=180]
+      node [pos=0.6,below=0.8cm] {firing $t_2$} ([xshift=-5mm]i22 -| i22);
+  \end{tikzpicture}
+  \caption{Conflict of two transitions leading to different program flows}
+  \label{fig:conflict}
+\end{figure}
+
+Ways to correct these issues include extending Petri nets to so-called
+\emph{colored} and \emph{timed Petri nets}. While studying them in full detail is beyond
+the scope of this thesis, we want to look at how they are realized in the GPI-Space
+environment, along with the other important extensions: % TODO citations
+\begin{description}[leftmargin=\parindent]
+  \item[Time:] As any enabled transitions will fire immediately in a traditional Petri
+    net cannot model the time the transitions would take in an application to process
+    their input. Timed Petri nets are used to predict best and worst case running times by
+    introducing them concept of time as follows: The firing process is split into three
+    phases
+    \begin{enumerate}[label=\arabic*.]
+      \item the tokens are removed from the respective input places when the transition
+        fires,
+      \item the transition holds these tokens during its execution and
+      \item the tokens are put into the output places after the transition finishes
+        firing.
+    \end{enumerate}
+    Hence, markings as given by Definition~\ref{def:marking} no longer provide enough
+    information to describe the full state of a timed Petri net. Assuming that phases 1
+    and 2 are immediate, a complete description the includes the knowledge about all
+    active transitions in phase 2. Note that this does not change the execution dynamics
+    of a Petri net in terms of reachability. % TODO cite
+  \item[Types and Type Safety:] Until now all tokens in the classical Petri net held no
+    information apart from being present or not. However, in practical applications it is
+    imperative to equip tokens with actual data. This leads to the notion of colored Petri
+    nets: We extend the Petri net $(P,T,F)$ with a finite set $\Sigma$ of \emph{token
+    color sets} or \emph{types} together with a \emph{color function} $C:P\to\Sigma$. In
+    particular, all tokens in a given place have the same color or type.
+
+    As above, a marking must be modified to not just count the amount of tokens in a given
+    place: A \emph{marking} is now a map $\Gamma \to \setN$ where $\Gamma = \{ (p,c) : p
+    \in P, c \in C(p) \}$. The idea is that each place $p$ holds certain blocks of data
+    $C(p)$, so in order to process the data stored in $c \in C(p)$ we need to know which
+    block out of how many blocks $c$ is.
+
+    GPI-Space enforces type safety of Petri nets by rejecting those nets with flow
+    relations violating the type constraints. This is realized by equipping transition with
+    \emph{ports} which are typed placeholders for incoming and outgoing connections.
+  \item[Expression Language:] GPI-Space provides an embedded programming language which
+    serves a twofold purpose: Firstly, it allows to define and utilize user-defined data
+    types from a range of provided standard types like integers, floating point numbers
+    booleans and lists thereof. These are defined as \enquote{structs} in a similar
+    fashion as in the C programming language. For example in our later Petri nets we use
+    \texttt{file} as an alias for \texttt{string}, accomplished by
+    \begin{verbatim}
+<struct name="file">
+  <field name="path" type="string" />
+</struct>\end{verbatim}%
+    with a similar type \texttt{optional\_file} that includes a boolean value indicating
+    whether the specified path is valid:
+    \begin{verbatim}
+<struct name="optional_file">
+  <field name="path" type="string" />
+  <field name="valid" type="bool" />
+</struct>\end{verbatim}%
+    This allows defining types recursively, for example our input consisting of an ideal
+    and an optional symmetry group may be represented by the type
+    \begin{verbatim}
+<struct name="problem_data">
+  <field name="ideal" type="file" />
+  <field name="symmetry_group" type="optional_file" />
+</struct>\end{verbatim}%
+
+    Secondly, the expression language allows so-called \emph{tiny computations}. Suppose,
+    for instance, a token carries some sort of counter which is to be increased by some
+    transition. The expression language allows us to increment the counter without passing
+    to a dedicated process, but instead executing it directly in the workflow engine
+    itself, for instance by the snippet
+    \begin{verbatim}${counter} := ${counter} + 1\end{verbatim}
+    This way we may skip the overhead of sending the data to the runtime system and
+    returning it back to the workflow engine. Clearly, this only makes sense for very
+    basic computations, as otherwise the workflow engine may be unavailable for its actual
+    scheduling work.
+    % TODO
+  \item[Conditions:] GPI-Space extends the firing process of transitions with conditions
+    depending on the properties of the input tokens of a transition.
+    % some matching example
+
+    Resolving conflicts as in Definition~\ref{def:conflict} and figure~\ref{fig:conflict}.
+    % TODO
+\end{description}
+
+% TODO (in progr) GPI-Space
 
 \subsection{Traversing a Fan in Parallel}
 \label{sec:traverseParal}
@@ -1781,7 +2008,7 @@ world applications.
 Computing tropical varieties in our setting follows the general structure of a fan
 traversal: Interpreting the maximal cones of a polyhedral fan together with their
 adjacency relations as a connected graph, we may realize the fan traversal as a simple
-graph traversal. To this end we want to formulate the version of
+graph traversal \cite{JenTravSym}. To this end we want to formulate the version of
 Algorithm~\ref{alg:traversal} enhanced with Algorithm~\ref{alg:tropLinks} into a Petri
 net. Indeed on first glance an implementation looks quite simple: After determining a
 starting cone using Algorithm~\ref{alg:tropicalPoint} we construct a set of
@@ -1812,12 +2039,12 @@ of our algorithm.
     % TODO more?
   \item Finally, in the context of tropical varieties it is desirable to consider the
     corresponding polyhedral fan modulo symmetry. More precisely, for a polyhedral fan
-    $\mathcal F$ in $\setR^n$ we want to find a subgroup of permutations $G \leq S_n$
-    that acts trivially on $\mathcal F$ but produces non-trivial cone orbits. It turns out
-    that considering the cones modulo symmetry is compatible with how their unique points
-    are computed, so we additionally get orbits of unique points. As these are just
-    integer vectors, we even pick a minimal representative by sorting lexicographically.
-    This allows to compare cones under symmetry very quickly.
+    $\mathcal F$ in $\setR^n$ we want to find a subgroup of permutations $G \leq S_n$ that
+    acts trivially on $\mathcal F$ but produces non-trivial cone orbits \cite{JenTravSym}.
+    It turns out that considering the cones modulo symmetry is compatible with how their
+    unique points are computed, so we additionally get orbits of unique points. As these
+    are just integer vectors, we even pick a minimal representative by sorting
+    lexicographically. This allows to compare cones under symmetry very quickly.
 \end{enumerate}
 From now on, we want to successively construct a Petri net describing our traversal
 algorithm. However, Algorithm~\ref{alg:traversal} is not yet formulated in a way that is
@@ -1935,8 +2162,8 @@ hold no tokens then the algorithm can terminate.
       edge [pre,bend left] (insert);
 
     \node [database] (stor) [right of=enabled,xshift=1cm] {storage}
-      edge [bend right,dotted,post] (get)
-      edge [bend left,dotted,pre] (insert);
+      edge [in=0,out=90,dotted,post,thick] (get)
+      edge [in=0,out=-90,dotted,pre,thick] (insert);
 
     \node [place] (data) [above of=init] {$d$}
       edge [post,dashed] (init)
@@ -1996,9 +2223,9 @@ small to be computed successfully on any private machine, we also want to consid
 examples which have not been computed in their entirety before. An example for this is the
 much larger tropical Grassmannian $\mathcal G_{3,8}$.
 
-Our running time test were executed on the cluster computing provided by Fraunhofer ITWM
+Our running time tests were executed on the cluster computing provided by Fraunhofer ITWM
 in Kaiserslautern. This cluster is comprised of 192 computing nodes each fitted with 16
-Intel Xeon E5-2670 processor cores running at 2.6 GHz with 64\,GB memory. The GPI-Space
+Intel Xeon E5-2670 processor cores running at 2.6\,GHz with 64\,GB memory. The GPI-Space
 engine uses these cores without hyperthreading, meaning we may run a maximum of 16 jobs
 per node. The nodes are connected via FDR Infiniband.
 
@@ -2046,7 +2273,7 @@ spaces which can be proved with basic knowledge of commutative algebra:
           v_{i_1} \wedge \cdots \wedge v_{i_k} : 1\leq i_1 < \cdots < i_k \leq n
         \right\}
       \]
-      will be a basis of $\bigwedge^kV$. In particular this vector space is of dimension
+      will be a basis of $\bigwedge^kV$. In particular this vector has dimension
       $\dim\bigwedge^kV = \binom nk$.
     \item For elements $v_1, \dots, v_k \in V$ the \emph{pure tensor} $v_1\wedge \cdots
       \wedge v_k \in \bigwedge^kV$ will be non-zero if and only if $v_1, \dots, v_k$ are
@@ -2124,15 +2351,15 @@ leads to the following definition:
       with four-dimensional homogeneity-space as their common facet. In particular,
       $\mathcal G_{2,4}$ is combinatorially a curve and $\mathcal G_{2,4}/C_0(\phi)$ is a
       tropical line consisting of three rays from the origin.
-    \item The next non-trivial Grassmannian $\Grass(2,5)$ is given by five similar
-      quadrics from the polynomial ring $K[x_{1,2}, \dots, x_{4,5}]$ in ten variables. Its
-      tropical variety $\mathcal G_{2,5}$ is given by a seven-dimensional fan consisting
-      of ten seven-dimensional cones and fifteen six-dimensional cones. Each maximal cone
-      has three of the fifteen six-dimensional cones as facets. The homogeneity space
-      $C_0(I_{2,5})$ is five-dimensional. Intersecting $\mathcal G_{2,5}/C_0(I_{2,5})$
-      with the unit sphere in $\setR^{10}$ yields a polyhedral complex which can be
-      interpreted as the \emph{Petersen graph} in ten nodes and fifteen vertices. It is
-      illustrated in figure~\ref{fig:petersen}.
+    \item The next non-trivial Grassmannian $\Grass(2,5)$ is given by an ideal $I_{2,5}$
+      generated by five similar quadrics from the polynomial ring $K[x_{1,2}, \dots,
+      x_{4,5}]$ in ten variables. Its tropical variety $\mathcal G_{2,5}$ is given by a
+      seven-dimensional fan consisting of ten seven-dimensional cones and fifteen
+      six-dimensional cones. Each maximal cone has three of the fifteen six-dimensional
+      cones as facets. The homogeneity space $C_0(I_{2,5})$ is five-dimensional.
+      Intersecting $\mathcal G_{2,5}/C_0(I_{2,5})$ with the unit sphere in $\setR^{10}$
+      yields a polyhedral complex which can be interpreted as the \emph{Petersen graph} in
+      ten nodes and fifteen vertices. It is illustrated in figure~\ref{fig:petersen}.
   \end{enumerate}
 \end{example}
 
@@ -2151,7 +2378,7 @@ We come to timing our computations and comparing them to the pure implementation
 
 In figure~\ref{fig:g38scaling} we see that \dots and so on.
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
   \begin{center}
     \input{fig/efficiency.tex}
   \end{center}
