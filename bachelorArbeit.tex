@@ -1688,7 +1688,9 @@ of three main components \cite[Section~4.1]{reinboldGitFan}:
 Petri nets are used as a coordination language in GPI-Space, which allow us to formulate
 our algorithms without explicitly specifying any parallelization. Further, they can be
 expressed as bipartite directed graphs, allowing them to be designed in an intuitive and
-accessible way. During execution they are interpreted by the workflow engine.
+accessible way. During execution they are interpreted by the workflow engine. In
+GPI-Space, the Petri nets and the expression language we will introduce later on are
+formulated in an XML-language.
 
 \begin{definition}[Petri net]
   \label{def:petri}
@@ -1937,7 +1939,7 @@ environment, along with the other important extensions: % TODO citations
     \end{enumerate}
     Hence, markings as given by Definition~\ref{def:marking} no longer provide enough
     information to describe the full state of a timed Petri net. Assuming that phases 1
-    and 2 are immediate, a complete description the includes the knowledge about all
+    and 2 are immediate, a complete description then includes the knowledge about all
     active transitions in phase 2. Note that this does not change the execution dynamics
     of a Petri net in terms of reachability. % TODO cite
   \item[Types and Type Safety:] Until now all tokens in the classical Petri net held no
@@ -1994,7 +1996,7 @@ environment, along with the other important extensions: % TODO citations
     % TODO
   \item[Conditions:] GPI-Space extends the firing process of transitions with conditions
     depending on the properties of the input tokens of a transition.
-    % some matching example
+    % TODO add some matching example
 
     Resolving conflicts as in Definition~\ref{def:conflict} and figure~\ref{fig:conflict}.
     % TODO
@@ -2312,7 +2314,8 @@ leads to the following definition:
   \]
   with Plücker coordinates $p_{i_1,\dots,i_k}$ which defines a determinantal variety
   $\Grass(k, n)$. This, in turn, defines a tropical variety and we write $\mathcal G_{k,n}
-  := \Trop(I(\Grass(k,n)))$.
+  := \Trop(I(\Grass(k,n)))$ which is the support of a pure $k(n-k)+1$-dimensional fan (or
+  polyhedral complex).
 \end{definition}
 
 \begin{figure}[tbhp]
@@ -2331,7 +2334,9 @@ leads to the following definition:
   \label{fig:petersen}
 \end{figure}
 
-\begin{example}\
+\begin{example}
+  Suppose, for instance, $K = \setC$ as a subfield of $\CCt$, hence we obtain fans as
+  remarked before.
   \begin{enumerate}
     \item As we clearly have $\Grass(0,n) \cong \Grass(n,n) \cong K^n$ and $\Grass(1,n)
       \cong \Grass(n-1, n) \cong \setP_K^{n-1}$, the first \enquote{non-trivial}
