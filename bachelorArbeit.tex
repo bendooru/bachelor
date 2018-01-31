@@ -185,7 +185,7 @@ and convex geometry. We then define tropical varieties and study their propertie
 polyhedral convexes. Finally, we illustrate how compute tropical varieties using methods
 from \cite{compTropVar} which we then improve using new techniques from
 \cite{tropPointsLinks}. In the third section we will introduce GPI-Space and Petri nets as
-a means to formulate parallelizable workflows and consequently formulate our traversal
+a means to formulate parallelizable workflows and subsequently formulate our traversal
 algorithm as such a Petri net. In the fourth section we introduce the tropical
 Grassmannians, an important class of tropical varieties and give timings for parallel
 computations of $\mathcal G_{3,7}$ and $\mathcal G_{3,8}$.
@@ -2211,8 +2211,7 @@ hold no tokens then the algorithm can terminate.
       edge [post,dashed] (init)
       edge [post,dashed] (neighbors);
   \end{tikzpicture}
-  \caption{Slightly less naive approach incorporating external storage,
-  \cite[Figure~8]{reinboldGitFan}}
+  \caption{New approach incorporating external storage, \cite[Figure~8]{reinboldGitFan}}
   \label{fig:naive:storage}
 \end{figure}
 
@@ -2223,8 +2222,8 @@ plans into our Petri net. This new version is depicted in Figure~\ref{fig:naive:
 and is basically what Christian Reinbold describes in Stage~3 of
 \cite[Sectiion~4.4]{reinboldGitFan} to traverse the GIT-fan.
 \begin{itemize}
-  \item The transition $iC$ and $n$ are unchanged, take the same input and produce the
-    same output as before, with one exception:
+  \item The transitions $iC$ and $n$ are basically unchanged, take the same input and
+    produce the same output as before, with one exception:
   \item The place $d$ holds the data $(I, G)$ and is read-only. Hence $iC$ fires by
     consuming the control token that was added. By initializing this place with exactly
     one token, we ensure that the initial Gröbner cone is computed exactly once. In the
