@@ -168,7 +168,7 @@ to be fixed.
 Our results are implemented in computer algebra system \textsc{Singular} \cite{Singular}
 with parallelization work done using GPI-Space at the ITWM.
 
-Also \texttt{gfan.lib} % TODO!!
+Also \texttt{gfan.lib} \cite{gfanLib} % TODO!!
 
 % TODO
 Based on work done by Dr.\ Lukas Ristau, Christian Reinbold with help from Dr.\ Mirko Rahn
@@ -179,20 +179,30 @@ and the HPC Department of ITWM.
 
 % TODO more motivation
 
-In the second section we will introduce the basic concepts of tropical geometry and
-tropical varieties. We will discuss several different approaches of computing tropical
-varieties, including considering the Gröbner fan of an ideal and the new Newton polygon
-method described in \cite{tropPointsLinks}. Subsequently we will take a look at Puiseux
-series rings which are special fields with valuation and fundamental to our results. In
-the third section we describe Petri nets as a language to formulate parallelizable
-workflows.
+In the second section we will introduce the general setting in which we want to compute
+tropical varieties. For this purpose we introduce notions concerning fields with valuation
+and convex geometry. We then define tropical varieties and study their properties as
+polyhedral convexes. Finally, we illustrate how compute tropical varieties using methods
+from \cite{compTropVar} which we then improve using new techniques from
+\cite{tropPointsLinks}. In the third section we will introduce GPI-Space and Petri nets as
+a means to formulate parallelizable workflows and consequently formulate our traversal
+algorithm as such a Petri net. In the fourth section we introduce the tropical
+Grassmannians, an important class of tropical varieties and give timings for parallel
+computations of $\mathcal G_{3,7}$ and $\mathcal G_{3,8}$.
 
-% TODO more here
-
-% TODO acknowledgements(?) Lukas, Christian, Santiago, Mirko etc
+% TODO not complete yet
 \subsubsection*{Acknowledgements}
-I thank
-% TODO
+Firstly I would like to thank Dr.~Janko Böhm for suggesting this topic to me, giving me
+the chance to work at Fraunhofer ITWM and guiding me in understanding tropical varieties
+and their computation. In this vein I thank Dr.~Yue Ren and Dr.~Tommy Hofmann for their
+support in understanding and adapting their \textsc{Singular} implementation. Special
+thanks goes to Santiago Laplagne, who, during his stay here in Germany, tirelessly
+implemented and improved a \textsc{Singular} library for computations with general Puiseux
+series expansions.
+
+I also would like to thank Dr.~Mirko Rahn from the High Performance Computing (HPC)
+department at Fraunhofer ITWM for his guidance and help during my work there. I further
+thank Christian Reinbold for his helpful introduction to his project.
 
 \section{Computing Tropical Varieties}
 
@@ -780,9 +790,10 @@ x^{\pm1}] = K[x_1^{\pm1}, \dots, x_n^{\pm1}]$ -- the ring of polynomials in $x_1
 x_n$ with integral but not necessarily non-negative exponents. Ideals and polynomials in
 this ring define zero loci much in the same manner as for standard polynomial rings,
 however as monomials are now invertible, evaluation at zero is no longer well-defined. As
-such, we consider the \emph{very affine variety} of an ideal $I \idealof K[\vec x^{\pm1}]$
-as a subset of the \emph{algebraic torus} $\setT^n = {(K^*)}^n = {(K \setminus
-\{0\})}^n$:
+such, we consider the \emph{very affine variety}\footnote{This name is mainly used in
+\cite{sturmMacTrop} and does not appear to be standard nomenclature.} of an ideal $I
+\idealof K[\vec x^{\pm1}]$ as a subset of the \emph{algebraic torus} $\setT^n = {(K^*)}^n
+= {(K \setminus \{0\})}^n$:
 \[
   X = V(I) = \left\{ a \in \setT^n : f(a) = 0 \text{ for all $f \in I$} \right\}.
 \]
@@ -1923,11 +1934,10 @@ Ways to correct these issues include extending Petri nets to so-called
 the scope of this thesis, we want to look at how they are realized in the GPI-Space
 environment, along with the other important extensions: % TODO citations
 \begin{description}[leftmargin=\parindent]
-  \item[Time:] As any enabled transitions will fire immediately in a traditional Petri
-    net cannot model the time the transitions would take in an application to process
-    their input. Timed Petri nets are used to predict best and worst case running times by
-    introducing them concept of time as follows: The firing process is split into three
-    phases
+  \item[Time:] A traditional Petri net cannot model execution times of its transitions
+    since they are defined to fire instantaneously. Clearly, this yields an incomplete
+    description of a realistic workflow. Timed Petri nets introduce them concept of time
+    by splitting the firing process into three phases:
     \begin{enumerate}[label=\arabic*.]
       \item the tokens are removed from the respective input places when the transition
         fires,
@@ -1935,27 +1945,40 @@ environment, along with the other important extensions: % TODO citations
       \item the tokens are put into the output places after the transition finishes
         firing.
     \end{enumerate}
-    Hence, markings as given by Definition~\ref{def:marking} no longer provide enough
-    information to describe the full state of a timed Petri net. Assuming that phases 1
-    and 2 are immediate, a complete description then includes the knowledge about all
-    active transitions in phase 2. Note that this does not change the execution dynamics
-    of a Petri net in terms of reachability. % TODO cite
+    Hence, markings as given by Definition~\ref{def:marking} have to be extended by an
+    intermediate marking corresponding to the second phase. Note that this does not change
+    the execution dynamics of a Petri net in terms of reachability. % TODO cite
   \item[Tokens and Data:] Until now all tokens in the classical Petri net held no
-    information apart from being present or not. However, in practical applications it is
-    imperative to equip tokens with actual data. This leads to the notion of colored Petri
-    nets: We extend the Petri net $(P,T,F)$ with a finite set $\Sigma$ of \emph{token
-    color sets} or \emph{types} together with a \emph{color function} $C:P\to\Sigma$. In
-    particular, all tokens in a given place have the same color or type.
+    information apart from being present or not. Of course, this severely limits the
+    amount of information that can be exchanged between independent processes. This leads
+    to the notion of colored Petri nets: We extend the Petri net $(P,T,F)$ with a finite
+    set $\Sigma$ of \emph{token color sets} or \emph{types} together with a \emph{color
+    function} $C:P\to\Sigma$. In particular, all tokens in a given place have the same
+    coloring.
 
     As above, a marking must be modified to not just count the amount of tokens in a given
     place: A \emph{marking} is now a map $\Gamma \to \setN$ where $\Gamma = \{ (p,c) : p
-    \in P, c \in C(p) \}$. The idea is that each place $p$ holds certain blocks of data
-    $C(p)$, so in order to process the data stored in $c \in C(p)$ we need to know which
-    block out of how many blocks $c$ is.
+    \in P, c \in C(p) \}$. So in some sense each place is associated with a certain
+    collection of colors and each such color can hold certain amounts of tokens.
 
-    GPI-Space enforces type safety of Petri nets by rejecting those nets with flow
-    relations violating the type constraints. This is realized by equipping transition with
+    On the practical side GPI-Space enforces type safety of Petri nets just like in
+    strongly typed programming language. This is realized by equipping transition with
     \emph{ports} which are typed placeholders for incoming and outgoing connections.
+  \item[Read-only ports:] To add to the previous point, GPI-Space employs different types
+    of ports. Depending on the direction of an arc in a Petri net, a port will be either
+    read from or written to, which corresponds to consuming and placing a token
+    respectively. In the cases where a token is placed back in the place it was read form,
+    we may also employ read-write ports.
+
+    % TODO not perfect
+    Finally, there is the notion of a \emph{read-only} port. In cases where data is static
+    over the course of the Petri net execution and must be accessed by several different
+    transitions, for instance configuration data and static input, it would be overly
+    tedious to repeatedly consume and replace tokens. Furthermore, if this data sat in a
+    single token it would be inaccessible to any other transitions during execution,
+    preventing parallel access. The solution is to make this token read-only. Any
+    transition which is enabled by this token will then not consume it, so any others may
+    access the corresponding data in parallel.
   \item[Expression Language:] GPI-Space provides an embedded programming language which
     serves a twofold purpose: Firstly, it allows to define and utilize user-defined data
     types from a range of provided standard types like integers, floating point numbers
@@ -1991,14 +2014,34 @@ environment, along with the other important extensions: % TODO citations
     returning it back to the workflow engine. Clearly, this only makes sense for very
     basic computations, as otherwise the workflow engine may be unavailable for its actual
     scheduling work.
-    % TODO
   \item[Conditions:] GPI-Space extends the firing process of transitions with conditions
-    depending on the properties of the input tokens of a transition.
+    depending on the properties of the input tokens of a transition. Consider again the
+    situation of a counter, incrementing some variable. Figure~\ref{fig:inc} gives a rough
+    sketch of how this might be implemented: Here $i$ is an integer value that is
+    incremented as long it is smaller than 4. Then \dots
     % TODO add some matching example
 
-    Resolving conflicts as in Definition~\ref{def:conflict} and Figure~\ref{fig:conflict}.
-    % TODO
+    Furthermore, conditional execution provides a tool to resolve potential conflicts as
+    described in Definition~\ref{def:conflict} and illustrated in Figure~\ref{fig:conflict}.
+    In fact, Petri nets formulated for GPI-Space require that any transitions may fire
+    without conflicts.
 \end{description}
+
+% TODO check position of condition, etc
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[node distance=1.4cm]
+    \node [place] (in) {$i$};
+    \node [transition] (plus) [right of=in] {$+$}
+      edge [pre, bend left] (in)
+      edge [post,bend right] (in);
+    \node [place] (out) [right of=plus] {$o$}
+      edge [pre] (plus);
+    \node at (out) [above=0.4cm] {\footnotesize\texttt{\$\{o\}\,:geq:\,4}};
+  \end{tikzpicture}
+  \caption{Incrementing net illustrating conditions}
+  \label{fig:inc}
+\end{figure}
 
 % TODO (in progr) GPI-Space
 
@@ -2142,8 +2185,6 @@ to keep track of the number of all tokens that hold unprocessed cones, including
 that are being processed. If this number drops to zero while all the places $sS$ and $c$
 hold no tokens then the algorithm can terminate.
 
-% TODO explain read only ports
-% TODO cite Christian
 \begin{figure}[tbhp]
   \centering
   \begin{tikzpicture}[node distance=1.4cm]
@@ -2170,7 +2211,8 @@ hold no tokens then the algorithm can terminate.
       edge [post,dashed] (init)
       edge [post,dashed] (neighbors);
   \end{tikzpicture}
-  \caption{Slightly less naive approach incorporating external storage}
+  \caption{Slightly less naive approach incorporating external storage,
+  \cite[Figure~8]{reinboldGitFan}}
   \label{fig:naive:storage}
 \end{figure}
 
@@ -2178,7 +2220,8 @@ Note that the algorithm given above is just a general graph traversal algorithm 
 provides the starting node and $n$ provides neighboring nodes. Before we want to exploit
 some properties specific to tropical varieties we have to incorporate the above storage
 plans into our Petri net. This new version is depicted in Figure~\ref{fig:naive:storage}
-and works much in the same way:
+and is basically what Christian Reinbold describes in Stage~3 of
+\cite[Sectiion~4.4]{reinboldGitFan} to traverse the GIT-fan.
 \begin{itemize}
   \item The transition $iC$ and $n$ are unchanged, take the same input and produce the
     same output as before, with one exception:
