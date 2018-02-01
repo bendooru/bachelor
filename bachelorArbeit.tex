@@ -1050,12 +1050,13 @@ $I$. Then \cite[Lemma~2.2]{compTropVar} states that the initial ideal $\initial_
 w}(I)$ contains a monomial if and only if $\initial_{(0,\vec w)}(^hI)$ contains a
 monomial. This restriction allows us to utilize techniques specialized to homogeneous
 ideals, which are -- in some sense -- nicer than their general counterparts. Also, as
-shown in Proposition~\ref{prp:grRegion} there are no restrictions on the Gröbner region of
-$I$.
+shown in Proposition~\ref{prp:grRegion}, there are no restrictions on the Gröbner region
+of $I$. Hence, for the following algorithms we will assume that every ideal $I \idealof
+K[\vec x]$ has constant coefficients and is homogeneous.
 
 With these simplifications in mind it is clear that a tropical variety is the support of a
 subfan of the Gröbner fan from Definition~\ref{def:groebnerConeFan}. We thus want to
-establish the connection between the Gröbner cones comprising the tropical varieties and
+establish the connection between the Gröbner cones contained in the tropical varieties and
 the Gröbner bases they define. Fixing a total monomial ordering $\prec$ as a \enquote{tie
 breaker}, we usually represent a Gröbner cone $C_{\vec w}(I)$ by the pair $(\mathcal
 G_{\prec_{\vec w}}(\initial_{\vec w}), \mathcal G_{\prec_{\vec w}}(I))$ of reduced Gröbner
@@ -1228,14 +1229,14 @@ between cones in it, which allows us to generate a starting and neighbor cones m
 efficiently. In particular, Ren and Hofmann's methods provide local optimizations to the
 algorithms discussed in the previous section. For this we again fix an algebraically
 closed field $K$ with non-trivial valuation $\nu:K\to\setR \cup \{\infty\}$ and
-residue field $\mathfrak K$ with uniformizing parameter $t$.
+residue field $\mathfrak K$ with uniformizing parameter~$t$.
 
 Until now we mainly dealt with tropical varieties as finite intersections of tropical
 prevarieties or the set of all weight vectors that define monomial-free initial ideals. In
 contrast, the focus of this section and our main algorithms will be the interpretation as
 the coordinate-wise image $\Trop(I) = \nu(V(I))$ as we have seen in
-Theorem~\ref{thm:fundamentalThm}. The main idea of Ren and Hofmann's results is to apply
-this interpretation to zero-dimensional ideals and their triangular decompositions:
+Theorem~\ref{thm:fundamentalThm}. The main idea behind Ren and Hofmann's results is to
+apply this interpretation to zero-dimensional ideals and their triangular decompositions:
 
 \begin{definition}
   \label{def:triangSet}
@@ -1512,9 +1513,10 @@ subspace
   C_0(I) = \left\{ \vec w \in \setR^n : \initial_{\vec w}(I) = I \right\}.
 \]
 It can be computed easily from any reduced Gröbner basis for $I$ and is trivially included
-in $\Trop(I)$ if $I$ itself contains no monomial. In fact, $C_0(I)$ is contained in every
-cone of the tropical variety, so computing a point in the homogeneity space offers no
-useful information for our algorithms. Hence, we call a point $\vec w \in \Trop(I)$
+in $\Trop(I)$ if $I$ itself contains no monomial, that is, if $\Trop(I) \neq \varnothing$.
+In fact, $C_0(I)$ is contained in every Gröbner cone which is itself contained in the
+tropical variety, so computing a point in the homogeneity space offers no useful
+information for our algorithms. Hence, we call a point $\vec w \in \Trop(I)$
 \emph{non-trivial} if $\vec w \not\in C_0(I)$. The following proposition formalizes the
 process of intersecting with generic hyperplanes:
 
@@ -1578,7 +1580,7 @@ the correctness of \cite[Algorithm~4.10]{compTropVar}. The properties needed for
 algorithm are as follows, mainly due to \cite{ossTropLift}
 
 \begin{thmCorollary} \label{thmc:tropInt}
-  Let $X$ and $X$ be two affine subvarieties. If the intersection $\Trop(X) \cap
+  Let $X$ and $X'$ be two affine subvarieties. If the intersection $\Trop(X) \cap
   \Trop(X')$ has codimension $\codim\Trop(X) + \codim\Trop(X')$ in a neighborhood of $\vec
   w$, then $\vec w \in \Trop(X\cap X')$. In particular:
   \begin{enumerate}
@@ -1655,7 +1657,6 @@ the timings in \cite{tropPointsLinks} show, this offers a considerable speedup i
 
 \section{Parallelization}
 
-% TODO cite some stuff
 In this section we want to discuss our main contribution for this thesis: the combination
 of \textsc{Singular}-methods to compute tropical varieties with recently developed
 parallelization efforts at the Fraunhofer ITWM for computer algebra software. The first
@@ -1664,10 +1665,10 @@ work on parallelization algorithms by Christian Reinbold to compute GIT-fans
 \cite{reinboldGitFan}. The basic algorithms described in the previous section are
 implemented in the \textsc{Singular} library \texttt{tropicalNewton.lib}
 \cite{tropNewtLib} and parallelization of our procedures is taken care of by the GPI-Space
-environment. The objective is to speed up computation of tropical varieties by exploiting
-concurrency and running on as many machines as possible. To this end it it necessary to
-identify such components where this concurrency may be exploited as well as those
-components which are inherently sequential.
+environment \cite{gpispace}. The objective is to speed up computation of tropical
+varieties by exploiting concurrency and running on as many machines as possible. To this
+end it it necessary to identify such components where this concurrency may be exploited as
+well as those components which are inherently sequential.
 
 % TODO meh
 In the following we will give a brief overview over the GPI-Space environment which is
@@ -1690,6 +1691,11 @@ of three main components \cite[Section~4.1]{reinboldGitFan}:
   \item The workflow engine (WE) which tracks the state of the workflow and identifies
     activities that can be executed. It then collects input data and active transitions
     into jobs which are sent to the DTRS for scheduling.
+
+    Note that the WE is a single-threaded process running on a single machine, so it is
+    imperative to design the workflow in way which does not place too much work on the WE
+    as it otherwise may become a major bottleneck to the algorithm.
+    % TODO say this somewhere else?
   \item A virtual memory layer that allows different activities and external programs to
     communicate and share data.
 \end{enumerate}
@@ -1929,14 +1935,15 @@ in general is undesirable.
   \label{fig:conflict}
 \end{figure}
 
-Ways to correct these issues include extending Petri nets to so-called
-\emph{colored} and \emph{timed Petri nets}. While studying them in full detail is beyond
-the scope of this thesis, we want to look at how they are realized in the GPI-Space
-environment, along with the other important extensions: % TODO citations
+Ways to correct these issues include extending Petri nets to so-called \emph{colored} and
+\emph{timed Petri nets}. While studying them in full detail is beyond the scope of this
+thesis, we want to look at how they are realized in the GPI-Space environment, along with
+the other important extensions (see \cite[Section~3.2.2]{towardsParallel} for more
+details): % TODO citations
 \begin{description}[leftmargin=\parindent]
   \item[Time:] A traditional Petri net cannot model execution times of its transitions
     since they are defined to fire instantaneously. Clearly, this yields an incomplete
-    description of a realistic workflow. Timed Petri nets introduce them concept of time
+    description of a realistic workflow. Timed Petri nets introduce the concept of time
     by splitting the firing process into three phases:
     \begin{enumerate}[label=\arabic*.]
       \item the tokens are removed from the respective input places when the transition
@@ -1950,11 +1957,11 @@ environment, along with the other important extensions: % TODO citations
     the execution dynamics of a Petri net in terms of reachability. % TODO cite
   \item[Tokens and Data:] Until now all tokens in the classical Petri net held no
     information apart from being present or not. Of course, this severely limits the
-    amount of information that can be exchanged between independent processes. This leads
-    to the notion of colored Petri nets: We extend the Petri net $(P,T,F)$ with a finite
-    set $\Sigma$ of \emph{token color sets} or \emph{types} together with a \emph{color
-    function} $C:P\to\Sigma$. In particular, all tokens in a given place have the same
-    coloring.
+    amount of information that can be exchanged between independent processes which
+    ultimately leads to the notion of colored Petri nets: We extend the Petri net
+    $(P,T,F)$ with a finite set $\Sigma$ of \emph{token color sets} or \emph{types}
+    together with a \emph{color function} $C:P\to\Sigma$. In particular, all tokens in a
+    given place have the same coloring.
 
     As above, a marking must be modified to not just count the amount of tokens in a given
     place: A \emph{marking} is now a map $\Gamma \to \setN$ where $\Gamma = \{ (p,c) : p
@@ -1997,7 +2004,8 @@ environment, along with the other important extensions: % TODO citations
   <field name="valid" type="bool" />
 </struct>\end{verbatim}%
     This allows defining types recursively, for example our input consisting of an ideal
-    and an optional symmetry group may be represented by the type
+    and an optional symmetry group, supplied as serialized files, may be represented by
+    the type
     \begin{verbatim}
 <struct name="problem_data">
   <field name="ideal" type="file" />
@@ -2010,10 +2018,10 @@ environment, along with the other important extensions: % TODO citations
     to a dedicated process, but instead executing it directly in the workflow engine
     itself, for instance by the snippet
     \begin{verbatim}${counter} := ${counter} + 1\end{verbatim}
-    This way we may skip the overhead of sending the data to the runtime system and
+    This way we may skip the overhead of sending the data to the run-time system and
     returning it back to the workflow engine. Clearly, this only makes sense for very
-    basic computations, as otherwise the workflow engine may be unavailable for its actual
-    scheduling work.
+    basic computations, as otherwise the workflow engine may become unavailable for its
+    actual scheduling work during overly expensive computations.
   \item[Conditions:] GPI-Space extends the firing process of transitions with conditions
     depending on the properties of the input tokens of a transition. Consider again the
     situation of a counter, incrementing some variable. Figure~\ref{fig:inc} gives a rough
@@ -2059,13 +2067,13 @@ starting cone using Algorithm~\ref{alg:tropicalPoint} we construct a set of
 not suffice quite yet: Recall that transitions do not in general fire instantaneously, so
 there might be situations where the set of unprocessed cones might be empty, while some
 transitions still process data. It is thus important to devise proper termination
-conditions to properly stop the execution of the net. Before we can tackle this problem we
-must consider some implementation details first that will be reflected in the description
-of our algorithm.
+conditions to properly stop the execution of the net. Before we can tackle this problem
+however, we must consider some implementation details first that will be reflected in the
+description of our algorithm.
 \begin{enumerate}[label=\arabic*.]
-  \item We must first decide how to store and represent input and intermediate results.
-    Each Gröbner cone is represented by a pair of Gröbner bases and usually we add the
-    actual cone obtained from them to the data as well. Furthermore, we require the ambient
+  \item We must decide how to store and represent input and intermediate results. Each
+    Gröbner cone is represented by a pair of Gröbner bases and usually we add the actual
+    cone obtained from them to the data as well. Furthermore, we require the ambient
     polynomial ring in which the corresponding ideals live as they contain the information
     about the term ordering. Also, it is not possible to store an ideal without also
     storing its ambient ring in \textsc{Singular}. As it turns out, the in-build storage
@@ -2079,19 +2087,22 @@ of our algorithm.
     given in canonical form, we may associate a \emph{unique point} to each of them. It is
     then sufficient to compare the unique points with each other. The unique point may
     then also be used as a \emph{key} for storage purposes.
+
+    For a given  cone its unique point is obtained by \dots % TODO
     % TODO more?
   \item Finally, in the context of tropical varieties it is desirable to consider the
     corresponding polyhedral fan modulo symmetry. More precisely, for a polyhedral fan
     $\mathcal F$ in $\setR^n$ we want to find a subgroup of permutations $G \leq S_n$ that
-    acts trivially on $\mathcal F$ but produces non-trivial cone orbits \cite{JenTravSym}.
-    It turns out that considering the cones modulo symmetry is compatible with how their
-    unique points are computed, so we additionally get orbits of unique points. As these
-    are just integer vectors, we even pick a minimal representative by sorting
-    lexicographically. This allows to compare cones under symmetry very quickly.
+    acts trivially on $\mathcal F$ but produces non-trivial cone orbits, see for example
+    \cite{JenTravSym} for more on this. It turns out that considering the cones modulo
+    symmetry is compatible with how their unique points are computed, so we additionally
+    get orbits of unique points. As these are just integer vectors, we even pick a minimal
+    representative by sorting lexicographically. This allows to compare cones under
+    symmetry very quickly.
 \end{enumerate}
 From now on, we want to successively construct a Petri net describing our traversal
 algorithm. However, Algorithm~\ref{alg:traversal} is not yet formulated in a way that is
-suitable to parallelize. We give a slight reformulation and add the computation of a
+suitable for parallelization. We give a slight reformulation and add the computation of a
 starting pair of Gröbner bases.
 
 \begin{algo}[Traversal (Modified)]\
@@ -2211,7 +2222,7 @@ hold no tokens then the algorithm can terminate.
       edge [post,dashed] (init)
       edge [post,dashed] (neighbors);
   \end{tikzpicture}
-  \caption{New approach incorporating external storage, \cite[Figure~8]{reinboldGitFan}}
+  \caption{Traversal incorporating external storage, \cite[Figure~8]{reinboldGitFan}}
   \label{fig:naive:storage}
 \end{figure}
 
@@ -2220,7 +2231,7 @@ provides the starting node and $n$ provides neighboring nodes. Before we want to
 some properties specific to tropical varieties we have to incorporate the above storage
 plans into our Petri net. This new version is depicted in Figure~\ref{fig:naive:storage}
 and is basically what Christian Reinbold describes in Stage~3 of
-\cite[Sectiion~4.4]{reinboldGitFan} to traverse the GIT-fan.
+\cite[Section~4.4]{reinboldGitFan} to traverse the GIT-fan.
 \begin{itemize}
   \item The transitions $iC$ and $n$ are basically unchanged, take the same input and
     produce the same output as before, with one exception:
