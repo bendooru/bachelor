@@ -2208,14 +2208,16 @@ hold no tokens then the algorithm can terminate.
     \node [place] (unproc) [right of=init] {$u$} edge [pre] (init);
     \node [transition] (insert) [right of=unproc] {$i$} edge [pre] (unproc);
     \node [transition] (neighbors) [above of=unproc] {$n$} edge [post] (unproc);
-    \node [place] (unprocCones) [above of=neighbors] {$u$} edge [post] (neighbors);
+    \node [place] (unprocCones) [above of=neighbors] {$c$} edge [post] (neighbors);
     \node [transition] (get) [right of=unprocCones] {$g$} edge [post] (unprocCones);
 
-    \node [place] (enabled) [below of=get] {$e$}
-      edge [post,bend right] (get)
-      edge [pre,bend left] (get)
-      edge [post,bend right] (insert)
-      edge [pre,bend left] (insert);
+    \begin{scope}[color=darkgray]
+      \node [place] (enabled) [below of=get] {$e$}
+        edge [post,bend right] (get)
+        edge [pre,bend left] (get)
+        edge [post,bend right] (insert)
+        edge [pre,bend left] (insert);
+    \end{scope}
 
     \node [database] (stor) [right of=enabled,xshift=1cm] {storage}
       edge [in=0,out=90,dotted,post,thick] (get)
@@ -2252,6 +2254,66 @@ and is basically what Christian Reinbold describes in Stage~3 of
     % TODO!!!
 \end{itemize}
 
+This is now a complete algorithm to traverse the fan whose support is the tropical
+variety. In particular, all the transitions run in isolated single-threaded jobs. However,
+as an additional optimization we want to exploit a property of our method of traversing
+this fan. To this end we recall Algorithm~\ref{alg:neighbors} and note that we actually
+traverse the finer bipartite graph consisting of maximal cones and their facets. The idea
+is to split up this Neighbor algorithm into separate parts, passing from maximal cones to
+facets and from facets to maximal cones respectively.
+
+% TODO
+
+\begin{figure}[tbhp]
+  \centering
+  \begin{tikzpicture}[node distance=1.4cm]
+    \node [place,tokens=1] (ctrl) {};
+    \node [transition] (init) [right of=ctrl] {$iC$} edge [pre] (ctrl);
+    \node [place] (uC) [right of=init] {$u$} edge [pre] (init);
+    \node [transition] (insC) [right of=uC] {$i_1$} edge [pre] (uC);
+
+    \node [place,color=darkgray] (eC) [right of=insC] {$e_1$}
+      edge [bend right,pre,color=darkgray] (insC)
+      edge [bend left,post,color=darkgray] (insC);
+    \node [transition] (getC) [right of=eC] {$g_1$}
+      edge [bend right,pre,color=darkgray] (eC)
+      edge [bend left,post,color=darkgray] (eC);
+
+    \node [place] (cone) [right of=getC] {} edge [pre] (getC);
+    \node [transition] (facets) [above of=cone] {$f$} edge [pre] (cone);
+    \node [place] (f) [above of=facets] {} edge [pre] (facets);
+    \node [transition] (insF) [left of=f] {$i_2$} edge [pre] (f);
+
+    \node [place,color=darkgray] (eF) [left of=insF] {$e_2$}
+      edge [bend right,pre,color=darkgray] (insF)
+      edge [bend left,post,color=darkgray] (insF);
+    \node [transition] (getF) [left of=eF] {$g_2$}
+      edge [bend right,pre,color=darkgray] (eF)
+      edge [bend left,post,color=darkgray] (eF);
+
+    \node [place] (ufac) [left of=getF] {} edge [pre] (getF);
+    \node [transition] (neigh) [below of=ufac] {$n$}
+      edge [pre] (ufac)
+      edge [post] (uC);
+
+    \node [database] (cs) [below of=eC] {cones}
+      edge [out=0,in=-90,dotted,post,thick] (getC)
+      edge [out=180,in=-90,dotted,pre,thick] (insC);
+
+    \node [database] (fs) [above of=eF] {facets}
+      edge [out=180,in=90,dotted,post,thick] (getF)
+      edge [out=0,in=90,dotted,pre,thick] (insF);
+
+    \node [place] (data) [above of=eC] {$d$}
+      edge [post,dashed] (neigh)
+      edge [post,dashed] (facets)
+      edge [out=-90,in=90,color=white,line width=4pt] (init)
+      edge [post,dashed,out=-90,in=90] (init);
+  \end{tikzpicture}
+  \caption{Refinement by splitting Neighbor procedure}
+  \label{fig:refined}
+\end{figure}
+
 % TODO
 
 \subsection{Adaptation and Implementation Details}
@@ -2280,7 +2342,7 @@ small to be computed successfully on any private machine, we also want to consid
 examples which have not been computed in their entirety before. An example for this is the
 much larger tropical Grassmannian $\mathcal G_{3,8}$.
 
-Our running time tests were executed on the cluster computing provided by Fraunhofer ITWM
+Our running time tests were executed on the computing cluster provided by Fraunhofer ITWM
 in Kaiserslautern. This cluster is comprised of 192 computing nodes each fitted with 16
 Intel Xeon E5-2670 processor cores running at 2.6\,GHz with 64\,GB memory. The GPI-Space
 engine uses these cores without hyperthreading, meaning we may run a maximum of 16 jobs
