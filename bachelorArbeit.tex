@@ -168,7 +168,7 @@ to be fixed.
 Our results are implemented in computer algebra system \textsc{Singular} \cite{Singular}
 with parallelization work done using GPI-Space at the ITWM.
 
-Also \texttt{gfan.lib} \cite{gfanLib} % TODO!!
+Also \texttt{gfan.lib} \cite{gfanLib}, interface to Gfan \cite{gfan} % TODO!!
 
 % TODO
 Based on work done by Dr.\ Lukas Ristau, Christian Reinbold with help from Dr.\ Mirko Rahn
@@ -441,8 +441,7 @@ A valuation is called \emph{non-trivial} if it is not the constant 0-function on
 K\setminus\{0\}$. Such a field with valuation defines a local ring $R_\nu = \{ x \in K :
 \nu(x) \geq 0 \}$ with unique maximal ideal $\mathfrak m_{R_\nu} = \{ x \in K : \nu(x) > 0
 \}$. The \emph{residue field} of $K$ is then defined to be the residue field $\mathfrak K
-= R_\nu/\mathfrak m_{R_\nu}$ of $R_\nu$. Any generator $t \in R_\nu$ of $\mathfrak
-m_{R_\nu}$ is called a \emph{uniformizing parameter}.
+= R_\nu/\mathfrak m_{R_\nu}$ of $R_\nu$. % TODO? uniformizing parameter not necessary?
 
 Various fields with non-trivial valuation are suitable for computational purposes. The
 most important one to us which we will usually work with is the field of Puiseux series:
@@ -454,12 +453,12 @@ most important one to us which we will usually work with is the field of Puiseux
   \begin{equation} \label{eq:puiseux1}
     f = c_1 t^{a_1} + c_2 t^{a_2} + c_3 t^{a_3} + \cdots
   \end{equation}
-  with $c_k \in K'$ for all $k \in \setN$ and rational numbers $a_1 < a_2 < a_3 < \cdots$
-  that have a common denominator. Hence, the series can be rewritten as
+  with $c_k \in K'\setminus\{0\}$ for all $k \in \setN$ and rational numbers $a_1 < a_2 <
+  a_3 < \cdots$ that have a common denominator. Hence, the series can be rewritten as
   \begin{equation} \label{eq:puiseux2}
     f = \sum_{k = k_0}^\infty c'_k t^{\frac kN}
   \end{equation}
-  with suitable $c'_k \in K'$ for all $k\geq k_0$, $c_{k_0}\neq0$ and the common
+  with suitable $c'_k \in K'$ for all $k\geq k_0$, $c_{k_0}'\neq0$ and the common
   denominator $N \in \setN$.
 \end{definition}
 
@@ -471,7 +470,7 @@ By considering the rings of formal Laurent series $\smash{K'((t^{\frac1n}))}$ fo
 The most important use case will involve $K'$ being algebraically closed, in particular we
 usually choose $K'=\setC$. This is due to the following theorem:
 
-\begin{theorem}
+\begin{theorem}[Newton-Puiseux]
   \label{thm:puisuexalgclosed}
   If $K'$ is an algebraically closed field of characteristic 0, then $K =
   \puiseux{K'}{t}$ is also algebraically closed. In particular, $K$ is the algebraic
@@ -491,9 +490,15 @@ term of $f$, i.e.\ $a_1$ in \eqref{eq:puiseux1} and $k_0/N$ in \eqref{eq:puiseux
   Let $L$ be any field and fix $K' = \setC$ so $K = \CCt$.
   \begin{enumerate}
     \item If we equip $L$ with the trivial valuation $\nu(L^*) = \{0\}$, then we have
-      $R_\nu = K$ and $\mathfrak m_{R_\nu} = \{0\}$, so $\mathfrak K = K$.
+      $R_\nu = L$ and $\mathfrak m_{R_\nu} = \{0\}$, so $\mathfrak K = L$.
     \item By the definitions it is clear that the residue field of the Puiseux series ring
-      $\CCt$ must be $\mathfrak K = \setC$. % TODO
+      $\CCt$ must be $\mathfrak K = \setC$. To see this, consider $f =
+      c_1t^{a_1}+c_2t^{a_2}+\cdots \in R_{\nu}$. Then since $\nu(f) \geq 0$ we have that
+      $a_1 = \nu(f) \in \setQ_{\geq0}$. If $a_1 > 0$, then already $f \in \mathfrak
+      m_{R_\nu}$, so $\bar f = 0 \in \mathfrak K$. Otherwise we have $a_1 = 0$ and
+      $c_2t^{a_2} + \cdots \in \mathfrak m_{R_\nu}$ as $a_2 > a_1$. Thus $\bar f = \bar
+      c_1 \in \mathfrak K$, showing $\mathfrak K \subseteq \setC$. But since any scalar in
+      $\setC$ is already a Puiseux series with valuation 0 we get equality.
     \item The Puiseux series $t^{\frac12}, t^{\frac12} + t^{\frac23} + t^2,
       \sum_{i=1}^\infty \frac1i t^{\frac i2} \in \CCt$ all have valuation $\frac12$.
     \item We will come back to computing finite expansions of roots of univariate
@@ -517,13 +522,11 @@ this.
   \to \Gamma_\nu$ splits.
 \end{lemma}
 
-We will use the notation $t^w$ for the elements $\phi(w) \in K^*$ which is motivated by
-the most important field for our purposes: In the case $K = \CCt$ we have $\Gamma_\nu =
-\setQ$ and the element $t^w$ will be exactly this power of $t$.
-
+We will denote the elements $\phi(w) \in K^*$ by $t^w$ which is motivated by our focus on
+Puiseux series. In the case $K = \CCt$ we have $\Gamma_\nu = \setQ$ and $\phi(w) = t^w$.
 While working in polynomial rings over $\CCt$ or similar fields with valuation mainly
 provides theoretical benefits like using Newton polygons to determine valuations of roots
-as in Lemma~\ref{lem:newtPolyRoots}, the iterative method given by
+as in Lemma~\ref{lem:newtPolyRoots}, the iterative method used to prove
 Theorem~\ref{thm:puisuexalgclosed} will provide a fall-back method of computing
 zero-dimensional affine varieties. To this end we usually consider elements of $\setQ(t)$
 as finite approximations of Puiseux series.
@@ -542,7 +545,6 @@ as finite approximations of Puiseux series.
   maximal ideal $\mathfrak m_{R_{\nu_p}} \idealof R_{\nu_p}$ consists then of these
   rational numbers where $m$ is in addition divisible by $p$. From this we obtain that
   the residue field $\mathfrak K = \setZ/p\setZ$ is the finite field with $p$ elements.
-  % TODO
 \end{example}
 
 \subsection{Gröbner Fans}
@@ -743,9 +745,8 @@ $\initial_\prec(I) = \initial_{\vec w}(I)$. Hence we define the corresponding Gr
 to be $C_\prec(I) = C_{\vec w}(I)$.
 
 To conclude this section, we present a result which warrants restricting our algorithms to
-the cases of homogeneous ideals. Recall that an ideal $I$ is called homogeneous if it is
-generated by homogeneous polynomials. Equivalently, for any $f \in I$ all its homogeneous
-components lie in $I$.
+the cases of homogeneous ideals. The proof of the next Proposition uses the equivalent
+condition that for any $f \in I$ all its homogeneous components lie in $I$.
 
 \begin{proposition}[{\cite[Proposition~1.12]{SturmGBCP}}]
   \label{prp:grRegion}
@@ -942,6 +943,8 @@ important characterizations for the easier case of tropical hypersurfaces:
   \end{proof}
 \end{theorem}
 
+In particular, the tropical hypersurface of a monomial is empty. This makes sense since
+the corner locus of a tropical monomial is empty as was previously stated.
 Theorem~\ref{thm:kapranov} naturally generalizes to full tropical varieties without having
 to alter the result in any way:
 
@@ -995,11 +998,13 @@ More generally, if $I \idealof K[\vec x^{\pm1}]$ is prime, respectively its vari
 is irreducible, then we call $\Trop(I)$ irreducible as well. Note again that, if we start
 with a prime ideal $I \idealof K[\vec x]$ then the ideal generated over $K[\vec x^{\pm1}]$
 will also be prime. Hence the above theorem is still applicable if we start in $K[\vec
-x]$. Not that \enquote{connected in codimension one} means that for any two maximal
-polyhedra $P, Q$ in the corresponding complex there is a sequence of maximal polyhedra $P
-= P_0, P_1, \dots, P_r = Q$ such that $P_{i-1}$ and $P_i$ share a facet for all $i = 1,
-\dots, r$. This important fact ensures that, by successively computing neighboring
-polyhedra we will eventually find all maximal ones.
+x]$. It is important to note the fan structure imposed on a tropical variety in this way
+is not unique, but for our purposes the most suitable. Moreover, \enquote{connected in
+codimension one} means that for any two maximal polyhedra $P, Q$ in the corresponding
+complex there is a sequence of maximal polyhedra $P = P_0, P_1, \dots, P_r = Q$ such that
+$P_{i-1}$ and $P_i$ share a facet for all $i = 1, \dots, r$. This important fact ensures
+that, by successively computing neighboring polyhedra we will eventually find all maximal
+ones.
 
 \begin{example}
   \label{ex:notFan}
@@ -1229,7 +1234,7 @@ between cones in it, which allows us to generate a starting and neighbor cones m
 efficiently. In particular, Ren and Hofmann's methods provide local optimizations to the
 algorithms discussed in the previous section. For this we again fix an algebraically
 closed field $K$ with non-trivial valuation $\nu:K\to\setR \cup \{\infty\}$ and
-residue field $\mathfrak K$ with uniformizing parameter~$t$.
+residue field $\mathfrak K$.
 
 Until now we mainly dealt with tropical varieties as finite intersections of tropical
 prevarieties or the set of all weight vectors that define monomial-free initial ideals. In
@@ -1567,7 +1572,6 @@ relative interior will yield a suitable starting cone.
   We now apply this procedure to find a non-trivial point of \dots% TODO
 \end{example}
 
-% TODO write differently from source?
 To conclude this section we want study an alternative method of obtaining points in
 neighboring cones. We call a tropical variety $\Trop(I)$ a \emph{tropical curve} if it is
 one dimensional and say it is \emph{combinatorially a curve} if $\Trop(I)/C_0(I)$ is
@@ -1623,7 +1627,7 @@ with the above corollaries culminate in the following algorithm:
           x_i & \text{else},
         \end{cases}
       \]
-      where $t \in K$ is a fixed uniformizing parameter.
+      where $t \in K$ is $t = t^1 = \phi(1)$ as in Lemma~\ref{lem:valSplit}.
       \label{alg:links:cut}
     \For{$i = d, \dots, n$}
       \State Let $J_i^\pm$ be the images of $J$ under the maps $x_i \mapsto t^\pm$
@@ -1845,7 +1849,6 @@ transitions with letters if necessary.
       parallelism}: We may regard each token in $i$ as a part of a larger chunk of data
       that is fed to $f$. Note that we will introduce tokens which hold actual data later
       on.
-      % TODO
     \item Consider now the Petri net given by the graph depicted in
       Figure~\ref{fig:petri:taskpar}. If we start with the marking $M = \{ (i,1) \}$, then
       firing $s$ will enable both $f$ and $g$. Both of these transitions may thus fire in
@@ -2288,7 +2291,8 @@ per node. The nodes are connected via FDR Infiniband.
 One important class of tropical varieties are the tropical Grassmannians which arise as
 the tropical varieties of the equally -- if not more -- important Grassmannians which can
 be interpreted as projective varieties. Some results on the tropical Grassmannian can be
-found in \cite{tropGrass}.
+found in \cite{tropGrass}. The following is an overview of the construction of projective
+Grassmannians found in \cite[Section~8]{gathmAlgGeo}. % TODO provide external source(?)
 
 \begin{definition}[Grassmannians]
   Let $n \in \setN_{>0}$ and $k \in \setN$ with $0 \leq k \leq n$, then the
