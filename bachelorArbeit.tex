@@ -202,7 +202,8 @@ series expansions.
 
 I also would like to thank Dr.~Mirko Rahn from the High Performance Computing (HPC)
 department at Fraunhofer ITWM for his guidance and help during my work there. I further
-thank Christian Reinbold for his helpful introduction to his project.
+thank Christian Reinbold for his helpful introduction to his project and providing a
+working code base in the first place.
 
 \section{Computing Tropical Varieties}
 
@@ -2037,34 +2038,36 @@ details): % TODO citations
     to a dedicated process, but instead executing it directly in the workflow engine
     itself, for instance by the snippet
     \begin{verbatim}${counter} := ${counter} + 1\end{verbatim}
-    This way we may skip the overhead of sending the data to the run-time system and
-    returning it back to the workflow engine. Clearly, this only makes sense for very
-    basic computations, as otherwise the workflow engine may become unavailable for its
-    actual scheduling work during overly expensive computations.
+    which could be used in the $+$-transition in Figure~\ref{fig:inc}. This way we may skip
+    the overhead of sending the data to the run-time system and returning it back to the
+    workflow engine. Clearly, this only makes sense for very basic computations, as
+    otherwise the workflow engine may become unavailable for its actual scheduling work
+    during overly expensive computations.
   \item[Conditions:] GPI-Space extends the firing process of transitions with conditions
     depending on the properties of the input tokens of a transition. Consider again the
     situation of a counter, incrementing some variable. Figure~\ref{fig:inc} gives a rough
     sketch of how this might be implemented: Here $i$ is an integer value that is
-    incremented as long it is smaller than 4. Then \dots
-    % TODO add some matching example
+    incremented as long it is smaller than 4 and afterwards passed on to some other
+    transition.
 
     Furthermore, conditional execution provides a tool to resolve potential conflicts as
     described in Definition~\ref{def:conflict} and illustrated in Figure~\ref{fig:conflict}.
     In fact, Petri nets formulated for GPI-Space require that any transitions may fire
-    without conflicts.
+    without conflicts. This is again illustrated in Figure~\ref{fig:inc} as the two
+    conditions shown are \emph{disjoint}, that is, they can not both be true for a given
+    token.
 \end{description}
 
-% TODO check position of condition, etc
 \begin{figure}[htbp]
   \centering
-  \begin{tikzpicture}[node distance=1.4cm]
+  \begin{tikzpicture}[node distance=1.7cm]
     \node [place] (in) {$i$};
-    \node [transition] (plus) [right of=in] {$+$}
+    \node [transition] (plus) [left of=in] {$+$}
       edge [pre, bend left] (in)
       edge [post,bend right] (in);
-    \node [place] (out) [right of=plus] {$o$}
-      edge [pre] (plus);
-    \node at (out) [above=0.4cm] {\footnotesize\texttt{\$\{o\}\,:geq:\,4}};
+    \node [transition] (next) [right of=in] {} edge [pre] (in);
+    \node at (plus) [above=0.4cm] {\footnotesize\verb|${i} :lt: 4|};
+    \node at (next) [above=0.4cm] {\footnotesize\verb|${i} :ge: 4|};
   \end{tikzpicture}
   \caption{Incrementing net illustrating conditions}
   \label{fig:inc}
@@ -2233,6 +2236,7 @@ hold no tokens then the algorithm can terminate.
         edge [pre,bend left] (get)
         edge [post,bend right] (insert)
         edge [pre,bend left] (insert);
+      \node at (get) [above=3mm] {\footnotesize\verb|${e}|};
     \end{scope}
 
     \node [database] (stor) [right of=enabled,xshift=1cm] {storage}
@@ -2356,13 +2360,17 @@ via GPI-Space.
       edge [post,dashed] (facets)
       edge [out=-90,in=90,color=white,line width=4pt] (init)
       edge [post,dashed,out=-90,in=90] (init);
+
+    % wew
+    \node at (getC) [above=3mm,darkgray] {\footnotesize\verb|${|$\mathtt{e_1}$\verb|}|};
+    \node at (getF) [below=3mm,darkgray] {\footnotesize\verb|${|$\mathtt{e_2}$\verb|}|};
   \end{tikzpicture}
   \caption{Refinement by splitting Neighbor procedure}
   \label{fig:refined}
 \end{figure}
 
 Figure~\ref{fig:refined} illustrates the necessary modifications to the Petri net from
-Figure~\ref{fig:naive:storage}, in particular the requirement for a second storage. The
+Figure~\ref{fig:naive:storage}, which basically amount to including a second storage. The
 net executes as follows:
 \begin{itemize}
   \item Initialization and initial cone computation are unchanged.
