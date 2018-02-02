@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DIR=$1
+
 awk '
   {
     arr[$1]   += $2
@@ -10,4 +12,4 @@ awk '
       printf "%i %.3f\n", a, arr[a] / count[a]
     }
   }
-' data/all_times > data/avg_times
+' ${DIR}/all_times > ${DIR}/avg_times

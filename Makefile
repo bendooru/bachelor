@@ -1,11 +1,11 @@
 all: doc
 
-avg_times: data/all_times
-	./comp_avg_times
+avg_times: data/g38/all_times
+	./comp_avg_times data/g38
 
-fig: data/all_times avg_times
+fig: data/g38/all_times avg_times
 	[[ -d ./fig ]] || mkdir -p ./fig
-	gnuplot ./create_g38_scaling.gnu
+	gnuplot ./create_figs.gnu
 
 doc: fig
 	latexmk
