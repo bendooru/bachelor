@@ -65,6 +65,7 @@
 
 % set default numbered list style to (i), (ii), ...
 \setlist[enumerate,1]{label=(\roman*)}
+\setlist[itemize,2]{label=$\circ$}
 
 % use mathds instead of mathbb
 \newcommand*\setZ{\mathds{Z}}
@@ -1171,6 +1172,7 @@ tropical variety:
     \For{$F \in \mathcal F$}
       \State Compute initial ideal $J := \initial_{\vec u}(I)$ for a point $\vec u$ in the
         relative interior of $F$.
+        \label{alg:neigh:line:start}
       \State Use Algorithms~\ref{alg:fanRefinement} and \ref{alg:tropBasisCurve} to compute
         a relative interior point $\vec v$ of each ray in the curve $\Trop(J)$. Denote by
         $V$ the set of these points.
@@ -1185,7 +1187,7 @@ tropical variety:
         \State Set $N := N \cup \left\{ (\mathcal G_{{\prec_{\vec v}}_{\vec
           u}}(\initial_{\vec v}(I)), \mathcal G_{{\prec_{\vec v}}_{\vec u}}(I))
           \right\}$.
-      \EndFor
+      \EndFor\label{alg:neigh:line:end}
     \EndFor
     \State\textbf{return} $N$.
   \end{algorithmic}
@@ -2206,7 +2208,7 @@ follows:
         c_{\vec w}\}$ to $uS$ and pushes $c_{\vec w}$ to the place $c$.
     \end{itemize}
     In short, the transition $sS$ processes sets of triples into tokens of single triples.
-  \item Finally, the transition $n$ consumes tokens from $c$ which holds the Gröbner cone
+  \item Finally, the transition $n$ consumes tokens from $c$ which hold Gröbner cone
     triples and applies the modified neighbor algorithm to them. Accordingly it produces
     sets of such triples which are then pushed to $uS$.
 \end{itemize}
@@ -2347,6 +2349,7 @@ via GPI-Space.
       edge [pre] (ufac)
       edge [post] (uC);
 
+    % storage
     \node [database] (cs) [below of=eC] {cones}
       edge [out=0,in=-90,dotted,post,thick] (getC)
       edge [out=180,in=-90,dotted,pre,thick] (insC);
@@ -2355,6 +2358,7 @@ via GPI-Space.
       edge [out=180,in=90,dotted,post,thick] (getF)
       edge [out=0,in=90,dotted,pre,thick] (insF);
 
+    % data
     \node [place] (data) [above of=eC] {$d$}
       edge [post,dashed] (neigh)
       edge [post,dashed] (facets)
@@ -2374,9 +2378,23 @@ Figure~\ref{fig:naive:storage}, which basically amount to including a second sto
 net executes as follows:
 \begin{itemize}
   \item Initialization and initial cone computation are unchanged.
+  \item The places resp.\ transitions $i_k, e_k, g_k$ for $k \in \{1, 2\}$ work
+    analogously to the previous net. For $k=1$ we manage maximal Gröbner cones represented
+    by their meta data, for $k=2$ we manage interior facet points together with their
+    minimal representative with respect to $G$.
+  \item The transition $f$ simply takes a Gröbner cone and computes its facets. It returns
+    the interior points of these facets (considered with and without symmetry) together
+    with meta data pointing to the \enquote{originating} cone.
+  \item The transition $n$ now takes an interior facet point and the ideals it points to
+    as specified above and applies
+    lines~\ref{alg:neigh:line:start}--\ref{alg:neigh:line:end} of
+    Algorithm~\ref{alg:neighbors} to obtain the adjacent maximal Gröbner cones.
+  \item The net terminates if all tokens corresponding to tokens have been processed,
+    which can be checked by the (implied) token counting mentioned before. Additionally,
+    it is necessary that $e_1$ and $e_2$ hold \texttt{false}.
 \end{itemize}
 
-% TODO
+% TODO?
 
 \subsection{Adaptation and Implementation Details}
 
@@ -2517,11 +2535,11 @@ leads to the following definition:
   \label{fig:petersen}
 \end{figure}
 
-\begin{example}
+\begin{example} \label{ex:tropGrass}
   Suppose, for instance, $K = \setC$ as a subfield of $\CCt$, hence we obtain fans as
   remarked before.
   \begin{enumerate}
-    \item As we clearly have $\Grass(0,n) \cong \Grass(n,n) \cong K^n$ and $\Grass(1,n)
+    \item As we clearly have $\Grass(0,n) \cong \Grass(n,n) \cong \{0\}$ and $\Grass(1,n)
       \cong \Grass(n-1, n) \cong \setP_K^{n-1}$, the first \enquote{non-trivial}
       Grassmannian is $\Grass(2,4)$. By the process described above one easily finds that
       $\Grass(2,4)$ is given by the ideal
@@ -2554,13 +2572,22 @@ leads to the following definition:
 \subsection{Runtime Measurements}
 
 We come to timing our computations and comparing them to the pure implementation in
-\textsc{Singular}.
+\textsc{Singular}. One additional notion we want to consider when studying tropical
+varieties is the so-called \emph{f-vector} of the polyhedral fan it corresponds to. Th
+f-vector simply counts all polyhedra in the fan grouped by dimension. In that regard, it
+gives an intuition for the \enquote{size} of the computational problem.
+
+\begin{example} \label{ex:fVec}
+  Continuing Example~\ref{ex:tropGrass}, the f-vector of $\mathcal G_{2,4}$ is
+  $(0,0,0,1,3)$ and that of $\mathcal G_{2,5}$ is $(0,0,0,0,1,15,10)$. Often, leading
+  zeroes of the f-vector are omitted.
+\end{example}
 
 \begin{figure}[htbp]
   \begin{center}
     \input{fig/scaling37-1.tex}
   \end{center}
-  \caption{Running times of computing $\mathcal G_{3,7}$ on one and two nodes}
+  \caption{Running times of computing $\mathcal{G}_{3,7}$ on one and two nodes}
   \label{fig:g37sc}
 \end{figure}
 
