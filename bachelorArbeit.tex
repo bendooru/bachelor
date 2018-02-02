@@ -1393,8 +1393,25 @@ polygon. An example of how such a computation might look like is given as follow
       Theorem~\ref{thm:puisuexalgclosed} to successively obtain finite approximations to
       the generally infinite solutions. In particular, the intermediate results will
       usually be elements of $\setQ(t)$ or $\setQ(a)(t)$ for some algebraic extension
-      $\setQ(a)$ of $\setQ$. Consider now the triangular set \dots% TODO
-      % TODO add fallback method to Puiseux expansions
+      $\setQ(a)$ of $\setQ$. Consider now the simple triangular set $F = \{ f_1, f_2, f_3
+      \} \subseteq \CCt[x,y,z]$ given by
+      \[
+        f_1 = tx^2 - x + 1, \quad
+        f_2 = ty - 1, \quad
+        f_3 = tz - tx + 1.
+      \]
+      Applying Algorithm~\ref{alg:zeroDimTrop} shows that not all polynomials admit a
+      unique Newton polygon: It is easy to see that for $\vec w \in \Trop(F)$ we must have
+      $w_1 \in \{ -1, 0 \}$ and $w_2 = -1$. $f_3$ has homogeneous decomposition $f_3 = (1
+      - tx) + tz$, but the initial ideal $\initial_{(-1,-1)}(1-tx) = 1-tx$ is no monomial.
+      Clearly, $f_2$ has the single root $y = t^{-1}$. For $f_1$, applying the iterative
+      Newton-Puiseux method we obtain two expansions
+      \begin{align*}
+        1 + t + 2t^2 + 5t^3 + 14t^4 + 42 t^5 + \cdots \\
+        t^{-1} - 1 - t - 2t^2 - 5t^3 - 14t^4 - 42t^5 + \cdots
+      \end{align*}
+      up to order 5. After some tedious substitutions we finally find that $\Trop(F) = \{
+      (0,-1,-1), (-1,-1,0) \}$.
       \label{ex:zdt2}
   \end{enumerate}
 \end{example}
@@ -1674,12 +1691,11 @@ varieties by exploiting concurrency and running on as many machines as possible.
 end it it necessary to identify such components where this concurrency may be exploited as
 well as those components which are inherently sequential.
 
-% TODO meh
-In the following we will give a brief overview over the GPI-Space environment which is
-used to formulate and run our algorithms in parallel. In particular we will discuss Petri
-nets and their extensions, which are used as the coordination language in GPI-Space.
-We will then begin to reformulate our algorithm as a Petri net and finally look into some
-implementation details to illustrate some of the choices made.
+In the following we will provide a brief overview of GPI-Space, our workflow management
+system of choice. In particular we will discuss Petri nets and their extensions, which are
+used as the coordination language in GPI-Space. We will then begin to reformulate our
+algorithm as a Petri net and finally look into some implementation details to illustrate
+some of the choices made.
 
 \subsection{Petri Nets and GPI-Space}
 
@@ -1992,14 +2008,14 @@ details): % TODO citations
   \item[Expression Language:] GPI-Space provides an embedded programming language which
     serves a twofold purpose: Firstly, it allows to define and utilize user-defined data
     types from a range of provided standard types like integers, floating point numbers
-    booleans and lists thereof. These are defined as \enquote{structs} in a similar
+    Booleans and lists thereof. These are defined as \enquote{structs} in a similar
     fashion as in the C programming language. For example in our later Petri nets we use
     \texttt{file} as an alias for \texttt{string}, accomplished by
     \begin{verbatim}
 <struct name="file">
   <field name="path" type="string" />
 </struct>\end{verbatim}%
-    with a similar type \texttt{optional\_file} that includes a boolean value indicating
+    with a similar type \texttt{optional\_file} that includes a Boolean value indicating
     whether the specified path is valid:
     \begin{verbatim}
 <struct name="optional_file">
@@ -2240,29 +2256,60 @@ and is basically what Christian Reinbold describes in Stage~3 of
 \begin{itemize}
   \item The transitions $iC$ and $n$ are basically unchanged, take the same input and
     produce the same output as before, with one exception:
-  \item The place $d$ holds the data $(I, G)$ and is read-only. Hence $iC$ fires by
-    consuming the control token that was added. By initializing this place with exactly
-    one token, we ensure that the initial Gröbner cone is computed exactly once. In the
-    previous Petri net we implicitly assumed that $G$ is part of the tokens that are fed
-    to $n$.
+  \item The place $d$ holds the data $(I, G)$ and is read-only for our input ideal $I$ and
+    the optional symmetry group $G$. If $G$ is not supplied we set $G=\{\id\}$. Hence $iC$
+    fires by consuming the control token that was added. By initializing this place with
+    exactly one token, we ensure that the initial Gröbner cone is computed exactly once.
+    In the previous Petri net we implicitly assumed that $G$ is part of the tokens that
+    are fed to $n$.
   \item Similarly, $u$ holds sets the unprocessed Gröbner cone triples produced by $iC$
     and $n$.
   \item The $i$ and $g$ transitions \emph{insert} and \emph{get} tokens of Gröbner cone
     sets respectively. For this they call retrieval and insertion operations provided by
     the external storage interface. Note that, as we may insert sets, this removes the
     need for the splitting operations by $sS$ in the previous net.
-    % TODO!!!
+  \item Finally, $g$ and $i$ are \enquote{managed} by the place $e$ which holds a Boolean
+    token indicating whether there are unprocessed cones available. This is realized as
+    follows (see parts colored in gray):
+    \begin{itemize}
+      \item At the beginning of executing the net \texttt{false} is placed in $e$ as no
+        cones are available yet.
+      \item If firing $i$ succeeds, that is, not all of the cones it inserted were already
+        known, the token in $e$ is consumed and replaced by \texttt{true}.
+      \item $g$ may only fire if $e$ holds \texttt{true}. If, upon firing $g$, no
+        unprocessed cones can be retrieved from storage, we replace the token in $e$ with
+        \texttt{false}.
+    \end{itemize}
 \end{itemize}
 
 This is now a complete algorithm to traverse the fan whose support is the tropical
 variety. In particular, all the transitions run in isolated single-threaded jobs. However,
 as an additional optimization we want to exploit a property of our method of traversing
-this fan. To this end we recall Algorithm~\ref{alg:neighbors} and note that we actually
-traverse the finer bipartite graph consisting of maximal cones and their facets. The idea
-is to split up this Neighbor algorithm into separate parts, passing from maximal cones to
-facets and from facets to maximal cones respectively.
+this fan, which comes at a slight cost of generality of our algorithm. To this end we
+recall Algorithm~\ref{alg:neighbors} and note that we actually traverse the finer
+bipartite graph consisting of maximal cones and their facets. The idea is to split up this
+Neighbor algorithm into separate parts, passing from maximal cones to facets and from
+facets to maximal cones respectively. This offers two advantages in comparison to the
+general method:
+\begin{itemize}
+  \item Splitting the algorithm allows for a more fine-grained control over the job-sizes
+    submitted to the run-time system. % TODO why is this good?
+  \item More importantly, additionally to storing all computed Gröbner cones with respect
+    to symmetry, we want store all visited facets during the fan traversal. It is obvious
+    that this is possible since the facets themselves are also polyhedral cones and thus
+    have a unique interior point with which they may be identified. This will then reduce
+    the amount of duplicate cone computations:
 
-% TODO
+    Say, during computation we obtain the cone $C_2$ as a neighbor of $C_1$ by traversing
+    the facet $F$ of both $C_1$ and $C_2$. If $C_2$ was not previously known,
+    Algorithm~\ref{alg:neighbors} will be applied to it as well at a later step in the
+    traversal. During this run, we will traverse $F$ another time, leading to superfluous
+    computations as all its adjacent maximal Gröbner cones are already known.
+\end{itemize}
+Note that the splitting of Algorithm~\ref{alg:neighbors} has to happen at the GPI-Space
+level due to the second point, since the $\textsc{Singular}$-invocations only compute
+\enquote{locally} and have no way of sharing the obtained facets other than communicating
+via GPI-Space.
 
 \begin{figure}[tbhp]
   \centering
@@ -2314,13 +2361,23 @@ facets and from facets to maximal cones respectively.
   \label{fig:refined}
 \end{figure}
 
+Figure~\ref{fig:refined} illustrates the necessary modifications to the Petri net from
+Figure~\ref{fig:naive:storage}, in particular the requirement for a second storage. The
+net executes as follows:
+\begin{itemize}
+  \item Initialization and initial cone computation are unchanged.
+\end{itemize}
+
 % TODO
 
 \subsection{Adaptation and Implementation Details}
 
-As was previously mentioned we heavily rely on work done by Christian Reinbold on
-GIT-fans \cite{reinboldGitFan}. His work, in turn, relies on work done by Lukas Ristau to
-enable a seamless integration into a GPI-Space project.
+As was previously mentioned we heavily rely on work done by Christian Reinbold on GIT-fans
+\cite{reinboldGitFan}. His work, in turn, relies on work done by Lukas Ristau to
+seamlessly integrate \textsc{Singular} into a GPI-Space project. As the foundation for our
+application was laid by Reinbold, it is best to check for details in
+\cite[Section~4]{reinboldGitFan}. We will give a short overview of implementation details
+that are especially important for our implementation.
 
 Introduce GIT-fans as similarly structured object
 
