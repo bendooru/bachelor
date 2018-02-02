@@ -13,6 +13,7 @@
 \usepackage[ngerman,english]{babel}
 % FIXME REMOVE LATER
 %\usepackage[displaymath,mathlines]{lineno}
+\usepackage[textsize=footnotesize]{todonotes}
 % FIXME END
 \usepackage[autostyle=true]{csquotes}
 \usepackage{enumitem}
@@ -169,16 +170,15 @@ to be fixed.
 Our results are implemented in computer algebra system \textsc{Singular} \cite{Singular}
 with parallelization work done using GPI-Space at the ITWM.
 
-Also \texttt{gfan.lib} \cite{gfanLib}, interface to Gfan \cite{gfan} % TODO!!
+Also \texttt{gfan.lib} \cite{gfanLib}, interface to Gfan \cite{gfan}
 
-% TODO
 Based on work done by Dr.\ Lukas Ristau, Christian Reinbold with help from Dr.\ Mirko Rahn
 and the HPC Department of ITWM.
 % TODO important! mention also in 3rd section!
 
 % abstract from Janko's paper
 
-% TODO more motivation
+\todo{formulate into full text}
 
 In the second section we will introduce the general setting in which we want to compute
 tropical varieties. For this purpose we introduce notions concerning fields with valuation
@@ -191,7 +191,7 @@ algorithm as such a Petri net. In the fourth section we introduce the tropical
 Grassmannians, an important class of tropical varieties and give timings for parallel
 computations of $\mathcal G_{3,7}$ and $\mathcal G_{3,8}$.
 
-% TODO not complete yet
+
 \subsubsection*{Acknowledgements}
 Firstly I would like to thank Dr.~Janko Böhm for suggesting this topic to me, giving me
 the chance to work at Fraunhofer ITWM and guiding me in understanding tropical varieties
@@ -205,6 +205,7 @@ I also would like to thank Dr.~Mirko Rahn from the High Performance Computing (H
 department at Fraunhofer ITWM for his guidance and help during my work there. I further
 thank Christian Reinbold for his helpful introduction to his project and providing a
 working code base in the first place.
+\todo{not finished yet}
 
 \section{Computing Tropical Varieties}
 
@@ -409,8 +410,8 @@ no points whatsoever. This will become important later on.
   \caption{A tropical line and quadric in $\setR^2$}
   \label{fig:tropLineQuad}
 \end{figure}
+\todo{quadric not generic, add one?}
 
-% TODO quadric not generic, add one?
 Since monomials and powers of variables are well-defined, we can assign a \emph{degree} to
 a tropical polynomial in the usual sense, hence we may carry over the naming conventions
 for hypersurfaces in standard algebraic geometry: A hypersurface given by a degree 1
@@ -424,7 +425,7 @@ particular to make sense of the tropicalization of Laurent polynomials.
 
 \subsection{Valuations and Puiseux Series}
 
-% TODO a _bit_ more introduction
+\todo{a \emph{bit} more introduction?}
 Most of the following definitions and algorithms will make use of fields equipped with a
 non-trivial valuation:
 
@@ -443,7 +444,8 @@ A valuation is called \emph{non-trivial} if it is not the constant 0-function on
 K\setminus\{0\}$. Such a field with valuation defines a local ring $R_\nu = \{ x \in K :
 \nu(x) \geq 0 \}$ with unique maximal ideal $\mathfrak m_{R_\nu} = \{ x \in K : \nu(x) > 0
 \}$. The \emph{residue field} of $K$ is then defined to be the residue field $\mathfrak K
-= R_\nu/\mathfrak m_{R_\nu}$ of $R_\nu$. % TODO? uniformizing parameter not necessary?
+= R_\nu/\mathfrak m_{R_\nu}$ of $R_\nu$.
+\todo{do we even need the uniformizing parameter? (removed for now)}
 
 Various fields with non-trivial valuation are suitable for computational purposes. The
 most important one to us which we will usually work with is the field of Puiseux series:
@@ -532,7 +534,7 @@ as in Lemma~\ref{lem:newtPolyRoots}, the iterative method used to prove
 Theorem~\ref{thm:puisuexalgclosed} will provide a fall-back method of computing
 zero-dimensional affine varieties. To this end we usually consider elements of $\setQ(t)$
 as finite approximations of Puiseux series.
-% TODO mention Santiagos work here?
+\todo{mention Santiago here or elsewhere}
 
 \begin{example}[$p$-adic Valuation] \label{ex:pAdic}
   On a closing note we want to take a look at another important class of fields with
@@ -576,7 +578,7 @@ and polyhedral cones:
   polyhedral cone $C$ is the positive span of finitely many vectors in $\setR^n$.
 \end{definition}
 
-% TODO cite something
+\todo{explain more or provide citation}
 Note that, using linear programming, it is possible to assign a unique \emph{canonical}
 set of defining equations to a polyhedral cone. This is important to quickly compare and
 uniquely identify polyhedral cones, especially in computational contexts.
@@ -647,7 +649,7 @@ a polyhedral complex define a representation.
   \end{enumerate}
 \end{example}
 
-% TODO maybe restructure, cite something
+\todo{maybe restructure, provide citation}
 Now, given a polynomial ring $K[\vec x]$ a \emph{term} or \emph{monomial ordering} $\prec$
 on the monomials $K[\vec x]$ is a total ordering such that $1 \prec \vec x^\alpha =
 x_1^{\alpha_1}\cdots x_n^{\alpha_n}$ for all $\alpha \in \setN^n$ and if $\vec x^\alpha
@@ -815,7 +817,6 @@ initial ideals. To define them in a useful way, we first need to establish a lin
 classical and tropical polynomials: this is where the valuation $\nu:K\to\setR$ will be
 used.
 
-% TODO: initial forms coincide only in max-plus algebra, so change?
 \begin{definition}[Tropicalization and Initial Forms]
   \label{def:initialId}
   Let $f \in K[\vec x^{\pm1}]$ be a Laurent polynomial and $\nu : K \to \setR$ a valuation
@@ -1139,7 +1140,6 @@ Gröbner cone. It is a step in the \emph{Gröbner walk} \cite{groebWalk}, which 
 Gröbner basis with respect to a given ordering to a basis of of an ordering of an adjacent
 Gröbner cone.
 
-% TODO formulate algorithm if easy enough
 \begin{algo}[Lift]\
   \label{alg:lift}
   \begin{algorithmic}[1]
@@ -1148,6 +1148,7 @@ Gröbner cone.
       $\prec$ and $\prec'$.
     \Ensure Reduced Gröbner basis $\mathcal G_{\prec_{\vec w}}(I)$.
   \end{algorithmic}
+  \todo{actually formulate the algorithm if possible}
 \end{algo}
 
 As we will see later again the tropical curves $\Trop(\initial_{\vec w}(I))$ for weights
@@ -1588,8 +1589,8 @@ the corresponding pair of reduced Gröbner bases) containing the point $\vec w$ 
 relative interior will yield a suitable starting cone.
 
 \begin{example}
-  % TODO
-  We now apply this procedure to find a non-trivial point of \dots% TODO
+  \todo{add an example}
+  We now apply this procedure to find a non-trivial point of \dots
 \end{example}
 
 To conclude this section we want study an alternative method of obtaining points in
@@ -1718,7 +1719,7 @@ of three main components \cite[Section~4.1]{reinboldGitFan}:
     Note that the WE is a single-threaded process running on a single machine, so it is
     imperative to design the workflow in way which does not place too much work on the WE
     as it otherwise may become a major bottleneck to the algorithm.
-    % TODO say this somewhere else?
+    \todo{move somewhere else?}
   \item A virtual memory layer that allows different activities and external programs to
     communicate and share data.
 \end{enumerate}
@@ -1961,7 +1962,7 @@ Ways to correct these issues include extending Petri nets to so-called \emph{col
 \emph{timed Petri nets}. While studying them in full detail is beyond the scope of this
 thesis, we want to look at how they are realized in the GPI-Space environment, along with
 the other important extensions (see \cite[Section~3.2.2]{towardsParallel} for more
-details): % TODO citations
+details): \todo{might need other sources}
 \begin{description}[leftmargin=\parindent]
   \item[Time:] A traditional Petri net cannot model execution times of its transitions
     since they are defined to fire instantaneously. Clearly, this yields an incomplete
@@ -1976,7 +1977,7 @@ details): % TODO citations
     \end{enumerate}
     Hence, markings as given by Definition~\ref{def:marking} have to be extended by an
     intermediate marking corresponding to the second phase. Note that this does not change
-    the execution dynamics of a Petri net in terms of reachability. % TODO cite
+    the execution dynamics of a Petri net in terms of reachability.
   \item[Tokens and Data:] Until now all tokens in the classical Petri net held no
     information apart from being present or not. Of course, this severely limits the
     amount of information that can be exchanged between independent processes which
@@ -1999,7 +2000,7 @@ details): % TODO citations
     respectively. In the cases where a token is placed back in the place it was read form,
     we may also employ read-write ports.
 
-    % TODO not perfect
+    \todo{maybe reformulate}
     Finally, there is the notion of a \emph{read-only} port. In cases where data is static
     over the course of the Petri net execution and must be accessed by several different
     transitions, for instance configuration data and static input, it would be overly
@@ -2075,7 +2076,7 @@ details): % TODO citations
   \label{fig:inc}
 \end{figure}
 
-% TODO (in progr) GPI-Space
+\todo{enough?}
 
 \subsection{Traversing a Fan in Parallel}
 \label{sec:traverseParal}
@@ -2112,8 +2113,8 @@ description of our algorithm.
     then sufficient to compare the unique points with each other. The unique point may
     then also be used as a \emph{key} for storage purposes.
 
-    For a given  cone its unique point is obtained by \dots % TODO
-    % TODO more?
+    For a given  cone its unique point is obtained by \dots
+    \todo{explain this}
   \item Finally, in the context of tropical varieties it is desirable to consider the
     corresponding polyhedral fan modulo symmetry. More precisely, for a polyhedral fan
     $\mathcal F$ in $\setR^n$ we want to find a subgroup of permutations $G \leq S_n$ that
@@ -2299,7 +2300,7 @@ facets to maximal cones respectively. This offers two advantages in comparison t
 general method:
 \begin{itemize}
   \item Splitting the algorithm allows for a more fine-grained control over the job-sizes
-    submitted to the run-time system. % TODO why is this good?
+    submitted to the run-time system. \todo{why is this good?}
   \item More importantly, additionally to storing all computed Gröbner cones with respect
     to symmetry, we want store all visited facets during the fan traversal. It is obvious
     that this is possible since the facets themselves are also polyhedral cones and thus
@@ -2394,7 +2395,7 @@ net executes as follows:
     it is necessary that $e_1$ and $e_2$ hold \texttt{false}.
 \end{itemize}
 
-% TODO?
+\todo{finished here?}
 
 \subsection{Adaptation and Implementation Details}
 
@@ -2410,6 +2411,8 @@ Introduce GIT-fans as similarly structured object
 Adapting existing code base
 
 Make in particular use of termination logic -- not trivial!
+
+\todo{write stuff}
 
 \section{Performance and Scalability}
 
@@ -2437,7 +2440,7 @@ One important class of tropical varieties are the tropical Grassmannians which a
 the tropical varieties of the equally -- if not more -- important Grassmannians which can
 be interpreted as projective varieties. Some results on the tropical Grassmannian can be
 found in \cite{tropGrass}. The following is an overview of the construction of projective
-Grassmannians found in \cite[Section~8]{gathmAlgGeo}. % TODO provide external source(?)
+Grassmannians found in \cite[Section~8]{gathmAlgGeo}. \todo{provide other source?}
 
 \begin{definition}[Grassmannians]
   Let $n \in \setN_{>0}$ and $k \in \setN$ with $0 \leq k \leq n$, then the
@@ -2583,6 +2586,8 @@ gives an intuition for the \enquote{size} of the computational problem.
   zeroes of the f-vector are omitted.
 \end{example}
 
+\todo{in progress}
+
 \begin{figure}[htbp]
   \begin{center}
     \input{fig/scaling37-1.tex}
@@ -2614,6 +2619,8 @@ In Figure~\ref{fig:g38scaling} we see that \dots and so on.
 Optimization of certain edge cases
 
 Mention improvements to \textsc{Singular} kernel here?
+
+\todo{in progress}
 
 \newpage
 \listoffigures
