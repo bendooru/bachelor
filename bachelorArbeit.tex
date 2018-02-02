@@ -1598,7 +1598,7 @@ $\Trop(\initial_{\vec u}(I))$ the \emph{tropical link} of $I$ around $\vec u$. T
 the support of a polyhedral fan, since it is a tropical variety, and also combinatorially
 a curve which describes $\Trop(I)$ locally around $\vec u$. This was shown in the proof of
 the correctness of \cite[Algorithm~4.10]{compTropVar}. The properties needed for our
-algorithm are as follows, mainly due to \cite{ossTropLift}
+algorithm are as follows, mainly due to \cite{ossTropLift}:
 
 \begin{thmCorollary} \label{thmc:tropInt}
   Let $X$ and $X'$ be two affine subvarieties. If the intersection $\Trop(X) \cap
@@ -1801,11 +1801,11 @@ allowing parallelisms.
 A nice property of Petri nets is that their static part given by
 Definition~\ref{def:petri} can be visualized as a directed bipartite graph. Recall that a
 directed graph $G = (V,E)$ is \emph{bipartite} is there is some partition $V = V_1 \dotcup
-V_2$ of the node set such that $E \subseteq (V_1 \times V_2) \cup (V_2 \cup V_2)$, meaning
-no arc connects nodes lying in the same set $V_i$. But by definition of the Petri net
-$(P,T,F)$ this clearly holds for the graph $G = (P \cup T, F)$ where we interpret places
-and transitions as nodes and their flow relations as arcs. This will be illustrated in the
-upcoming examples, see for instance figures~\ref{fig:firing} and \ref{fig:petriEx}.
+V_2$ of the node set such that $E \subseteq (V_1 \times V_2) \cup (V_2 \times V_1)$,
+meaning no arc connects nodes lying in the same set $V_i$. But by definition of the Petri
+net $(P,T,F)$ this clearly holds for the graph $G = (P \cup T, F)$ where we interpret
+places and transitions as nodes and their flow relations as arcs. This will be illustrated
+in the upcoming examples, see for instance figures~\ref{fig:firing} and \ref{fig:petriEx}.
 Usually, places will be represented by circles and transitions as boxes, while tokens held
 by places will be drawn as points in the corresponding place. We will also mark places or
 transitions with letters if necessary.
