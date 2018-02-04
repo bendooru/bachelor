@@ -1611,7 +1611,10 @@ algorithm are as follows, mainly due to \cite{ossTropLift}:
   w$, then $\vec w \in \Trop(X\cap X')$. In particular:
   \begin{enumerate}
     \item Assume $\Trop(I)$ is combinatorially a curve with $\dim C_0(I) = d$ and
-      $C_0(I)\cap \Lin(e_{d+1}, \dots, e_n) = \{0\}$, then for any $c \in \setT^d$ we have
+      \[
+        C_0(I)\cap \Lin(e_{d+1}, \dots, e_n) = \{0\},
+      \]
+      then for any $c \in \setT^d$ we have
       \[
         \Trop(I) \cap \{\nu(c)\} \times \setR^{n-d} = \Trop(I + \ideal{x_1-c_1, \dots,
         x_d-c_d}),
@@ -1679,13 +1682,13 @@ of a tropical fan in this setting, it is necessarily a collection of rays. Hence
 representation as $\bigcup_{w \in W} w\cdot \setR_{\geq0} + C_0(I)$ is justified. This
 algorithm can then be used in line \ref{alg:interiorPoints} of
 Algorithm~\ref{alg:neighbors} as a replacement for the methods concerning prevarieties. As
-the timings in \cite{tropPointsLinks} show, this offers a considerable speedup in general.
+the timings in \cite{tropPointsLinks} show, this yields a considerable speedup in general.
 
 \section{Parallelization}
 
 In this section we want to discuss our main contribution for this thesis: the combination
 of \textsc{Singular}-methods to compute tropical varieties with recently developed
-parallelization efforts at the Fraunhofer ITWM for computer algebra software. The first
+parallelization efforts at Fraunhofer ITWM for computer algebra software. The first
 efforts to this end are described in \cite{towardsParallel} while we specifically base our
 work on parallelization algorithms by Christian Reinbold to compute GIT-fans
 \cite{reinboldGitFan}. The basic algorithms described in the previous section are
@@ -2395,9 +2398,9 @@ net executes as follows:
     as specified above and applies
     lines~\ref{alg:neigh:line:start}--\ref{alg:neigh:line:end} of
     Algorithm~\ref{alg:neighbors} to obtain the adjacent maximal Gröbner cones.
-  \item The net terminates if all tokens corresponding to tokens have been processed,
-    which can be checked by the (implied) token counting mentioned before. Additionally,
-    it is necessary that $e_1$ and $e_2$ hold \texttt{false}.
+  \item The net terminates if all tokens corresponding to maximal cones and facets have
+    been processed, which can be checked by the (implied) token counting mentioned before.
+    Additionally, it is necessary that $e_1$ and $e_2$ hold \texttt{false}.
 \end{itemize}
 
 \todo{finished here?}
@@ -2406,8 +2409,8 @@ net executes as follows:
 
 As was previously mentioned we heavily rely on work done by Christian Reinbold on GIT-fans
 \cite{reinboldGitFan}. His work, in turn, relies on work done by Lukas Ristau to
-seamlessly integrate \textsc{Singular} into a GPI-Space project. As the foundation for our
-application was laid by Reinbold, it is best to check for details in
+seamlessly integrate \textsc{Singular} into a GPI-Space project. Since the foundation for
+our application was laid by Reinbold, it is best to check for details in
 \cite[Section~4]{reinboldGitFan}. We will give a short overview of implementation details
 that are especially important for our implementation.
 
