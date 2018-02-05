@@ -217,7 +217,8 @@ for method computing Puiseux expansions of roots of zero-dimensional ideals. On 
 hand during our work with \textsc{Singular} we were able to identify several bugs --
 mainly memory leaks -- which were promptly fixed. Using our parallel algorithm we were
 able to compute the tropical Grassmannian $\mathcal G_{3,8}$ modulo symmetry in its
-entirety, which was not possible with legacy methods until now.
+entirety, which was not possible with legacy methods until now. Using this as benchmark,
+we also found that our algorithm scales favorably to large processor counts.
 \todo{check for completion}
 
 In the second section we will introduce the general setting in which we want to compute
