@@ -210,15 +210,15 @@ relies on foundational work done by Dr.~Lukas Ristau in creating interface code 
 GPI-Space and \textsc{Singular}. As tropical varieties admit the structure of a polyhedral
 fan as well, we were able to successfully modify Reinbold's algorithm to compute tropical
 varieties instead. The development was coordinated in cooperation with the HPC department
-of Fraunhofer ITWM, in particular with Dr.~Mirko Rahn and Christian Reinbold.
-Additionally, as a side effect we accelerated the development of \texttt{puiseux.lib}
-\cite{puiseuxLib} lead by Santiago Laplagne on the one hand, which is used as a fallback
-for method computing Puiseux expansions of roots of zero-dimensional ideals. On the other
-hand during our work with \textsc{Singular} we were able to identify several bugs --
-mainly memory leaks -- which were promptly fixed. Using our parallel algorithm we were
-able to compute the tropical Grassmannian $\mathcal G_{3,8}$ modulo symmetry in its
-entirety, which was not possible with legacy methods until now. Using this as benchmark,
-we also found that our algorithm scales favorably to large processor counts.
+of Fraunhofer ITWM, in particular with the support of Dr.~Mirko Rahn and Christian
+Reinbold. Additionally, as a side effect we accelerated the development of
+\texttt{puiseux.lib} \cite{puiseuxLib} lead by Santiago Laplagne on the one hand, which is
+used as a fallback for method computing Puiseux expansions of roots of zero-dimensional
+ideals. On the other hand during our work with \textsc{Singular} we were able to identify
+several bugs -- mainly memory leaks -- which were promptly fixed. Using our parallel
+algorithm we were able to compute the tropical Grassmannian $\mathcal G_{3,8}$ modulo
+symmetry in its entirety, which was not possible with legacy methods until now. Using this
+as benchmark, we also found that our algorithm scales favorably to large processor counts.
 \todo{check for completion}
 
 In the second section we will introduce the general setting in which we want to compute
@@ -2667,17 +2667,18 @@ Singular features?}{} in the GPI-Space implementation.
 
 \begin{table}[tbh]
   \centering
-  \begin{tabular}{r|r||r}
-                   & \multicolumn{2}{c}{\textbf{time in seconds}} \\
-    \textbf{cores} & \textbf{one machine} & \textbf{two machines} \\ \hline
-    1   & 792.806 &      -- \\
-    2   & 389.855 & 375.859 \\
-    4   & 190.589 & 191.739 \\
-    8   &  99.254 &  96.990 \\
-    12  &  74.158 &      -- \\
-    16  &  59.599 &  56.512 \\
-    24  &      -- &  42.803 \\
-    32  &      -- &  39.756
+  \begin{tabular}{r||r|r||r}
+                   & \multicolumn{2}{c||}{\textbf{time in seconds}} &\\
+    \textbf{cores} & \textbf{one machine} & \textbf{two machines} &
+    \textbf{efficiency} \\ \hline
+    1   & 792.806 &      -- & 1 \\
+    2   & 389.855 & 375.859 & 1.017--1.054 \\
+    4   & 190.589 & 191.739 & 1.034--1.040 \\
+    8   &  99.254 &  96.990 & 0.998--1.022 \\
+    12  &  74.158 &      -- & 0.891 \\
+    16  &  59.599 &  56.512 & 0.831--0.878 \\
+    24  &      -- &  42.803 & 0.772 \\
+    32  &      -- &  39.756 & 0.623
   \end{tabular}
   \caption{Timings of computing $\mathcal G_{3,7}$}
   \label{tab:g37}
@@ -2687,8 +2688,21 @@ In Table~\ref{tab:g37} we provide timings for running the computation of $\mathc
 G_{3,7}$ modulo $S_7$ using up to 32 processor cores on one and two machines respectively.
 The timings are averages of eight runs each. These timings are plotted in
 Figure~\ref{fig:g37sc} together with two extrapolated hyperbolas corresponding to the
-minimal and maximal running times observed for two cores on one machine respectively.
-\todo{in progress}
+minimal and maximal running times respectively, observed for two cores on one machine. The
+parallelization \emph{efficiency} above is simply
+\[
+  \frac{ \text{running time on one core} }{ n \cdot (\text{running time on $n$ cores})}
+\]
+for each core count $n$ and describes the ratio between total processor time needed for
+one core and $n$ cores respectively. If the number is greater than 1, computing on $n$
+cores is not only faster but also more efficient. Similarly, if the number is less than 1
+we lose efficiency for instance due to bottlenecks and scheduling overhead. We see that
+computing times scale linearly with processor core count up to eight cores. However,
+starting with 12 threads we observe a sudden drop in the speed-up which worsens for
+increasing core counts. This can also be observed in the lower plot in
+Figure~\ref{fig:g37sc}, where the curve through the mean running times flattens earlier
+than the expected hyperbolas.
+\todo{give reasons for efficiency drop}
 
 \begin{figure}[htbp]
   \begin{center}
@@ -2698,13 +2712,38 @@ minimal and maximal running times observed for two cores on one machine respecti
   \label{fig:g37sc}
 \end{figure}
 
+This example is as interesting to us since it has already been studied quite thoroughly
+and does not parallelize well beyond two compute nodes. Hence in the next step we want to
+consider the tropical Grassmannian $\mathcal G_{3,8}$ which turns out to be much larger.
+Of course, we again want to consider this Grassmannian modulo symmetry: in the same way as
+above the symmetry group $S_8$ acts on the Plücker coordinates and lifts to a subgroup
+$S_8 \leq S_{56}$ of size $8!=40320$ -- recall that $\Grass(3,8)$ is given by an ideal
+over the polynomial ring in 56 variables. Note that the size of the symmetry group also
+plays into the running times since we usually iterate over all elements of $S_8$ to find
+the minimal representative of a interior point.
+
+\begin{table}[tbh]
+  \centering
+  \todo[inline]{construct table}
+  \caption{Timings of computing $\mathcal G_{3,8}$, using all 16 cores per node}
+  \label{tab:g38}
+\end{table}
+
 By our calculations $\mathcal G_{3,8}$ modulo $S_8$ has $f$-vector
 \[
   (0,0,0,0,0,0,0,0,1,95,1098,6671,24196,53648,70557,50125,14763),
 \]
 however the recombination into the full fan has proven to be too memory intensive even
 for the high-memory compute servers in the mathematics department of TU Kaiserslautern.
-\todo{obviously not complete yet}
+\todo{in progress}
+
+\begin{figure}[htb]
+  \begin{center}
+    \input{fig/efficiency38.tex}
+  \end{center}
+  \caption{Parallelization efficiency of computing $\mathcal{G}_{3,8}$}
+  \label{fig:g38efficiency}
+\end{figure}
 
 \begin{figure}[htbp]
   \begin{center}
@@ -2715,14 +2754,6 @@ for the high-memory compute servers in the mathematics department of TU Kaisersl
 \end{figure}
 
 In Figure~\ref{fig:g38scaling} we see that \dots and so on.
-
-\begin{figure}[htb]
-  \begin{center}
-    \input{fig/efficiency38.tex}
-  \end{center}
-  \caption{Parallelization efficiency of computing $\mathcal{G}_{3,8}$}
-  \label{fig:g38efficiency}
-\end{figure}
 
 \subsection{Practical Optimizations and Secondary Results}
 
