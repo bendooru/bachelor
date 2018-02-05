@@ -2,7 +2,6 @@
   paper=a4,
   titlepage,
   bibliography=totoc,
-  listof=totoc,
   pagesize=pdftex
 ]{scrartcl}
 % TMP
@@ -156,6 +155,11 @@
 
 \tableofcontents
 \newpage
+\listoffigures
+\listoftables
+\newpage
+
+\addtokomafont{section}{\clearpage}
 
 % FIXME REMOVE LATER
 %\linenumbers
@@ -165,15 +169,23 @@ Tropical geometry is a relatively new field in mathematics that studies algebrai
 varieties in a combinatorial fashion, reducing algebraic problems to polyhedral ones in
 the process. In particular, the \emph{tropical varieties} arising in this field are
 sometimes referred to as the \enquote{combinatorial shadow} of their algebraic
-counterpart. As usual, mathematicians are interested in studying concrete examples of
-tropical varieties study -- for instance to gain a general intuition behind the
-combinatorial structures or to find counter examples.
-\todo{more on tropical geometry?}
+counterpart. The general idea is to pass from classical arithmetic to \emph{tropical
+arithmetic}, where addition is replaced by taking minima and multiplication is replaced by
+addition. This turns the graphs of polynomial functions into piecewise linear object and
+the tropical varieties are the \emph{corner loci} of these objects. An important
+application of tropical geometry include intersection theory which deals with
+intersections between subvarieties of an algebraic variety: Many theorems have counter
+parts in tropical geometry or even carry over entirely.
+\todo{more I guess, Hurwitz}
+As usual, mathematicians are interested in studying concrete examples of tropical
+varieties -- for instance to gain a general intuition behind the combinatorial structures
+or to find counter examples.
 
 While this process of \emph{tropicalization} yields objects that are far easier to
 describe and compute than their algebraic counterparts, it is not hard to construct
-examples that cannot be computed in reasonable time frames using single-threaded legacy
-applications that are in use now. There are mainly two ways of tackling this issue:
+examples that cannot be computed in reasonable time frames using purely sequential legacy
+algorithms that are in use now, mainly Gfan \cite{gfan} and the \textsc{Singular} library
+\texttt{tropical.lib} \cite{tropLib}. There are mainly two ways of tackling this issue:
 Firstly, one could attempt to devise new theories and algorithms to reduce the
 computational requirements behind the problems. This, however, will eventually suffer from
 the limits of our legacy applications as well. Secondly and more importantly, we may
@@ -186,58 +198,65 @@ To this end, one usually considers two kinds of parallelization. On \emph{shared
 systems} a single process uses multiple threads while processing shared data, allowing for
 fine-grained parallelism. In this, they are limited by how many processors can access
 shared memory and only work in a local sense. On \emph{distributed} and
-\emph{multi-process systems} data is processed by different processes which not share
-memory but instead communicate by message passing. This only provides coarse-grained
-parallelism but can in theory scale to arbitrarily large computing configurations.
+\emph{multi-process systems} data is processed by different processes which do not share
+memory but instead communicate by message passing or a joint virtual memory layer. This
+only provides coarse-grained parallelism but can in theory scale to arbitrarily large
+computing configurations.
 
-Our contribution in this thesis is the combination of the latter kind of paralellization
-method mentioned above with existing methods to compute tropical varieties. Methods of
-computing tropical varieties have been studied by Bogart, Jensen, Speyer, Sturmfels and
-Thomas \cite{compTropVar} and further improved by Ren and Hofmann \cite{tropPointsLinks}.
-These methods constitute the \enquote{lower} level of the final parallel implementation
-and are implemented in the computer algebra system \textsc{Singular} \cite{Singular} which
-is being developed at Technische Universität Kaiserslautern. In particular, tropical
-computations are carried out by methods of the library \texttt{tropicalNewton.lib}
-\cite{tropNewtLib} which relies on Gfan \cite{gfan} for polyhedral computations via the
-interface library \texttt{gfan.lib} \cite{gfanLib}. Instances of \textsc{Singular}
-processes are then managed by the workflow management system GPI-Space \cite{gpispace} at
-the \enquote{upper} level. GPI-Space is developed by the High Performance Computations
-(HPC) department at Fraunhofer Institut für Techno- und Wirtschaftsmathematik (ITWM).
+Our contribution in this thesis is a combination of both of these notions: We apply the
+latter kind of paralellization method mentioned above to existing methods to compute
+tropical varieties. Methods of computing tropical varieties have been studied by Tristram
+Bogart, Anders Jensen, David Speyer, Benrd Sturmfels and Rekha Thomas \cite{compTropVar}
+and further improved by Yue Ren and Tommy Hofmann \cite{tropPointsLinks}. These methods
+constitute the \enquote{lower} level of the final parallel implementation and are
+implemented in the computer algebra system \textsc{Singular} \cite{Singular} which is
+being developed at University of Kaiserslautern. In particular, tropical computations are
+carried out by methods of the library \texttt{tropicalNewton.lib} \cite{tropNewtLib} which
+relies on Gfan \cite{gfan} for polyhedral computations via the interface library
+\texttt{gfan.lib} \cite{gfanLib}. Instances of \textsc{Singular} processes are then
+managed by the workflow management system GPI-Space \cite{gpispace} at the \enquote{upper}
+level. GPI-Space is developed by the High Performance Computations (HPC) department at
+Fraunhofer Institute for Industrial Mathematics (ITWM).
 
 Our parallelization solution is based on work by Christian Reinbold who used GPI-Space to
-implement a parallel algorithm to compute GIT-fans \cite{reinboldGitFan}. This, in turn,
-relies on foundational work done by Dr.~Lukas Ristau in creating interface code between
-GPI-Space and \textsc{Singular}. As tropical varieties admit the structure of a polyhedral
-fan as well, we were able to successfully modify Reinbold's algorithm to compute tropical
-varieties instead. The development was coordinated in cooperation with the HPC department
-of Fraunhofer ITWM, in particular with the support of Dr.~Mirko Rahn and Christian
-Reinbold. Additionally, as a side effect we accelerated the development of
-\texttt{puiseux.lib} \cite{puiseuxLib} lead by Santiago Laplagne on the one hand, which is
-used as a fallback for method computing Puiseux expansions of roots of zero-dimensional
-ideals. On the other hand during our work with \textsc{Singular} we were able to identify
-several bugs -- mainly memory leaks -- which were promptly fixed. Using our parallel
-algorithm we were able to compute the tropical Grassmannian $\mathcal G_{3,8}$ modulo
-symmetry in its entirety, which was not possible with legacy methods until now. Using this
-as benchmark, we also found that our algorithm scales favorably to large processor counts.
-\todo{check for completion}
+implement a parallel algorithm to compute GIT-fans \cite{reinboldGitFan}, implementing
+algorithms by Janko Böhm, Simon Keicher and Yue Ren \cite{compGitFan}. This, in turn,
+relies on foundational work done by Lukas Ristau in creating interface code to use
+\textsc{Singular} in conjunction with GPI-Space. As tropical varieties admit the structure
+of a polyhedral fan as well, we were able to successfully modify Christian Reinbold's
+implementation to handle computation of tropical varieties instead. The development was
+coordinated in cooperation with the HPC department of Fraunhofer ITWM, in particular with
+the support of Dr.~Mirko Rahn and Christian Reinbold. Additionally, as a side effect we
+accelerated the development of \texttt{puiseux.lib} \cite{puiseuxLib}, which is used as a
+fallback for method computing Puiseux expansions of zero-dimensional ideals. Moreover,
+during our work with \textsc{Singular} we were able to identify various bugs, for example
+memory leaks.
 
-In the second section we will introduce the general setting in which we want to compute
-tropical varieties. For this purpose we introduce notions concerning fields with valuation
-and convex geometry. We then define tropical varieties and study their properties as
-polyhedral convexes. Finally, we illustrate how to compute tropical varieties using
-methods from \cite{compTropVar} which we then improve using new techniques from
-\cite{tropPointsLinks}. In the third section we will introduce GPI-Space and Petri nets as
-a means to formulate parallelizable workflows and subsequently translate our traversal
-algorithm into such a Petri net. In the fourth section we introduce the tropical
-Grassmannians, an important class of tropical varieties and give timings for parallel
-computations of $\mathcal G_{3,7}$ and $\mathcal G_{3,8}$.
+Using our parallel algorithm we were able to compute the tropical Grassmannian $\mathcal
+G_{3,8}$ modulo symmetry in its entirety, which was not possible with legacy methods until
+now. Using this as benchmark, we also found that our algorithm scales favorably for large
+numbers of processor cores. In fact, our algorithm scales well to as many as 56 compute
+nodes, which corresponds to 896 processor cores, reducing the running time to 20\,minutes.
 
+The thesis is structures as follows: In section~2 we will describe the general setting in
+which we want to compute tropical varieties. For this purpose we introduce various notions
+concerning fields with valuation and convex geometry. We then define tropical varieties
+and study their properties as polyhedral convexes. Finally, we illustrate how to compute
+tropical varieties using methods from \cite{compTropVar} and describe improvements using
+new techniques from \cite{tropPointsLinks}. In the third section we will give an account
+on GPI-Space and the concept of Petri nets which is used in GPI-Space to formulate
+parallelizable workflows. Subsequently we translate our traversal algorithm into such a
+Petri net. In the fourth section we consider the tropical Grassmannians, an important
+class of tropical varieties and give timings for parallel computations of $\mathcal
+G_{3,7}$ and $\mathcal G_{3,8}$.
+
+\clearpage
 \subsubsection*{Acknowledgements}
 Firstly I would like to thank Dr.~Janko Böhm for suggesting this topic to me, giving me
 the chance to work at Fraunhofer ITWM and guiding me in understanding tropical varieties
 and their computation. In this vein I thank Dr.~Yue Ren and Dr.~Tommy Hofmann for their
 support in understanding and adapting their \textsc{Singular} implementation. Special
-thanks goes to Santiago Laplagne, who, during his stay here in Germany, tirelessly
+thanks goes to Santiago Laplagne, who, during his stay in Kaiserslautern, tirelessly
 implemented and improved a \textsc{Singular} library for computations with general Puiseux
 series expansions. Similarly, I want to thank Dr.~Hans Schönemann who quickly provided
 fixes to some annoying bugs we found in \text{Singular}.
@@ -245,8 +264,9 @@ fixes to some annoying bugs we found in \text{Singular}.
 I also would like to thank Dr.~Mirko Rahn from the High Performance Computing (HPC)
 department at Fraunhofer ITWM for his guidance and help during my work there. I further
 thank Christian Reinbold for his helpful introduction to his project and providing a
-working code base in the first place.
-\todo{everyone accounted for?}
+working code base. My final thanks go to the HPC department and Fraunhofer ITWM in general
+for providing access to their massive computation infrastructure, without which this
+thesis would not have been possible.
 
 \section{Computing Tropical Varieties}
 
@@ -466,7 +486,6 @@ particular to make sense of the tropicalization of Laurent polynomials.
 
 \subsection{Valuations and Puiseux Series}
 
-\todo{a \emph{bit} more introduction?}
 Most of the following definitions and algorithms will make use of fields equipped with a
 non-trivial valuation:
 
@@ -485,11 +504,9 @@ A valuation is called \emph{non-trivial} if it is not the constant 0-function on
 K\setminus\{0\}$. Such a field with valuation defines a local ring $R_\nu = \{ x \in K :
 \nu(x) \geq 0 \}$ with unique maximal ideal $\mathfrak m_{R_\nu} = \{ x \in K : \nu(x) > 0
 \}$. The \emph{residue field} of $K$ is then defined to be the residue field $\mathfrak K
-= R_\nu/\mathfrak m_{R_\nu}$ of $R_\nu$.
-\todo{do we even need the uniformizing parameter? (removed for now)}
-
-Various fields with non-trivial valuation are suitable for computational purposes. The one
-over which we will usually do our computations is the field of Puiseux series:
+= R_\nu/\mathfrak m_{R_\nu}$ of $R_\nu$. Various fields with non-trivial valuation are
+suitable for computational purposes. The one over which we will usually do our
+computations is the field of Puiseux series:
 
 \begin{definition}[Puiseux Series]
   \label{def:puiseux}
@@ -504,13 +521,13 @@ over which we will usually do our computations is the field of Puiseux series:
     f = \sum_{k = k_0}^\infty c'_k t^{\frac kN}
   \end{equation}
   with suitable $c'_k \in K'$ for all $k\geq k_0$, $c_{k_0}'\neq0$ and the common
-  denominator $N \in \setN$.
+  denominator $N \in \setN_{>0}$.
 \end{definition}
 
 By considering the rings of formal Laurent series $\smash{K'((t^{\frac1n}))}$ for $n \in
-\setN$ in the indeterminate $\smash{t^{\frac1n}}$, we can see that
+\setN_{>0}$ in the indeterminate $\smash{t^{\frac1n}}$, we can see that
 \[
-  K = \puiseux{K'}t = \bigcup_{n \in \setN} K'((t^{\frac1n})).
+  K = \puiseux{K'}t = \bigcup_{n \in \setN_{>0}} K'((t^{\frac1n})).
 \]
 The most important use case will involve $K'$ being algebraically closed, in particular we
 usually choose $K'=\setC$. This is due to the following theorem:
@@ -619,10 +636,11 @@ and polyhedral cones:
   polyhedral cone $C$ is the positive span of finitely many vectors in $\setR^n$.
 \end{definition}
 
-\todo{explain more or provide citation}
 Note that, using linear programming, it is possible to assign a unique \emph{canonical}
-set of defining equations to a polyhedral cone. This is important to quickly compare and
-uniquely identify polyhedral cones, especially in computational contexts.
+set of defining equations and inequalities to a polyhedral cone. This is important to
+quickly compare and uniquely identify polyhedral cones, especially in computational
+contexts. This is usually achieved via the \emph{double description method}, see for
+instance \cite{fuDD}.
 
 For a polyhedron $P \subseteq \setR^n$ we further define its dimension as the dimension of
 the smallest affine linear space containing $P$. Consider now an element $\vec w \in
@@ -660,12 +678,12 @@ a polyhedral complex define a representation.
 
 \begin{example}\
   \begin{enumerate}
-    \item For any $n \in \setN$ we have $\setR^n = \{ \vec x \in \setR^n : 0 \cdot \vec x
-        \leq 0 \}$, so the entire ambient space is a polyhedral cone. Furthermore it is
-        clear that $\face_{\vec w}(\setR^n) = \varnothing$ for any $0\neq\vec w \in
-        \setR^n$, so the only faces of $\setR^n$ are $\varnothing$ and the whole space
-        itself. Thus $\{ \varnothing, \setR^n\}$ is a pure and complete polyhedral fan,
-        albeit an uninteresting one.
+    \item For any $n \in \setN_{>0}$ we have $\setR^n = \{ \vec x \in \setR^n : 0 \cdot
+      \vec x \leq 0 \}$, so the entire ambient space is a polyhedral cone. Furthermore it
+      is clear that $\face_{\vec w}(\setR^n) = \varnothing$ for any $0\neq\vec w \in
+      \setR^n$, so the only faces of $\setR^n$ are $\varnothing$ and the whole space
+      itself. Thus $\{ \varnothing, \setR^n\}$ is a pure and complete polyhedral fan,
+      albeit an uninteresting one.
     \item Consider the four quadrants
       \begin{align*}
         C_0 &= \{ \vec x \in \setR^2 : x_1 \geq 0, x_2 \geq 0 \}, &
@@ -1017,8 +1035,7 @@ a standard polynomial ring $K[\vec x]$ as these rings are more suited for Gröbn
 computations. In fact, starting with an $I \idealof K[\vec x]$,
 Definition~\ref{def:tropicalVariety} and Theorem~\ref{thm:fundamentalThm} work in exactly
 the same way. Considering the ideal $I' \idealof K[\vec x^{\pm1}]$ generated by the
-elements of $I$ it is easy to see that $\Trop(I) = \Trop(I')$: \todo{can we just say
-this?} If $\vec w \not\in
+elements of $I$ it is easy to see that $\Trop(I) = \Trop(I')$: If $\vec w \not\in
 \Trop(I')$ then there is a polynomial $f \in I'$ such that $\initial_{\vec w}(f)$ is a
 monomial. Then there is a monomial $m \in K[\vec x]$ such that $mf \in I$ and
 $\initial_{\vec w}(mf)$ is a monomial as well, so $\vec w \not\in \Trop(I)$, see also the
@@ -1766,7 +1783,6 @@ of three main components \cite[Section~4.1]{reinboldGitFan}:
     Note that the WE is a single-threaded process running on a single machine, so it is
     imperative to design the workflow in way which does not place too much work on the WE
     as it otherwise may become a major bottleneck to the algorithm.
-    \todo{move somewhere else?}
   \item A virtual memory layer that allows different activities and external programs to
     communicate and share data.
 \end{enumerate}
@@ -1876,19 +1892,19 @@ transitions with letters if necessary.
   \begin{subfigure}{.64\textwidth}
     \centering
     \begin{tikzpicture}[node distance=1.4cm]
-      \node [place]      (in) {$i$};
+      \node [place]      (in) {};
       \node [transition] (s)  [right of=in] {$s$} edge [pre] (in);
 
       \node [place]      (su) [above right of=s] {}    edge [pre] (s);
       \node [transition] (f)  [right of=su]      {$f$} edge [pre] (su);
-      \node [place]      (l)  [right of=f]       {$l$} edge [pre] (f);
+      \node [place]      (l)  [right of=f]       {}    edge [pre] (f);
 
       \node [place]      (sd) [below right of=s] {}    edge [pre] (s);
       \node [transition] (g)  [right of=sd]      {$g$} edge [pre] (sd);
-      \node [place]      (r)  [right of=g]       {$r$} edge [pre] (g);
+      \node [place]      (r)  [right of=g]       {}    edge [pre] (g);
 
-      \node [transition] (j)  [below right of=l] {$j$} edge [pre] (l) edge [pre] (r);
-      \node [place]      (o)  [right of=j]       {$o$} edge [pre] (j);
+      \node [transition] (j)  [below right of=l] {}    edge [pre] (l) edge [pre] (r);
+      \node [place]      (o)  [right of=j]       {}    edge [pre] (j);
     \end{tikzpicture}
     \caption{Task parallelism}
     \label{fig:petri:taskpar}
@@ -1900,30 +1916,22 @@ transitions with letters if necessary.
 \begin{example}[Parallelisms in Petri Nets]
   \label{ex:petriPar}
   We now want to look at how different kinds of parallelisms can be realized in Petri
-  nets.
+  nets (see also \cite[Examples~3.4--3.5]{towardsParallel}).
   \begin{enumerate}[label=(\alph*)]
-    \item First consider the Petri net $\Psi = (P,T,F)$ given by $P = \{i, o\}$, $T =
-      \{f\}$ and $T = \{ (i,f), (f,o) \}$ whose graph is depicted in
-      Figure~\ref{fig:petri:datapar}. Let $M=M_0 = \{ (i, n) \}$ be the initial marking
-      for some $n>1$, then the transition $f$ is enabled. Firing $f$ once yields the new
-      marking $M_1 = \{ (i, n-1), (o, 1) \}$, so $t$ is still enabled. Hence $f$ may fire
-      $n-1$ more times, yielding the marking $M' = M_n = \{ (o,n) \}$, which we usually
-      denote by $\smash{M \overset{t^n}{\longrightarrow} M'}$. As there is no
-      interdependence between the tokens held in $i$ the transition $f$ may fire for each
-      one at the same time. This form of parallelism is then used in GPI-Space, as firing
-      transitions will not be an immediate change in most real world applications.
-      Applying a function or procedure to several inputs is precisely \emph{data
-      parallelism}: We may regard each token in $i$ as a part of a larger chunk of data
-      that is fed to $f$. Note that we will introduce tokens which hold actual data later
-      on.
+    \item First consider the Petri net $\Psi$ whose graph is depicted in
+      Figure~\ref{fig:petri:datapar}. If $i$ holds multiple tokens, then $f$ is enabled
+      and may fire for each on individually, in particular in parallel. If $f$ fires $n$
+      times, we may extend the above notation to $\smash{M \overset{f^n}{\longrightarrow}
+      M'}$ for corresponding markings $M, M'$. We may regard each token in $i$ as a part
+      of a larger chunk of data that is fed to $f$. Note that we will introduce tokens
+      which hold actual data later on. This parallel firing of a single transition for
+      several chunks of data is referred to as \emph{data parallelism}.
     \item Consider now the Petri net given by the graph depicted in
-      Figure~\ref{fig:petri:taskpar}. If we start with the marking $M = \{ (i,1) \}$, then
-      firing $s$ will enable both $f$ and $g$. Both of these transitions may thus fire in
+      Figure~\ref{fig:petri:taskpar}. If $f$ and $g$ are enabled by firing $s$, then both
+      $f$ and $g$ may thus fire in
       parallel. Constructions like this arise when different functions are applied to
-      parts of some data and have no interdependence. As above, if $i$ contains multiple
-      tokens, then $s$ and hence also $f$ and $g$ may fire multiple times in parallel,
-      potentially leading to a situation where all named transitions are enabled at the
-      same time.
+      parts of some data and have no interdependence. Running different tasks like this in
+      parallel is usually referred to as \emph{task parallelism}.
   \end{enumerate}
 \end{example}
 
@@ -2013,18 +2021,12 @@ details): \todo{might need other sources}
 \begin{description}[leftmargin=\parindent]
   \item[Time:] A traditional Petri net cannot model execution times of its transitions
     since they are defined to fire instantaneously. Clearly, this yields an incomplete
-    description of a realistic workflow. Timed Petri nets introduce the concept of time
-    by splitting the firing process into three phases:
-    \begin{enumerate}[label=\arabic*.]
-      \item the tokens are removed from the respective input places when the transition
-        fires,
-      \item the transition holds these tokens during its execution and
-      \item the tokens are put into the output places after the transition finishes
-        firing.
-    \end{enumerate}
-    Hence, markings as given by Definition~\ref{def:marking} have to be extended by an
-    intermediate marking corresponding to the second phase. Note that this does not change
-    the execution dynamics of a Petri net in terms of reachability.
+    description of a realistic workflow. Timed Petri nets introduce the concept of time by
+    extending the firing process of transitions with an intermediate phase where consumed
+    tokens are held in the transition itself. Hence, markings as given by
+    Definition~\ref{def:marking} have to be extended by an intermediate marking
+    corresponding to this intermediate phase. Note that this does not change the execution
+    dynamics of a Petri net in terms of reachability.
   \item[Tokens and Data:] Until now all tokens in the classical Petri net held no
     information apart from being present or not. Of course, this severely limits the
     amount of information that can be exchanged between independent processes which
@@ -2047,7 +2049,6 @@ details): \todo{might need other sources}
     respectively. In the cases where a token is placed back in the place it was read form,
     we may also employ read-write ports.
 
-    \todo{maybe reformulate}
     Finally, there is the notion of a \emph{read-only} port. In cases where data is static
     over the course of the Petri net execution and must be accessed by several different
     transitions, for instance configuration data and static input, it would be overly
@@ -2101,11 +2102,13 @@ details): \todo{might need other sources}
     transition.
 
     Furthermore, conditional execution provides a tool to resolve potential conflicts as
-    described in Definition~\ref{def:conflict} and illustrated in Figure~\ref{fig:conflict}.
-    In fact, Petri nets formulated for GPI-Space require that any transitions may fire
-    without conflicts. This is again illustrated in Figure~\ref{fig:inc} as the two
-    conditions shown are \emph{disjoint}, that is, they can not both be true for a given
-    token.
+    described in Definition~\ref{def:conflict} and illustrated in
+    Figure~\ref{fig:conflict}. In fact, Petri nets formulated for GPI-Space require that
+    any transitions may fire without conflicts. This is again illustrated in
+    Figure~\ref{fig:inc} as the two conditions shown are mutually exclusive, that is, they
+    can not both be true for a given token. GPI-Space supports the common Boolean
+    operators \texttt{:gt:} (greater than), \texttt{:ge:} (greater than or equal),
+    similarly \texttt{:lt:} and \texttt{:le:}, \texttt{:eq:} (equal) and so on.
 \end{description}
 
 \begin{figure}[htbp]
@@ -2123,7 +2126,7 @@ details): \todo{might need other sources}
   \label{fig:inc}
 \end{figure}
 
-\todo{enough?}
+\todo{formulate entire (easy) Petri net here or above}
 
 \subsection{Traversing a Fan in Parallel}
 \label{sec:traverseParal}
@@ -2131,34 +2134,35 @@ details): \todo{might need other sources}
 Computing tropical varieties in our setting follows the general structure of a fan
 traversal: Interpreting the maximal cones of a polyhedral fan together with their
 adjacency relations as a connected graph, we may realize the fan traversal as a simple
-graph traversal \cite{JenTravSym}. To this end we want to formulate the version of
+graph traversal \cite{JenTravSym}. To this end, we want to formulate a version of
 Algorithm~\ref{alg:traversal} enhanced with Algorithm~\ref{alg:tropLinks} into a Petri
-net. Indeed on first glance an implementation looks quite simple: After determining a
+net. Indeed, on first glance an implementation looks quite simple: After determining a
 starting cone using Algorithm~\ref{alg:tropicalPoint} we construct a set of
 \emph{unprocessed} and \emph{processed} cones respectively. However, these steps alone do
 not suffice quite yet: Recall that transitions do not in general fire instantaneously, so
-there might be situations where the set of unprocessed cones might be empty, while some
+there might be situations where the set of unprocessed cones is empty, while some
 transitions still process data. It is thus important to devise proper termination
-conditions to properly stop the execution of the net. Before we can tackle this problem
-however, we must consider some implementation details first that will be reflected in the
+conditions to stop the execution of the net. Before we can tackle this problem however, we
+must first consider some implementation details first that will be reflected in the
 description of our algorithm.
 \begin{enumerate}[label=\arabic*.]
-  \item We must decide how to store and represent input and intermediate results. Each
-    Gröbner cone is represented by a pair of Gröbner bases and usually we add the actual
-    cone obtained from them to the data as well. Furthermore, we require the ambient
-    polynomial ring in which the corresponding ideals live as they contain the information
-    about the term ordering. Also, it is not possible to store an ideal without also
-    storing its ambient ring in \textsc{Singular}. As it turns out, the in-build storage
-    solutions in the GPI-Space environment are not suitable to handle the amount of data
-    that is exchanged between processes. Instead we use a separate storage solution that
-    will be accessed by the GPI-Space environment. We will discuss implementation details
-    hereof in the next section.
+  \item We must decide how to store and represent data and intermediate results. As we
+    have seen already, a Gröbner cone can be represented by a pair reduced Gröbner bases,
+    see Lemma~\ref{lem:grConEq}. In our applications, we usually add the actual Gröbner
+    cone to obtain a data triple. As a requirement by \textsc{Singular}, an ideal is
+    always given together with its ambient polynomial ring, which, in this case, contains
+    both pairs. Hence, in practice, the data will consist of a polynomial ring together
+    with two ideals and a polyhedral cone. As it turns out, the built-in storage solutions
+    in the GPI-Space environment are not suitable to handle the amount of data that is
+    exchanged between processes. Instead we use a separate storage solution that will be
+    accessed by the GPI-Space environment. We will discuss implementation details hereof
+    in the next section.
   \item We previously noted that it is necessary to be able to test two given Gröbner
-    cones for equality. While we may compare the given initial ideals as they cannot
-    differ by definition, it is faster to instead consider the actual cones. If they are
-    given in canonical form, we may associate a \emph{unique point} to each of them. It is
-    then sufficient to compare the unique points with each other. The unique point may
-    then also be used as a \emph{key} for storage purposes.
+    cones for equality. While we may compare the given initial ideals as they are uniquely
+    determined by the Gröbner cone by definition, it is faster to instead consider the
+    actual cones. If they are given in canonical form, we may associate a \emph{unique
+    point} to each of them. It is then sufficient to compare the unique points with each
+    other. The unique point may then also be used as a \emph{key} for storage purposes.
 
     For a given  cone its unique point is obtained by \dots
     \todo{explain this}
@@ -2168,14 +2172,14 @@ description of our algorithm.
     acts trivially on $\mathcal F$ but produces non-trivial cone orbits, see for example
     \cite{JenTravSym} for more on this. It turns out that considering the cones modulo
     symmetry is compatible with how their unique points are computed, so we additionally
-    get orbits of unique points. As these are just integer vectors, we even pick a minimal
-    representative by sorting lexicographically. This allows to compare cones under
-    symmetry very quickly.
+    get orbits of unique points. As these are just integer vectors, we may even pick a
+    minimal representative by sorting lexicographically. This allows us to compare cones
+    up to symmetry very efficiently.
 \end{enumerate}
-From now on, we want to successively construct a Petri net describing our traversal
-algorithm. However, Algorithm~\ref{alg:traversal} is not yet formulated in a way that is
-suitable for parallelization. We give a slight reformulation and add the computation of a
-starting pair of Gröbner bases.
+We now successively describe a Petri net modelling our traversal algorithm. However,
+Algorithm~\ref{alg:traversal} is not yet formulated in a way that is suitable for
+parallelization. We give a slight reformulation and add the computation of a starting pair
+of Gröbner bases which serves as the input to Algorithm~\ref{alg:traversal}:
 
 \begin{algo}[Traversal (Modified)]\
   \label{alg:traversalMod}
@@ -2201,10 +2205,10 @@ starting pair of Gröbner bases.
   \end{algorithmic}
 \end{algo}
 
-Note that we check in line~\ref{alg:line:coneExists} for existence with respect to the
-symmetry group $G$, so if $\{ \id \} \lneq G$ it is possible that we discard cones which
-were not found yet themselves, but lie in the orbit of some cone in $P$. This will become
-important later on again when we further refine this algorithm.
+Note that in the implementation we check in line~\ref{alg:line:coneExists} for existence
+with respect to the symmetry group $G$, so if $\{ \id \} \lneq G$ it is possible that we
+discard cones which were not found yet themselves, but lie in the orbit of some cone in
+$P$. This will become important later on again when we further refine this algorithm.
 
 \begin{figure}[tbhp]
   \centering
@@ -2255,14 +2259,15 @@ follows:
         consumes the token holding $\mathcal C$, pushes back $\mathcal C\setminus \{
         c_{\vec w}\}$ to $uS$ and pushes $c_{\vec w}$ to the place $c$.
     \end{itemize}
-    In short, the transition $sS$ processes sets of triples into tokens of single triples.
-  \item Finally, the transition $n$ consumes tokens from $c$ which hold Gröbner cone
-    triples and applies the modified neighbor algorithm to them. Accordingly it produces
-    sets of such triples which are then pushed to $uS$.
+    In short, the transition $sS$ consumes tokens representing sets of triples and outputs
+    tokens representing single triples.
+  \item Finally, the transition $n$ consumes tokens from $c$ which hold triples as above
+    and applies the modified neighbor algorithm to them. Accordingly it produces sets of
+    such triples which are then pushed to $uS$.
 \end{itemize}
 Note that for this to make sense we have to assume that the transition $n$ stores and has
 access to the processed Gröbner cones and thus only pushes \enquote{new} cones onto the
-place $uS$. As said above this net does not contain any termination logic and is thus not
+place $uS$. As said above, this net does not contain any termination logic and is thus not
 complete. One way to properly terminate if and only if no more neighbors can be found is
 to keep track of the number of all tokens that hold unprocessed cones, including those
 that are being processed. If this number drops to zero while all the places $sS$ and $c$
@@ -2280,7 +2285,7 @@ hold no tokens then the algorithm can terminate.
     \node [place] (unprocCones) [above of=neighbors] {$c$} edge [post] (neighbors);
     \node [transition] (get) [right of=unprocCones] {$g$} edge [post] (unprocCones);
 
-    \begin{scope}[color=darkgray]
+    \begin{scope}[color=blue]
       \node [place] (enabled) [below of=get] {$e$}
         edge [post,bend right] (get)
         edge [pre,bend left] (get)
@@ -2316,17 +2321,17 @@ and is basically what Christian Reinbold describes in Stage~3 of
     exactly one token, we ensure that the initial Gröbner cone is computed exactly once.
     In the previous Petri net we implicitly assumed that $G$ is part of the tokens that
     are fed to $n$.
-  \item Similarly, $u$ holds sets the unprocessed Gröbner cone triples produced by $iC$
-    and $n$.
-  \item The $i$ and $g$ transitions \emph{insert} and \emph{get} tokens of Gröbner cone
+  \item Similarly, $u$ holds sets of unprocessed Gröbner cone and basis triples produced
+    by $iC$ and $n$.
+  \item The transitions $i$ and $g$ \emph{insert} and \emph{get} tokens of Gröbner cone
     sets respectively. For this they call retrieval and insertion operations provided by
     the external storage interface. Note that, as we may insert sets, this removes the
     need for the splitting operations by $sS$ in the previous net.
   \item Finally, $g$ and $i$ are \enquote{managed} by the place $e$ which holds a Boolean
     token indicating whether there are unprocessed cones available. This is realized as
-    follows (see parts colored in gray):
+    follows (see parts colored in blue in Figure~\ref{fig:naive:storage}):
     \begin{itemize}
-      \item At the beginning of executing the net \texttt{false} is placed in $e$ as no
+      \item At the beginning of executing the net, \texttt{false} is placed in $e$ as no
         cones are available yet.
       \item If firing $i$ succeeds, that is, not all of the cones it inserted were already
         known, the token in $e$ is consumed and replaced by \texttt{true}.
@@ -2336,15 +2341,15 @@ and is basically what Christian Reinbold describes in Stage~3 of
     \end{itemize}
 \end{itemize}
 
-This is now a complete algorithm to traverse the fan whose support is the tropical
-variety. In particular, all the transitions run in isolated single-threaded jobs. However,
-as an additional optimization we want to exploit a property of our method of traversing
-this fan, which comes at a slight cost of generality of our algorithm. To this end we
-recall Algorithm~\ref{alg:neighbors} and note that we actually traverse the finer
-bipartite graph consisting of maximal cones and their facets. The idea is to split up this
-Neighbor algorithm into separate parts, passing from maximal cones to facets and from
-facets to maximal cones respectively. This offers two advantages in comparison to the
-general method:
+This now a general algorithm which can be applied to any polyhedral fan which connected in
+codimension one, provided one has procedures of neighboring cones and a starting cone. As
+an additional optimization we want to exploit a property of our method of traversing this
+fan, which comes at a potential cost of generality of our algorithm. To this end we recall
+Algorithm~\ref{alg:neighbors} and note that we actually traverse the finer bipartite graph
+consisting of maximal cones and their facets. The idea is to split up this Neighbor
+algorithm into separate parts, passing from maximal cones to facets and from facets to
+maximal cones respectively. This offers two advantages in comparison to the general
+method:
 \begin{itemize}
   \item Splitting the algorithm allows for a more fine-grained control over the job-sizes
     submitted to the run-time system. \todo{why is this good?}
@@ -2352,17 +2357,18 @@ general method:
     Note that we must be careful in choosing job-sizes: As the workflow engine is a
     single-threaded process it might become a major bottleneck to the algorithm if the
     number of jobs it is tasked with scheduling becomes to big.
-  \item More importantly, additionally to storing all computed Gröbner cones with respect
-    to symmetry, we want store all visited facets during the fan traversal. It is obvious
-    that this is possible since the facets themselves are also polyhedral cones and thus
-    have a unique interior point with which they may be identified. This will then reduce
-    the amount of duplicate cone computations:
+  \item More importantly, in addition to storing all computed Gröbner cones with respect
+    to symmetry, we want store all facets, which have been visited during the fan
+    traversal. It is obvious that this is possible since the facets themselves are also
+    polyhedral cones and thus have a unique interior point with which they may be
+    identified. This will then reduce the amount of duplicate cone computations:
 
     Say, during computation we obtain the cone $C_2$ as a neighbor of $C_1$ by traversing
     the facet $F$ of both $C_1$ and $C_2$. If $C_2$ was not previously known,
-    Algorithm~\ref{alg:neighbors} will be applied to it as well at a later step in the
-    traversal. During this run, we will traverse $F$ another time, leading to superfluous
-    computations as all its adjacent maximal Gröbner cones are already known.
+    Algorithm~\ref{alg:neighbors} will be applied to $C_2$ as well at a later step in the
+    traversal. During this run, we will traverse the facet $F$ another time, leading to
+    superfluous computations as all of the maximal Gröbner cones adjacent to $F$ were
+    already computed in the first traversal of $F$.
 \end{itemize}
 Note that the splitting of Algorithm~\ref{alg:neighbors} has to happen at the GPI-Space
 level due to the second point, since the $\textsc{Singular}$-invocations only compute
@@ -2377,24 +2383,24 @@ via GPI-Space.
     \node [place] (uC) [right of=init] {$u$} edge [pre] (init);
     \node [transition] (insC) [right of=uC] {$i_1$} edge [pre] (uC);
 
-    \node [place,color=darkgray] (eC) [right of=insC] {$e_1$}
-      edge [bend right,pre,color=darkgray] (insC)
-      edge [bend left,post,color=darkgray] (insC);
+    \node [place,color=blue] (eC) [right of=insC] {$e_1$}
+      edge [bend right,pre,color=blue] (insC)
+      edge [bend left,post,color=blue] (insC);
     \node [transition] (getC) [right of=eC] {$g_1$}
-      edge [bend right,pre,color=darkgray] (eC)
-      edge [bend left,post,color=darkgray] (eC);
+      edge [bend right,pre,color=blue] (eC)
+      edge [bend left,post,color=blue] (eC);
 
     \node [place] (cone) [right of=getC] {} edge [pre] (getC);
     \node [transition] (facets) [above of=cone] {$f$} edge [pre] (cone);
     \node [place] (f) [above of=facets] {} edge [pre] (facets);
     \node [transition] (insF) [left of=f] {$i_2$} edge [pre] (f);
 
-    \node [place,color=darkgray] (eF) [left of=insF] {$e_2$}
-      edge [bend right,pre,color=darkgray] (insF)
-      edge [bend left,post,color=darkgray] (insF);
+    \node [place,color=blue] (eF) [left of=insF] {$e_2$}
+      edge [bend right,pre,color=blue] (insF)
+      edge [bend left,post,color=blue] (insF);
     \node [transition] (getF) [left of=eF] {$g_2$}
-      edge [bend right,pre,color=darkgray] (eF)
-      edge [bend left,post,color=darkgray] (eF);
+      edge [bend right,pre,color=blue] (eF)
+      edge [bend left,post,color=blue] (eF);
 
     \node [place] (ufac) [left of=getF] {} edge [pre] (getF);
     \node [transition] (neigh) [below of=ufac] {$n$}
@@ -2418,8 +2424,8 @@ via GPI-Space.
       edge [post,dashed,out=-90,in=90] (init);
 
     % wew
-    \node at (getC) [above=3mm,darkgray] {\footnotesize\verb|${|$\mathtt{e_1}$\verb|}|};
-    \node at (getF) [below=3mm,darkgray] {\footnotesize\verb|${|$\mathtt{e_2}$\verb|}|};
+    \node at (getC) [above=3mm,blue] {\footnotesize\verb|${|$\mathtt{e_1}$\verb|}|};
+    \node at (getF) [below=3mm,blue] {\footnotesize\verb|${|$\mathtt{e_2}$\verb|}|};
   \end{tikzpicture}
   \caption{Refinement by splitting Neighbor procedure}
   \label{fig:refined}
@@ -2431,9 +2437,9 @@ net executes as follows:
 \begin{itemize}
   \item Initialization and initial cone computation are unchanged.
   \item The places resp.\ transitions $i_k, e_k, g_k$ for $k \in \{1, 2\}$ work
-    analogously to the previous net. For $k=1$ we manage maximal Gröbner cones represented
-    by their meta data, for $k=2$ we manage interior facet points together with their
-    minimal representative with respect to $G$.
+    analogously to $i,e,g$ in the previous net. For $k=1$ we manage maximal Gröbner cones
+    represented by their meta data, for $k=2$ we manage interior facet points together
+    with their minimal representative with respect to $G$.
   \item The transition $f$ simply takes a Gröbner cone and computes its facets. It returns
     the interior points of these facets (considered with and without symmetry) together
     with meta data pointing to the \enquote{originating} cone.
@@ -2445,8 +2451,6 @@ net executes as follows:
     been processed, which can be checked by the (implied) token counting mentioned before.
     Additionally, it is necessary that $e_1$ and $e_2$ hold \texttt{false}.
 \end{itemize}
-
-\todo{finished here?}
 
 \subsection{Adaptation and Implementation Details}
 
@@ -2467,15 +2471,15 @@ Make in particular use of termination logic -- not trivial!
 
 \section{Performance and Scalability}
 
-In this section we want to apply our implemented algorithms to real world examples in
-order to examine how efficient they parallelize. The idea is to consider examples which
-are \enquote{big} enough to provide reliable parallelization timings. An important class
-of (tropical) varieties already considered in \cite{tropPointsLinks} and \cite{tropGrass}
-are the so-called \emph{tropical Grassmannians} which can be parameterized to arbitrary
-dimensions. We want to compare the single-threaded computing times of the
+In this section we want to apply our implemented algorithms to examples originating from
+current research in order to examine how efficiently they parallelize. The idea is to
+consider examples which are \enquote{big} enough to provide reliable parallelization
+timings. An important class of (tropical) varieties already considered in
+\cite{tropPointsLinks} and \cite{tropGrass} are the so-called \emph{tropical
+Grassmannians}. We want to compare the single-threaded computing times of the
 \textsc{Singular}-only version of our algorithm with the parallel version by considering
 the tropical Grassmannian $\mathcal G_{3,7}$. While this tropical variety is sufficiently
-small to be computed successfully on any private machine, we also want to consider
+small to be computed successfully on any individual machine, we also want to consider
 examples which have not been computed in their entirety before. An example for this is the
 much larger tropical Grassmannian $\mathcal G_{3,8}$.
 
@@ -2488,8 +2492,8 @@ per node. The nodes are connected via FDR Infiniband.
 \subsection{Tropical Grassmannians}
 
 One important class of tropical varieties are the tropical Grassmannians which arise as
-the tropical varieties of the equally -- if not more -- important Grassmannians which can
-be interpreted as projective varieties. Some results on the tropical Grassmannian can be
+the tropical varieties of the equally -- if not more -- important classical Grassmannians
+which are in fact projective varieties. Some results on the tropical Grassmannian can be
 found in \cite{tropGrass}. The following is an overview of the construction of projective
 Grassmannians found in \cite[Section~8]{gathmAlgGeo}. \todo{provide other source?}
 
@@ -2562,8 +2566,8 @@ that the Grassmannian is an irreducible projective variety of dimension $k(n-k)$
 leads to the following definition:
 
 \begin{definition}[Tropical Grassmannians]
-  By the above a Grassmannian can be viewed as a projective variety given by a homogeneous
-  prime ideal
+  By the above a Grassmannian can be viewed as a projective variety given by the
+  homogeneous prime ideal
   \[
     I(\Grass(k,n)) \idealof K[ p_{i_1, \dots, i_k} : 1\leq i_1 < \cdots < i_k \leq n ]
   \]
@@ -2590,8 +2594,8 @@ leads to the following definition:
 \end{figure}
 
 \begin{example} \label{ex:tropGrass}
-  Suppose, for instance, $K = \setC$ as a subfield of $\CCt$, hence we obtain fans as
-  remarked before.
+  Suppose, for instance, $K = \setC$ as a subfield of $\CCt$, hence we our algorithms work
+  with polyhedral fans as was remarked before.
   \begin{enumerate}
     \item As we clearly have $\Grass(0,n) \cong \Grass(n,n) \cong \{0\}$ and $\Grass(1,n)
       \cong \Grass(n-1, n) \cong \setP_K^{n-1}$, the first \enquote{non-trivial}
@@ -2680,7 +2684,7 @@ Singular features?}{} in the GPI-Space implementation.
     24  &      -- &  42.803 & 0.772 \\
     32  &      -- &  39.756 & 0.623
   \end{tabular}
-  \caption{Timings of computing $\mathcal G_{3,7}$}
+  \caption{Timings of computing $\mathcal G_{3,7}$ in parallel.}
   \label{tab:g37}
 \end{table}
 
@@ -2702,7 +2706,7 @@ starting with 12 threads we observe a sudden drop in the speed-up which worsens 
 increasing core counts. This can also be observed in the lower plot in
 Figure~\ref{fig:g37sc}, where the curve through the mean running times flattens earlier
 than the expected hyperbolas.
-\todo{give reasons for efficiency drop}
+\todo{give reasons for efficiency drop -- structure of problem}
 
 \begin{figure}[htbp]
   \begin{center}
@@ -2712,8 +2716,8 @@ than the expected hyperbolas.
   \label{fig:g37sc}
 \end{figure}
 
-This example is as interesting to us since it has already been studied quite thoroughly
-and does not parallelize well beyond two compute nodes. Hence in the next step we want to
+This example is interesting to us since it has already been studied quite thoroughly but
+does not parallelize well beyond two compute nodes. Hence in the next step we want to
 consider the tropical Grassmannian $\mathcal G_{3,8}$ which turns out to be much larger.
 Of course, we again want to consider this Grassmannian modulo symmetry: in the same way as
 above the symmetry group $S_8$ acts on the Plücker coordinates and lifts to a subgroup
@@ -2755,22 +2759,10 @@ for the high-memory compute servers in the mathematics department of TU Kaisersl
 
 In Figure~\ref{fig:g38scaling} we see that \dots and so on.
 
-\subsection{Practical Optimizations and Secondary Results}
+\clearpage
 
-Optimization of certain edge cases
-
-Mention improvements to \textsc{Singular} kernel here?
-
-\todo{in progress (section useless?)}
-
-\newpage
-\listoffigures
-
-\listoftables
-\newpage% only maybe
 \printbibliography
 
-\vfill
 \begin{otherlanguage}{ngerman}
   \section*{Erklärung zur Bachelorarbeit}
   Hiermit versichere ich, dass ich die vorliegende Arbeit selbstständig und lediglich
@@ -2779,6 +2771,7 @@ Mention improvements to \textsc{Singular} kernel here?
   Prüfungsverfahrens eingereicht wurde.\\[1em]
   Kaiserslautern, den \today,\\[5em]
   Dominik Bendle
+  \thispagestyle{plain}
 \end{otherlanguage}
 
 \end{document}

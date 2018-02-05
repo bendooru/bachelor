@@ -9,7 +9,7 @@ set style line 2 lc rgb '#000000' pt 7 ps 0.5 lt 1 lw 2 # --- black
 set style line 3 lc rgb '#aa0000' lt 2 lw 2
 set style line 4 lc rgb 'blue' pt 2 ps 2 lw 3
 
-set xlabel 'threads'
+set xlabel 'cores'
 set ylabel 'time [min]'
 
 f(x) = 19745.97 / x
@@ -30,7 +30,7 @@ constmean(x) = 64*14486.34
 constone(x) = 1
 
 set yrange [0.8:1.8]
-set ylabel 'efficiency normalized to 64 threads'
+set ylabel 'efficiency normalized to 64 cores'
 
 plot constone(x) notitle with lines linestyle 2, \
      'data/g38/all_times' using 1:($1*$2/constmean(x)) title 'individual runs' with points linestyle 4
