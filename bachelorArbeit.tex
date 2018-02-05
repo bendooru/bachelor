@@ -122,17 +122,20 @@
 % adjust numbering
 \numberwithin{definition}{section}
 
+% not properly hyphenated in English
+\hyphenation{Kai-sers-lau-tern}
+
 \subtitle{Bachelor's Thesis}
 \title{Massively Parallel Computation of Tropical Varieties}
 \author{Dominik Bendle}
 % hacky
 \publishers{%
   \begin{tabular}{ll}
-    First corrector:  & Dr.\ Janko Böhm \\
-    Second corrector: & Prof.\ Dr.\ Andreas Gathmann \\
+    First corrector:  & Dr.~Janko Böhm \\
+    Second corrector: & Prof.~Dr.~Andreas Gathmann \\
                       & \\
-    Supervisors:      & Dr.\ Janko Böhm \\
-                      & Dr.\ Mirko Rahn
+    Supervisors:      & Dr.~Janko Böhm \\
+                      & Dr.~Mirko Rahn
   \end{tabular}\\[3em]
   Fachbereich Mathematik\\
   Arbeitsgruppe Algebra, Geometrie und Computeralgebra\\[1em]
@@ -157,40 +160,75 @@
 %\linenumbers
 \section{Overview}
 
-Give general introduction to topic
+Tropical geometry is a relatively new field in mathematics that studies algebraic
+varieties in a combinatorial fashion, reducing algebraic problems to polyhedral ones in
+the process. In particular, the \emph{tropical varieties} arising in this field are
+sometimes referred to as the \enquote{combinatorial shadow} of their algebraic
+counterpart. As usual, mathematicians are interested in studying concrete examples of
+tropical varieties study -- for instance to gain a general intuition behind the
+combinatorial structures or to find counter examples.
+\todo{more on tropical geometry?}
 
-Describe work done at ITWM and their assistance
+While this process of \emph{tropicalization} yields objects that are far easier to
+describe and compute than their algebraic counterparts, it is not hard to construct
+examples that cannot be computed in reasonable time frames using single-threaded legacy
+applications that are in use now. There are mainly two ways of tackling this issue:
+Firstly, one could attempt to devise new theories and algorithms to reduce the
+computational requirements behind the problems. This, however, will eventually suffer from
+the limits of our legacy applications as well. Secondly and more importantly, we may
+identify and modify the parts of existing methods which are suitable for parallelization
+to utilize the capabilities of modern computers to the fullest. Furthermore, aiming for
+parallel methods running on multiple machines would in theory allow for parallelization to
+arbitrary dimensions.
 
-Mention $\mathcal G_{3,8}$ which has not been computed prior and give some properties of the
-fan.
+To this end, one usually considers two kinds of parallelization. On \emph{shared memory
+systems} a single process uses multiple threads while processing shared data, allowing for
+fine-grained parallelism. In this, they are limited by how many processors can access
+shared memory and only work in a local sense. On \emph{distributed} and
+\emph{multi-process systems} data is processed by different processes which not share
+memory but instead communicate by message passing. This only provides coarse-grained
+parallelism but can in theory scale to arbitrarily large computing configurations.
 
-Work exposed several memory leaks and small errors in \textsc{Singular} kernel, were able
-to be fixed.
+Our contribution in this thesis is the combination of the latter kind of paralellization
+method mentioned above with existing methods to compute tropical varieties. Methods of
+computing tropical varieties have been studied by Bogart, Jensen, Speyer, Sturmfels and
+Thomas \cite{compTropVar} and further improved by Ren and Hofmann \cite{tropPointsLinks}.
+These methods constitute the \enquote{lower} level of the final parallel implementation
+and are implemented in the computer algebra system \textsc{Singular} \cite{Singular} which
+is being developed at Technische Universität Kaiserslautern. In particular, tropical
+computations are carried out by methods of the library \texttt{tropicalNewton.lib}
+\cite{tropNewtLib} which relies on Gfan \cite{gfan} for polyhedral computations via the
+interface library \texttt{gfan.lib} \cite{gfanLib}. Instances of \textsc{Singular}
+processes are then managed by the workflow management system GPI-Space \cite{gpispace} at
+the \enquote{upper} level. GPI-Space is developed by the High Performance Computations
+(HPC) department at Fraunhofer Institut für Techno- und Wirtschaftsmathematik (ITWM).
 
-Our results are implemented in computer algebra system \textsc{Singular} \cite{Singular}
-with parallelization work done using GPI-Space at the ITWM.
-
-Also \texttt{gfan.lib} \cite{gfanLib}, interface to Gfan \cite{gfan}
-
-Based on work done by Dr.\ Lukas Ristau, Christian Reinbold with help from Dr.\ Mirko Rahn
-and the HPC Department of ITWM.
-% TODO important! mention also in 3rd section!
-
-% abstract from Janko's paper
-
-\todo{formulate into full text}
+Our parallelization solution is based on work by Christian Reinbold who used GPI-Space to
+implement a parallel algorithm to compute GIT-fans \cite{reinboldGitFan}. This, in turn,
+relies on foundational work done by Dr.~Lukas Ristau in creating interface code between
+GPI-Space and \textsc{Singular}. As tropical varieties admit the structure of a polyhedral
+fan as well, we were able to successfully modify Reinbold's algorithm to compute tropical
+varieties instead. The development was coordinated in cooperation with the HPC department
+of Fraunhofer ITWM, in particular with Dr.~Mirko Rahn and Christian Reinbold.
+Additionally, as a side effect we accelerated the development of \texttt{puiseux.lib}
+\cite{puiseuxLib} lead by Santiago Laplagne on the one hand, which is used as a fallback
+for method computing Puiseux expansions of roots of zero-dimensional ideals. On the other
+hand during our work with \textsc{Singular} we were able to identify several bugs --
+mainly memory leaks -- which were promptly fixed. Using our parallel algorithm we were
+able to compute the tropical Grassmannian $\mathcal G_{3,8}$ modulo symmetry in its
+entirety, which was not possible with legacy methods until now.
+\todo{check for completion}
 
 In the second section we will introduce the general setting in which we want to compute
 tropical varieties. For this purpose we introduce notions concerning fields with valuation
 and convex geometry. We then define tropical varieties and study their properties as
-polyhedral convexes. Finally, we illustrate how compute tropical varieties using methods
-from \cite{compTropVar} which we then improve using new techniques from
+polyhedral convexes. Finally, we illustrate how to compute tropical varieties using
+methods from \cite{compTropVar} which we then improve using new techniques from
 \cite{tropPointsLinks}. In the third section we will introduce GPI-Space and Petri nets as
-a means to formulate parallelizable workflows and subsequently formulate our traversal
-algorithm as such a Petri net. In the fourth section we introduce the tropical
+a means to formulate parallelizable workflows and subsequently translate our traversal
+algorithm into such a Petri net. In the fourth section we introduce the tropical
 Grassmannians, an important class of tropical varieties and give timings for parallel
 computations of $\mathcal G_{3,7}$ and $\mathcal G_{3,8}$.
-
 
 \subsubsection*{Acknowledgements}
 Firstly I would like to thank Dr.~Janko Böhm for suggesting this topic to me, giving me
@@ -199,13 +237,14 @@ and their computation. In this vein I thank Dr.~Yue Ren and Dr.~Tommy Hofmann fo
 support in understanding and adapting their \textsc{Singular} implementation. Special
 thanks goes to Santiago Laplagne, who, during his stay here in Germany, tirelessly
 implemented and improved a \textsc{Singular} library for computations with general Puiseux
-series expansions.
+series expansions. Similarly, I want to thank Dr.~Hans Schönemann who quickly provided
+fixes to some annoying bugs we found in \text{Singular}.
 
 I also would like to thank Dr.~Mirko Rahn from the High Performance Computing (HPC)
 department at Fraunhofer ITWM for his guidance and help during my work there. I further
 thank Christian Reinbold for his helpful introduction to his project and providing a
 working code base in the first place.
-\todo{not finished yet}
+\todo{everyone accounted for?}
 
 \section{Computing Tropical Varieties}
 
@@ -447,8 +486,8 @@ K\setminus\{0\}$. Such a field with valuation defines a local ring $R_\nu = \{ x
 = R_\nu/\mathfrak m_{R_\nu}$ of $R_\nu$.
 \todo{do we even need the uniformizing parameter? (removed for now)}
 
-Various fields with non-trivial valuation are suitable for computational purposes. The
-most important one to us which we will usually work with is the field of Puiseux series:
+Various fields with non-trivial valuation are suitable for computational purposes. The one
+over which we will usually do our computations is the field of Puiseux series:
 
 \begin{definition}[Puiseux Series]
   \label{def:puiseux}
