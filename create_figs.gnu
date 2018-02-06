@@ -29,11 +29,11 @@ set output 'fig/efficiency38.tex'
 constmean(x) = 64*14486.34
 constone(x) = 1
 
-set yrange [0.8:1.8]
+set yrange [0.4:1.3]
 set ylabel 'efficiency normalized to 64 cores'
 
 plot constone(x) notitle with lines linestyle 2, \
-     'data/g38/all_times' using 1:($1*$2/constmean(x)) title 'individual runs' with points linestyle 4
+     'data/g38/all_times' using 1:(constmean(x)/($1*$2)) title 'individual runs' with points linestyle 4
 
 
 # g37, one node

@@ -1664,6 +1664,7 @@ the support of a polyhedral fan, since it is a tropical variety, and also combin
 a curve which describes $\Trop(I)$ locally around $\vec u$. This was shown in the proof of
 the correctness of \cite[Algorithm~4.10]{compTropVar}. The properties needed for our
 algorithm are as follows, mainly due to \cite{ossTropLift}:
+\todo{reformulate, make definition etc}
 
 \begin{thmCorollary} \label{thmc:tropInt}
   Let $X$ and $X'$ be two affine subvarieties. If the intersection $\Trop(X) \cap
@@ -2728,7 +2729,20 @@ the minimal representative of a interior point.
 
 \begin{table}[tbh]
   \centering
-  \todo[inline]{construct table}
+  \begin{tabular}{r|r||r|r}
+    \textbf{nodes} & \textbf{cores} & \textbf{run time [s]} & \textbf{efficiency} \\
+    \hline
+     1 &  16 & 98771.000 & 0.587 \\
+     2 &  32 & 37398.740 & 0.775 \\
+     4 &  64 & 14486.337 & 1     \\
+     8 & 128 &  6597.369 & 1.098 \\
+    16 & 256 &  3300.084 & 1.097 \\
+    24 & 384 &  2506.033 & 0.963 \\
+    32 & 512 &  2001.769 & 0.904 \\
+    40 & 640 &  1830.740 & 0.791 \\ % FIXME watch out for bad data
+    48 & 768 &  1267.394 & 0.952 \\
+    56 & 896 &  1188.226 & 0.871
+  \end{tabular}
   \caption{Timings of computing $\mathcal G_{3,8}$, using all 16 cores per node}
   \label{tab:g38}
 \end{table}
