@@ -2588,7 +2588,7 @@ leads to the following definition:
       \draw ({\x*72+90}:2) -- ({\x*72+162}:2);
     }
   \end{tikzpicture}
-  \caption{Petersen graph illustrating connectivity of $\mathcal G_{2,5}$}
+  \caption{Petersen graph illustrating $\mathcal G_{2,5}$ reduced to a polyhedral complex}
   \label{fig:petersen}
 \end{figure}
 
@@ -2622,7 +2622,7 @@ leads to the following definition:
       cones as facets. The homogeneity space $C_0(I_{2,5})$ is five-dimensional.
       Intersecting $\mathcal G_{2,5}/C_0(I_{2,5})$ with the unit sphere in $\setR^{10}$
       yields a polyhedral complex which can be interpreted as the \emph{Petersen graph} in
-      ten nodes and fifteen vertices. It is illustrated in Figure~\ref{fig:petersen} and
+      ten nodes and fifteen vertices. It is illustrated in Figure~\ref{fig:petersen} --
       note that edges and vertices \emph{both} correspond to polyhedra of the complex.
       For details see for instance \cite[Example~9.10]{sturmSolve}.
   \end{enumerate}
@@ -2706,8 +2706,12 @@ computing times scale linearly with processor core count up to eight cores. Howe
 starting with 12 threads we observe a sudden drop in the speed-up which worsens for
 increasing core counts. This can also be observed in the lower plot in
 Figure~\ref{fig:g37sc}, where the curve through the mean running times flattens earlier
-than the expected hyperbolas.
-\todo{give reasons for efficiency drop -- structure of problem}
+than the expected hyperbolas. In this case, the loss of parallelization efficiency is not
+related to implementational problems or algorithmic overhead: Indeed, due to the structure
+of the fan the set of unprocessed Gröbner cones, that is, the \emph{frontier nodes} of the
+corresponding incidence graph, has a maximum size much smaller than 125. Using more
+processor cores than this maximum size will leave some workers idle during execution,
+and hence provides less or even no speed-up at all.
 
 \begin{figure}[htbp]
   \begin{center}
@@ -2747,13 +2751,23 @@ the minimal representative of a interior point.
   \label{tab:g38}
 \end{table}
 
-By our calculations $\mathcal G_{3,8}$ modulo $S_8$ has $f$-vector
+As, at the time of our experiments, the number of Gröbner cones in $\mathcal G_{3,8}$
+modulo $S_8$ was not known, we gradually computed larger and larger sets of
+cones\footnote{While mainly a debug feature, Christian Reinbold included a setting to
+terminate after computing a fixed amount of cones}, starting out with 1000 and ending up
+with {20,000}, where we then saw that all cones had been computed: By our calculations
+$\mathcal G_{3,8}$ modulo $S_8$ has $f$-vector
 \[
   (0,0,0,0,0,0,0,0,1,95,1098,6671,24196,53648,70557,50125,14763),
 \]
-however the recombination into the full fan has proven to be too memory intensive even
-for the high-memory compute servers in the mathematics department of TU Kaiserslautern.
-\todo{in progress}
+however the recombination into the full fan has proven to be too memory intensive even for
+the high-memory compute servers in the mathematics department of TU Kaiserslautern. Having
+obtained a full solution, we started benchmarking this example. Timings of these runs are
+given in \ref{tab:g38}. In contrast to $\mathcal G_{3,8}$, computations of $\mathcal
+G_{3,8}$ are done in steps of whole compute nodes where all 16 processor cores are
+utilized. The timings, taken as averages over at least 8 runs, are plotted in
+Figure~\ref{fig:g38scaling}. Note that for 16 and 32 cores we only did five and four runs
+each due to time constraints.
 
 \begin{figure}[htb]
   \begin{center}
@@ -2763,6 +2777,29 @@ for the high-memory compute servers in the mathematics department of TU Kaisersl
   \label{fig:g38efficiency}
 \end{figure}
 
+We again want to consider the parallelization efficiency tested in these runs. A graph of
+this is given in Figure~\ref{fig:g38efficiency} but note that in this case we normalize
+the efficiency to 4 compute nodes, that is, 64 processor cores. Here we observer very
+interesting behavior: Firstly, the algorithm shows super-linear speed-up when passing from
+16 to 64 -- in particular running on 64 cores is 6.8 times faster than running on 16 cores
+while only using four times as many processor cores. This is quite counterintuitive:
+possible explanations include memory and storage latencies on fewer machines.\todo{not
+sure}{} Secondly, while we observe the expected degradation of parallelization efficiency
+after 128 cores, we also see some erratic behavior of the resulting graph. In particular
+the runs for 40 nodes, that is, 640 cores, show a significant increase in total
+computation time and drop in efficiency. We can imagine two reasons for this:
+\begin{itemize}
+  \item As the sample size of runs is rather small, disturbances in the computing cluster
+    can have significant impact to the average timings.
+  \item More importantly, the computation of a starting cone via
+    Algorithm~\ref{alg:tropicalPoint} and execution orders of simultaneously enabled
+    transitions in GPI-Space are randomized, leading to different program flows for each
+    invocation. This is further amplified by the computation modulo symmetry: For
+    different starting cones we will come across different representatives for the cone
+    orbits. Also, computations in \texttt{puiseux.lib} are comparatively time-expensive
+    compared to the Newton-method described in Section~\ref{sec:newtonMethod}.
+\end{itemize}
+
 \begin{figure}[htbp]
   \begin{center}
     \input{fig/scaling38.tex}
@@ -2771,10 +2808,13 @@ for the high-memory compute servers in the mathematics department of TU Kaisersl
   \label{fig:g38scaling}
 \end{figure}
 
-In Figure~\ref{fig:g38scaling} we see that \dots and so on.
+Despite the uncharacteristic drops in efficiency we still see that this algorithm scales
+quite favorably, even for up to 896 processor cores, far exceeding our initial
+expectations. In particular, scaled to 16 cores our efficiency values all lie above 1.
+We can conclude that parallelizing algorithms for algebraic geometry is a worthwhile
+endeavor and offers tremendous speed-up.
 
 \clearpage
-
 \printbibliography
 
 \begin{otherlanguage}{ngerman}
