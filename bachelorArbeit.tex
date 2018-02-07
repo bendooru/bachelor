@@ -79,6 +79,8 @@
 \newcommand*\setT{\mathds{T}}
 \newcommand*\ii{\mathrm{i}}
 
+\newcommand{\Cpp}{C\nolinebreak\texttt{++}}
+
 % number a single equation in unnumbered environment
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 \newcommand*\dotcup{\mathbin{\dot{\cup}}}
@@ -2454,19 +2456,56 @@ net executes as follows:
 \subsection{Adaptation and Implementation Details}
 
 As was previously mentioned we heavily rely on work done by Christian Reinbold on GIT-fans
-\cite{reinboldGitFan}. His work, in turn, relies on work done by Lukas Ristau to
-seamlessly integrate \textsc{Singular} into a GPI-Space project. Since the foundation for
-our application was laid by Reinbold, it is best to check for details in
-\cite[Section~4]{reinboldGitFan}. We will give a short overview of implementation details
-that are especially important for our implementation.
+\cite{reinboldGitFan}, realizing algorithms from \cite{compGitFan} in parallel. His work,
+in turn, relies on work done by Lukas Ristau to seamlessly integrate \textsc{Singular}
+into a GPI-Space project, particularly for \cite{towardsParallel}. Since the foundation
+for our application was laid by Reinbold, it is best to check for details in
+\cite[Section~4]{reinboldGitFan}. As described in this thesis, the computation of the
+GIT-fan is a 3-stage algorithm of which only the third stage is involves traversing a fan.
+Hence, for our applications we had to remove the unnecessary stages from the workflow and
+modify the existing traversal Petri net to our needs. We will give a short overview of
+implementation details that are especially important for our implementation.
 
-Introduce GIT-fans as similarly structured object
+One of the bigger challenges of parallelizing algorithms for algebraic geometry is
+integrating the computer algebra system \textsc{Singular} into the GPI-Space environment.
+\textsc{Singular} provides a C/\Cpp-interface which can be accessed easily from within
+GPI-Space, but we still have to deal with some nuisances
+\cite[Section~4.2]{reinboldGitFan}. Particularly relevant to our implementation are:
+\begin{itemize}
+  \item Most functionality of \textsc{Singular} is available through libraries written in
+    its interpreter language. This language only provides array-like lists for storing
+    collections of data. This is unsuitable for larger data sets like the collection of
+    cones we must manage during the computation of a tropical variety. We thus externalize
+    this to the GPI-Space-level where we may use structures provided by the Standard
+    Template Library (STL) of \Cpp.
+  \item As first tests have shown using the built-in virtual memory layer of GPI-Space is
+    not suitable for passing Gröbner cone data between processes for size reasons. Apart
+    from this, \textsc{Singular} does not provide serialization of data into memory. It is
+    thus unavoidable to write our cone data to disk. Of course, this requires that all
+    compute nodes used have access to a shared (network) storage. On the computing cluster
+    provided by Fraunhofer ITWM this is achieved via \textsc{BeeGFS} \cite{bgfs}, which
+    allows efficient parallel access to storage.
+\end{itemize}
 
-Adapting existing code base
+Now, as Gröbner cones must be stored on disk, we must decide in which manner and how to
+identify the data. As \textsc{Singular} provides the \emph{simple singular interface}
+(SSI) to serialize its data into files, it suffices to devise a method to determine unique
+file names for our data. Making file names dependent on the Gröbner cones contained
+therein might yield race conditions or corrupted data, as different processes might
+compute the same cone independently, thus writing into the same file at the same time.
+Another problem that might arise from this is the limited file length of most file
+systems, since the size of identifying information grows with problem size as well.
 
-Make in particular use of termination logic -- not trivial!
-
-\todo{write stuff}
+Hence we chose to assign each Neighbor-computation a unique ID, provided by a counter.
+This is then added as a simple self-incrementing counter to the Petri net given in
+Figure~\ref{fig:refined}, supplying transition $n$ with IDs. Note that the only
+information we obtain in transition $f$ is the interior point of a facet which can be
+stored in a token. Each neighbor computation then creates a directory named after its ID
+and writes the resulting Gröbner cone data into numbered SSI-files \texttt{0.ssi},
+\texttt{1.ssi} and so on. The token corresponding to this Gröbner cone in the Petri net
+then contains the interior point of the cone as a unique identifier the relative file path
+\texttt{ID/n.ssi} to keep track of the data.
+\todo{write stuff, include some real life code, termination logic?}
 
 \section{Performance and Scalability}
 
@@ -2666,7 +2705,7 @@ which is much more manageable -- in fact, $\mathcal G_{3,7}$ can be computed on 
 personal computers in a relatively small amount of time. On one of the compute nodes
 described above the \enquote{pure} single-threaded \textsc{Singular}-version of the
 traversal algorithm takes about {672.19} seconds averaged over 8 runs. Note that this
-version of the algorithm has parts implemented in a dynamic \textsc{C++}-module that were
+version of the algorithm has parts implemented in a dynamic \Cpp-module that were
 translated into the slower \text{Singular} interpreter language\todo{talk earlier about
 Singular features?}{} in the GPI-Space implementation.
 
