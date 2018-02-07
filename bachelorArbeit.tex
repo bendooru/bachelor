@@ -130,9 +130,11 @@
 \hyphenation{Kai-sers-lau-tern}
 \hyphenation{Tech-ni-sche}
 
-\subtitle{Bachelor's Thesis}
+\subject{Bachelor's Thesis}
 \title{Massively Parallel Computation of Tropical Varieties}
-\author{Dominik Bendle}
+% TODO needed by Prüfungsordnung?
+\subtitle{Massivparallele Berechnung tropischer Varietäten}
+\author{Dominik Bendle\\{\small Matrikelnr.: 392713}}
 % hacky
 \publishers{%
   \begin{tabular}{ll}
@@ -154,7 +156,7 @@
 \date{Kaiserslautern, \today}
 
 \begin{document}
-\pagestyle{headings}
+\pagestyle{plain}
 
 \maketitle
 
@@ -164,6 +166,7 @@
 \listoftables
 \newpage
 
+\pagestyle{headings}
 \addtokomafont{section}{\clearpage}
 
 % FIXME REMOVE LATER
@@ -473,10 +476,10 @@ no points whatsoever. This will become important later on.
     \caption{Tropical quadric}
     \label{fig:trop:quad}
   \end{subfigure}
+  \todo[inline]{quadric not generic, add one?}
   \caption{A tropical line and quadric in $\setR^2$}
   \label{fig:tropLineQuad}
 \end{figure}
-\todo{quadric not generic, add one?}
 
 Since monomials and powers of variables are well-defined, we can assign a \emph{degree} to
 a tropical polynomial in the usual sense, hence we may carry over the naming conventions
@@ -1941,14 +1944,14 @@ transitions with letters if necessary.
     \caption{Task parallelism}
     \label{fig:petri:taskpar}
   \end{subfigure}
-  \caption{Petri nets illustrating parallelisms}
+  \caption{Minimal Petri nets illustrating parallelisms}
   \label{fig:petriEx}
 \end{figure}
 
-\begin{example}[Parallelisms in Petri Nets]
-  \label{ex:petriPar}
+\begin{example}[Parallelisms in Petri Nets, {\cite[Examples~3.4
+  and~3.5]{towardsParallel}}] \label{ex:petriPar}
   We now want to look at how different kinds of parallelisms can be realized in Petri
-  nets (see also \cite[Examples~3.4--3.5]{towardsParallel}).
+  nets.
   \begin{enumerate}[label=(\alph*)]
     \item First consider the Petri net $\Psi$ whose graph is depicted in
       Figure~\ref{fig:petri:datapar}. If $i$ holds multiple tokens, then $f$ is enabled
@@ -2473,8 +2476,8 @@ net executes as follows:
   \item The transition $f$ simply takes a Gröbner cone and computes its facets. It returns
     the interior points of these facets (considered with and without symmetry) together
     with meta data pointing to the \enquote{originating} cone.
-  \item The transition $n$ now takes an interior facet point and the ideals it points to
-    as specified above and applies
+  \item The transition $n$ now takes an interior facet point and the pair of reduced
+    Gröbner bases (resp.\ their location on disk) included in the token and applies
     lines~\ref{alg:neigh:line:start}--\ref{alg:neigh:line:end} of
     Algorithm~\ref{alg:neighbors} to obtain the adjacent maximal Gröbner cones.
   \item The net terminates if all tokens corresponding to maximal cones and facets have
@@ -2512,8 +2515,8 @@ GPI-Space, but we still have to deal with some nuisances
     from this, \textsc{Singular} does not provide serialization of data into memory. It is
     thus unavoidable to write our cone data to disk. Of course, this requires that all
     compute nodes used have access to a shared (network) storage. On the computing cluster
-    provided by Fraunhofer ITWM this is achieved via \textsc{BeeGFS} \cite{bgfs}, which
-    allows efficient parallel access to storage.
+    provided by Fraunhofer ITWM this is achieved via the file system \textsc{BeeGFS}
+    \cite{bgfs}, which allows efficient parallel access to storage.
 \end{itemize}
 
 Now, as Gröbner cones must be stored on disk, we must decide in which manner and how to
@@ -2522,7 +2525,7 @@ identify the data. As \textsc{Singular} provides the \emph{simple singular inter
 file names for our data. Making file names dependent on the Gröbner cones contained
 therein might yield race conditions or corrupted data, as different processes might
 compute the same cone independently, thus writing into the same file at the same time.
-Another problem that might arise from this is the limited file length of most file
+Another problem that might arise from this is the limited file path length of most file
 systems, since the size of identifying information grows with problem size as well.
 
 Hence we chose to assign each Neighbor-computation a unique ID, provided by a counter.
