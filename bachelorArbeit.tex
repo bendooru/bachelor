@@ -204,11 +204,9 @@ the tropical varieties are the \emph{corner loci} of these objects. An important
 application of tropical geometry include intersection theory which deals with
 intersections between subvarieties of an algebraic variety and is for example used to
 count numbers of solutions to geometric questions \cite{mikhEnum}: Many theorems have
-counter parts in tropical geometry or even carry over entirely.
-\todo{what is intersection theory, more, Hurwitz}
-As usual, mathematicians are interested in studying concrete examples of tropical
-varieties -- for instance to gain a general intuition behind the combinatorial structures
-or to find counter examples.
+counter parts in tropical geometry or even carry over entirely. As usual, mathematicians
+are interested in studying concrete examples of tropical varieties -- for instance to gain
+a general intuition behind the combinatorial structures or to find counter examples.
 
 While this process of \emph{tropicalization} yields objects that are far easier to
 describe and compute than their algebraic counterparts, it is not hard to construct
@@ -2251,8 +2249,13 @@ description of our algorithm.
     point} to each of them. It is then sufficient to compare the unique points with each
     other. The unique point may then also be used as a \emph{key} for storage purposes.
 
-    For a given  cone its unique point is obtained by \dots
-    \todo{explain this}
+    Assume for the given cone $C$ that $C = \{ \vec x : A\vec x \leq 0 \}$, then its
+    \emph{lineality space} is the linear subspace $L = \{ \vec x : A\vec x=0 \}$. To
+    obtain a unique point which is stable under symmetry we first compute unique minimal
+    set of primitive vectors which span $C$ in the orthogonal complement of $L$ and then
+    take their sum. Obtaining these vectors is again possible via the double description
+    method \cite{fuDD} and it is clear that, since spanning vectors are mapped to
+    spanning vectors under symmetry this yields a suitable interior point.
   \item Finally, in the context of tropical varieties it is desirable to consider the
     corresponding polyhedral fan modulo symmetry. More precisely, for a polyhedral fan
     $\mathcal F$ in $\setR^n$ we want to find a subgroup of permutations $G \leq S_n$ that
@@ -2908,8 +2911,8 @@ the efficiency to 4 compute nodes, that is, 64 processor cores. Here we observer
 interesting behavior: Firstly, the algorithm shows super-linear speed-up when passing from
 16 to 64 -- in particular running on 64 cores is 6.8 times faster than running on 16 cores
 while only using four times as many processor cores. This is quite counterintuitive:
-possible explanations include memory and storage latencies on fewer machines.\todo{not
-sure}{} Secondly, while we observe the expected degradation of parallelization efficiency
+possible explanations include memory and storage latencies on fewer machines.\todo{clarify}{}
+Secondly, while we observe the expected degradation of parallelization efficiency
 after 128 cores, we also see some erratic behavior of the resulting graph. In particular
 the runs for 40 nodes, that is, 640 cores, show a significant increase in total
 computation time, that is, the combined running time of all individual processes, and drop
