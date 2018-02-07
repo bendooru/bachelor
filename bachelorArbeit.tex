@@ -15,10 +15,24 @@
 \usepackage{mathtools,amsfonts,amssymb,amsthm,mathrsfs}
 \usepackage{lmodern}
 \usepackage{dsfont}
-% FIXME REMOVE LATER
-%\usepackage[displaymath,mathlines]{lineno}
-\usepackage[textsize=footnotesize]{todonotes}
-% FIXME END
+
+\usepackage[svgnames]{xcolor}
+\usepackage{listings}
+\lstdefinelanguage{XML}
+{
+  basicstyle=\ttfamily\footnotesize,
+  morestring=[b]",
+  moredelim=[s][\bfseries\color{Maroon}]{<}{\ },
+  moredelim=[s][\bfseries\color{Maroon}]{</}{>},
+  moredelim=[l][\bfseries\color{Maroon}]{/>},
+  moredelim=[l][\bfseries\color{Maroon}]{>},
+  morecomment=[s]{<?}{?>},
+  morecomment=[s]{<!--}{-->},
+  commentstyle=\color{DarkOliveGreen},
+  stringstyle=\color{blue},
+  identifierstyle=\color{red},
+  showstringspaces=false
+}
 
 \usepackage[noend]{algpseudocode}
 \algrenewcommand\algorithmicrequire{\textbf{Input:}}
@@ -43,6 +57,10 @@
     shape border rotate=90,aspect=0.2,draw
   }
 }
+% FIXME REMOVE LATER
+%\usepackage[displaymath,mathlines]{lineno}
+\usepackage[textsize=footnotesize]{todonotes}
+% FIXME END
 
 \usepackage[pdftex,hidelinks]{hyperref}
 
@@ -138,11 +156,11 @@
 % hacky
 \publishers{%
   \begin{tabular}{ll}
-    First corrector:  & Dr.~Janko Böhm \\
-    Second corrector: & Prof.~Dr.~Andreas Gathmann \\
-                      & \\
-    Supervisors:      & Dr.~Janko Böhm \\
-                      & Dr.~Mirko Rahn
+    First examiner:  & Dr.~Janko Böhm \\
+    Second examiner: & Prof.~Dr.~Andreas Gathmann \\
+                     & \\
+    Supervisors:     & Dr.~Janko Böhm \\
+                     & Dr.~Mirko Rahn
   \end{tabular}\\[3em]
   Fachbereich Mathematik\\
   Arbeitsgruppe Algebra, Geometrie und Computeralgebra\\[1em]
@@ -164,6 +182,7 @@
 \newpage
 \listoffigures
 \listoftables
+\lstlistoflistings
 \newpage
 
 \pagestyle{headings}
@@ -171,7 +190,7 @@
 
 % FIXME REMOVE LATER
 %\linenumbers
-\section{Overview}
+\section{Introduction}
 
 Tropical geometry is a relatively new field in mathematics that studies algebraic
 varieties in a combinatorial fashion, reducing algebraic problems to polyhedral ones in
@@ -182,9 +201,10 @@ arithmetic}, where addition is replaced by taking minima and multiplication is r
 addition. This turns the graphs of polynomial functions into piecewise linear object and
 the tropical varieties are the \emph{corner loci} of these objects. An important
 application of tropical geometry include intersection theory which deals with
-intersections between subvarieties of an algebraic variety: Many theorems have counter
-parts in tropical geometry or even carry over entirely.
-\todo{more I guess, Hurwitz}
+intersections between subvarieties of an algebraic variety and is for example used to
+count numbers of solutions to geometric questions \cite{mikhEnum}: Many theorems have
+counter parts in tropical geometry or even carry over entirely.
+\todo{what is intersection theory, more, Hurwitz}
 As usual, mathematicians are interested in studying concrete examples of tropical
 varieties -- for instance to gain a general intuition behind the combinatorial structures
 or to find counter examples.
@@ -198,9 +218,9 @@ Firstly, one could attempt to devise new theories and algorithms to reduce the
 computational requirements behind the problems. This, however, will eventually suffer from
 the limits of our legacy applications as well. Secondly and more importantly, we may
 identify and modify the parts of existing methods which are suitable for parallelization
-to utilize the capabilities of modern computers to the fullest. Furthermore, aiming for
-parallel methods running on multiple machines would in theory allow for parallelization to
-arbitrary dimensions.
+to utilize the capabilities of modern computers to the fullest. In particular, the aim is
+to exploit parallel structures of the mathematical problems in order to use these
+resources with maximum efficiency.
 
 To this end, one usually considers two kinds of parallelization. On \emph{shared memory
 systems} a single process uses multiple threads while processing shared data, allowing for
@@ -211,20 +231,20 @@ memory but instead communicate by message passing or a joint virtual memory laye
 only provides coarse-grained parallelism but can in theory scale to arbitrarily large
 computing configurations.
 
-Our contribution in this thesis is a combination of both of these notions: We apply the
+Our contribution in this thesis is a combination of both of these approaches: We apply the
 latter kind of paralellization method mentioned above to existing methods to compute
 tropical varieties. Methods of computing tropical varieties have been studied by Tristram
 Bogart, Anders Jensen, David Speyer, Benrd Sturmfels and Rekha Thomas \cite{compTropVar}
 and further improved by Yue Ren and Tommy Hofmann \cite{tropPointsLinks}. These methods
 constitute the \enquote{lower} level of the final parallel implementation and are
 implemented in the computer algebra system \textsc{Singular} \cite{Singular} which is
-being developed at University of Kaiserslautern. In particular, tropical computations are
-carried out by methods of the library \texttt{tropicalNewton.lib} \cite{tropNewtLib} which
-relies on Gfan \cite{gfan} for polyhedral computations via the interface library
+being developed at the University of Kaiserslautern. In particular, tropical computations
+are carried out by methods of the library \texttt{tropicalNewton.lib} \cite{tropNewtLib}
+which relies on Gfan \cite{gfan} for polyhedral computations via the interface library
 \texttt{gfan.lib} \cite{gfanLib}. Instances of \textsc{Singular} processes are then
 managed by the workflow management system GPI-Space \cite{gpispace} at the \enquote{upper}
-level. GPI-Space is developed by the High Performance Computations (HPC) department at
-Fraunhofer Institute for Industrial Mathematics (ITWM).
+level, that is, the coordination layer. GPI-Space is developed by the High Performance
+Computations (HPC) department at Fraunhofer Institute for Industrial Mathematics (ITWM).
 
 Our parallelization solution is based on work by Christian Reinbold who used GPI-Space to
 implement a parallel algorithm to compute GIT-fans \cite{reinboldGitFan}, implementing
@@ -235,16 +255,17 @@ of a polyhedral fan as well, we were able to successfully modify Christian Reinb
 implementation to handle computation of tropical varieties instead. The development was
 coordinated in cooperation with the HPC department of Fraunhofer ITWM, in particular with
 the support of Dr.~Mirko Rahn and Christian Reinbold. Additionally, as a side effect we
-accelerated the development of \texttt{puiseux.lib} \cite{puiseuxLib}, which is used as a
-fallback for method computing Puiseux expansions of zero-dimensional ideals. Moreover,
-during our work with \textsc{Singular} we were able to identify various bugs, for example
-memory leaks.
+accelerated the development of \texttt{puiseux.lib} \cite{puiseuxLib}, which is used to
+compute Puiseux expansions of zero-dimensional ideals as. This is required by the methods
+in \cite{tropPointsLinks} as a special case. Moreover, during our work with
+\textsc{Singular} we were able to identify various bugs, for example memory leaks.
 
 Using our parallel algorithm we were able to compute the tropical Grassmannian $\mathcal
 G_{3,8}$ modulo symmetry in its entirety, which was not possible with legacy methods until
-now. Using this as benchmark, we also found that our algorithm scales favorably for large
-numbers of processor cores. In fact, our algorithm scales well to as many as 56 compute
-nodes, which corresponds to 896 processor cores, reducing the running time to 20\,minutes.
+now. Using this as a benchmark, we also found that our algorithm scales favorably for
+large numbers of processor cores. In fact, our algorithm scales well to as many as 56
+compute nodes, which corresponds to 896 processor cores, reducing the running time to
+20\,minutes.
 
 The thesis is structures as follows: In section~2 we will describe the general setting in
 which we want to compute tropical varieties. For this purpose we introduce various notions
@@ -258,7 +279,6 @@ Petri net. In the fourth section we consider the tropical Grassmannians, an impo
 class of tropical varieties and give timings for parallel computations of $\mathcal
 G_{3,7}$ and $\mathcal G_{3,8}$.
 
-\clearpage
 \subsubsection*{Acknowledgements}
 Firstly I would like to thank Dr.~Janko Böhm for suggesting this topic to me, giving me
 the chance to work at Fraunhofer ITWM and guiding me in understanding tropical varieties
@@ -476,7 +496,6 @@ no points whatsoever. This will become important later on.
     \caption{Tropical quadric}
     \label{fig:trop:quad}
   \end{subfigure}
-  \todo[inline]{quadric not generic, add one?}
   \caption{A tropical line and quadric in $\setR^2$}
   \label{fig:tropLineQuad}
 \end{figure}
@@ -716,7 +735,6 @@ a polyhedral complex define a representation.
   \end{enumerate}
 \end{example}
 
-\todo{maybe restructure, provide citation}
 Now, given a polynomial ring $K[\vec x]$ a \emph{term} or \emph{monomial ordering} $\prec$
 on the monomials $K[\vec x]$ is a total ordering such that $1 \prec \vec x^\alpha =
 x_1^{\alpha_1}\cdots x_n^{\alpha_n}$ for all $\alpha \in \setN^n$ and if $\vec x^\alpha
@@ -1060,8 +1078,9 @@ polyhedral methods:
 \begin{theorem}[{\cite[Theorem~3.5.1]{sturmMacTrop}}]
   \label{thm:tropComplexConn}
   Let $I \idealof K[\vec x^{\pm1}]$ be an ideal with irreducible variety $X = V(I)
-  \subseteq \setT^n$ of dimension $d$. Then $\Trop(I)$ is the support of a pure
-  $d$-dimensional polyhedral complex that is connected in codimension one.
+  \subseteq \setT^n$ of dimension $d$ over an algebraically closed field $K$. Then
+  $\Trop(I)$ is the support of a pure $d$-dimensional polyhedral complex that is connected
+  in codimension one.
 \end{theorem}
 
 More generally, if $I \idealof K[\vec x^{\pm1}]$ is prime, respectively its variety $V(I)$
@@ -1141,8 +1160,9 @@ we can deduce defining equations for the Gröbner cone from the Gröbner bases t
 
 \begin{lemma}[{\cite[Lemma~4.2]{compTropVar}}]
   \label{lem:grConEq}
-  Let $I \ideal K[\vec x]$ be a homogeneous ideal, $\prec$ some term ordering as above and
-  $\vec w \in \setR^n$ a weight vector. For any other weight $\vec w' \in \setR^n$. Then
+  Let $I \idealof K[\vec x]$ be a homogeneous ideal, $\prec$ some term ordering as above
+  and $\vec w \in \setR^n$ a weight vector. For any other weight $\vec w' \in \setR^n$.
+  Then
   \[
     \vec w' \in C_{\vec w}(I) \iff
     \forall f \in \mathcal G_{\prec_{\vec w}}(I) :
@@ -1153,15 +1173,15 @@ we can deduce defining equations for the Gröbner cone from the Gröbner bases t
 We now come to the main algorithms needed to compute tropical varieties. While needed by
 Algorithms~\ref{alg:neighbors} and \ref{alg:traversal} as formulated in
 \cite{compTropVar}, our modifications presented in Section~\ref{sec:newtonMethod} will not
-involve intersections of polyhedral fans and cones. Still, we want to consider how this
-achieved in general: Given two tropical varieties represented by fans $\mathcal F_1,
-\mathcal F_2$ we define their \emph{common refinement} to be $\mathcal F_1 \wedge \mathcal
-F_2 = \{ C_1 \cap C_2 : C_1 \in \mathcal F_1, C_2 \in \mathcal F_2 \}$. This is again a
-fan and clearly the support of $\mathcal F_1 \wedge \mathcal F_2$ is the intersection of
-the supports of $\mathcal F_1$ and $\mathcal F_2$ respectively. Also, by considering
-representations of the respective fans we obtain a representation of the common refinement
-in the following way, and note that in practice we canonicalize the resulting intersection
-cones, allowing us to easily check for duplicates:
+involve intersections of polyhedral fans and cones. Still, we want to give a short account
+on obtaining such intersections: Given two tropical varieties represented by fans
+$\mathcal F_1, \mathcal F_2$ we define their \emph{common refinement} to be $\mathcal F_1
+\wedge \mathcal F_2 = \{ C_1 \cap C_2 : C_1 \in \mathcal F_1, C_2 \in \mathcal F_2 \}$.
+This is again a fan and clearly the support of $\mathcal F_1 \wedge \mathcal F_2$ is the
+intersection of the supports of $\mathcal F_1$ and $\mathcal F_2$ respectively. Also, by
+considering representations of the respective fans we obtain a representation of the
+common refinement in the following way, and note that in practice we canonicalize the
+resulting intersection cones, allowing us to easily check for duplicates:
 
 \begin{algo}[Common Refinement, {\cite[Algorithm~4.4]{compTropVar}}]\
   \label{alg:fanRefinement}
@@ -1394,9 +1414,9 @@ evaluated at these roots:
 \end{proposition}
 
 In other words if $f$ has a unique Newton polygon we may regard its expected Newton
-polygon instead of evaluating $f$ at a partial root and vice versa. Now, the use of Newton
-polygons becomes apparent with the following lemma, which draws the connection between
-valuations of roots and the slopes of the Newton polygons:
+polygon instead of evaluating $f$ at a partial solution for a subset of variables and vice
+versa. Now, the use of Newton polygons becomes apparent with the following lemma, which
+draws the connection between valuations of roots and the slopes of the Newton polygons:
 
 \begin{lemma}[{\cite[Proposition~II.6.3]{neuAlg}}]
   Let $f \in K[x]$ be a univariate polynomial and $e$ be an edge of the Newton polygon
@@ -1405,8 +1425,6 @@ valuations of roots and the slopes of the Newton polygons:
   \label{lem:newtPolyRoots}
 \end{lemma}
 
-In other words, if $f$ has a unique Newton polygon we may regard its expected Newton
-polygon instead of evaluating $f$ at a partial root and vice versa.
 Proposition~\ref{prp:expectedNewt} and Lemma~\ref{lem:newtPolyRoots} naturally lead to the
 formulation of the following algorithm to compute tropical varieties of zero-dimensional
 ideals given by a triangular set. By Proposition~\ref{prp:triang} this then enables us to
@@ -1444,15 +1462,15 @@ polygon. An example of how such a computation might look like is given as follow
 
 \begin{example} \label{ex:zeroDimTrop}\
   \begin{enumerate}
-    \item This is a nice example given in \cite[Example~2.13]{tropPointsLinks}. We
-      consider the triangular set $F = \{ f_1, f_2, f_3 \} \subseteq \CCt[x_1, x_2, x_3]$
-      given by
+    \item This is a nice example given in \cite[Example~2.13]{tropPointsLinks}.
+      Considering the triangular set $F = \{ f_1, f_2, f_3 \} \subseteq \CCt[x_1, x_2,
+      x_3]$ given by
       \[
         f_1 = tx_1^2 + x_1 + 1, \quad
         f_2 = tx_1x_2^2 + x_1x_2 + 1, \quad
-        f_3 = x_1x_2x_3+1
+        f_3 = x_1x_2x_3+1,
       \]
-      then each step in the algorithm allows several choices of unique Newton polygons as
+      each step in the algorithm allows several choices of unique Newton polygons as
       illustrated in Figure~\ref{fig:seriesOfNewtonPolygons}. Iterating over all of them
       yields the tropical variety
       \[
@@ -1464,10 +1482,10 @@ polygon. An example of how such a computation might look like is given as follow
       corresponding ideal. In our applications we will usually work over the field of
       complex formal Puiseux series $\CCt$ where we may apply the method used to prove
       Theorem~\ref{thm:puisuexalgclosed} to successively obtain finite approximations to
-      the generally infinite solutions. In particular, the intermediate results will
-      usually be elements of $\setQ(t)$ or $\setQ(a)(t)$ for some algebraic extension
-      $\setQ(a)$ of $\setQ$. Consider now the simple triangular set $F = \{ f_1, f_2, f_3
-      \} \subseteq \CCt[x,y,z]$ given by
+      the generally infinite power series solutions. In particular, the intermediate
+      results will usually be elements of $\setQ(t)$ or $\setQ(a)(t)$ for some algebraic
+      extension $\setQ(a)$ of $\setQ$. Consider now the simple triangular set $F = \{ f_1,
+      f_2, f_3 \} \subseteq \CCt[x,y,z]$ given by
       \[
         f_1 = tx^2 - x + 1, \quad
         f_2 = ty - 1, \quad
@@ -1690,7 +1708,7 @@ $\Trop(\initial_{\vec u}(I))$ is combinatorially a curve. Further, by
 \[
   \initial_{\vec v}(\initial_{\vec u}(I)) = \initial_{\vec v + \epsilon \vec u}(I)
 \]
-for all $\vec v$ some some appropriate $\epsilon>0$. Hence $\Trop(\initial_{\vec u}(I))$
+for all $\vec v$ for some appropriate $\epsilon>0$. Hence $\Trop(\initial_{\vec u}(I))$
 contains relative interior points of all maximal Gröbner cones that have $F$ as a facet,
 yielding the claimed \enquote{local description}. To apply this result in an algorithm,
 the following additional results are required:
@@ -2052,7 +2070,7 @@ Ways to correct these issues include extending Petri nets to so-called \emph{col
 \emph{timed Petri nets}. While studying them in full detail is beyond the scope of this
 thesis, we want to look at how they are realized in the GPI-Space environment, along with
 the other important extensions (see \cite[Section~3.2.2]{towardsParallel} for more
-details): \todo{might need other sources}
+details):
 
 A traditional Petri net cannot model execution times of its transitions since the firing
 process is in principle instantaneous. Clearly, this yields an incomplete description of
@@ -2159,7 +2177,42 @@ are mutually exclusive, that is, they can not both be true for a given token. GP
 supports the common Boolean operators \texttt{:gt:} (greater than), \texttt{:ge:} (greater
 than or equal), similarly \texttt{:lt:} and \texttt{:le:}, \texttt{:eq:} (equal) and so
 on.
-\todo{formulate entire (easy) Petri net here or above}
+
+In Listing~\ref{lst:ez} we see a formulation for the Petri net depicted in
+Figure~\ref{fig:petri:datapar} using the XML language used in GPI-Space. We assume here
+that the transition $f$ is realized as a C-procedure that is implemented externally and
+that the token hold some unspecified data of type \texttt{data}. Note that such a Petri
+net has global input and output places which are then connected to their local
+counterparts $i$ and $o$. These, in turn, are then connected to their corresponding ports
+\texttt{input} and \texttt{output} in $t$.
+
+\begin{lstlisting}[language=XML,basicstyle=\ttfamily\small,
+  gobble=2,float,captionpos=b,frame=single,
+  label=lst:ez,
+  caption={GPI-Space implementation of Figure~\ref{fig:petri:datapar}}]
+  <defun name="example_net">
+    <in  name="input"  type="data" place="i" />
+    <out name="output" type="data" place="o" />
+    <net>
+      <place name="i" type="data" />
+      <place name="o" type="data" />
+      <transition name="f" />
+        <defun>
+          <in  name="input"  type="data" />
+          <out name="output" type="data" />
+          <module name="example" function="output f(input)">
+            <code><![CDATA[
+              data output = function_which_computes_f(input);
+              return output;
+            ]]></code>
+          </module>
+        </defun>
+        <connect-in  port="input"  place="i" />
+        <connect-out port="output" place="o" />
+      </transition>
+    </net>
+  </defun>
+\end{lstlisting}
 
 \subsection{Traversing a Fan in Parallel}
 \label{sec:traverseParal}
@@ -2385,7 +2438,7 @@ maximal cones respectively. This offers two advantages in comparison to the gene
 method:
 \begin{itemize}
   \item Splitting the algorithm allows for a more fine-grained control over the job-sizes
-    submitted to the run-time system. \todo{why is this good?}
+    submitted to the run-time system.
 
     Note that we must be careful in choosing job-sizes: As the workflow engine is a
     single-threaded process it might become a major bottleneck to the algorithm if the
@@ -2565,7 +2618,7 @@ One important class of tropical varieties are the tropical Grassmannians which a
 the tropical varieties of the equally -- if not more -- important classical Grassmannians
 which are in fact projective varieties. Some results on the tropical Grassmannian can be
 found in \cite{tropGrass}. The following is an overview of the construction of projective
-Grassmannians found in \cite[Section~8]{gathmAlgGeo}. \todo{provide other source?}
+Grassmannians found in \cite[Section~8]{gathmAlgGeo}.
 
 \begin{definition}[Grassmannians]
   Let $n \in \setN_{>0}$ and $k \in \setN$ with $0 \leq k \leq n$, then the
@@ -2724,12 +2777,12 @@ $f$-vector
 \]
 including leading zeroes. Hence, if we wanted to compute $\mathcal G_{3,7}$ without
 symmetry we would have to compute 252.000 Gröbner cones, which -- as it turns out -- is
-quite time-consuming even with the massive computing cluster provided to us by Fraunhofer
-ITWM. Luckily, a canonical symmetry group for any $\mathcal G_{k,n}$ is well known:
-\todo{formalize this above?} The symmetry group $S_7$ acts naturally on the indices of the
-Plücker coordinates of $\Grass(3,7)$, and we may lift it to a subgroup of $S_{35}$ of size
-$7! = 5040$. Then, as stated after \cite[Theorem~2.2]{tropPlane}, the tropical
-Grassmannian $\mathcal G_{3,7}$ modulo $S_7$ has $f$-vector
+quite time-consuming even with the massively parallel approach we use here. Luckily, a
+canonical symmetry group for any $\mathcal G_{k,n}$ is well known: The symmetry group
+$S_7$ acts naturally on the indices of the Plücker coordinates of $\Grass(3,7)$, and we
+may lift it to a subgroup of $S_{35}$ of size $7! = 5040$. Then, as stated after
+\cite[Theorem~2.2]{tropPlane}, the tropical Grassmannian $\mathcal G_{3,7}$ modulo $S_7$
+has $f$-vector
 \[
   (0,0,0,0,0,0,0,1,6,37,140,296,300,125)
 \]
@@ -2738,8 +2791,8 @@ personal computers in a relatively small amount of time. On one of the compute n
 described above the \enquote{pure} single-threaded \textsc{Singular}-version of the
 traversal algorithm takes about {672.19} seconds averaged over 8 runs. Note that this
 version of the algorithm has parts implemented in a dynamic \Cpp-module that were
-translated into the slower \text{Singular} interpreter language\todo{talk earlier about
-Singular features?}{} in the GPI-Space implementation.
+translated into the slower \text{Singular} interpreter language in the GPI-Space
+implementation.
 
 \begin{table}[tbh]
   \centering
@@ -2858,10 +2911,11 @@ possible explanations include memory and storage latencies on fewer machines.\to
 sure}{} Secondly, while we observe the expected degradation of parallelization efficiency
 after 128 cores, we also see some erratic behavior of the resulting graph. In particular
 the runs for 40 nodes, that is, 640 cores, show a significant increase in total
-computation time and drop in efficiency. We can imagine two reasons for this:
+computation time, that is, the combined running time of all individual processes, and drop
+in efficiency. We can imagine two reasons for this:
 \begin{itemize}
   \item As the sample size of runs is rather small, disturbances in the computing cluster
-    can have significant impact to the average timings.
+    can have significant impact on the average timings.
   \item More importantly, the computation of a starting cone via
     Algorithm~\ref{alg:tropicalPoint} and execution orders of simultaneously enabled
     transitions in GPI-Space are randomized, leading to different program flows for each
@@ -2882,8 +2936,8 @@ computation time and drop in efficiency. We can imagine two reasons for this:
 Despite the uncharacteristic drops in efficiency we still see that this algorithm scales
 quite favorably, even for up to 896 processor cores, far exceeding our initial
 expectations. In particular, scaled to 16 cores our efficiency values all lie above 1.
-We can conclude that parallelizing algorithms for algebraic geometry is a worthwhile
-endeavor and offers tremendous speed-up.
+We can conclude that parallelizing algorithms for algebraic geometry with the methods
+provided by GPI-Space is a worthwhile endeavor and offers tremendous speed-up.
 
 \clearpage
 \printbibliography
