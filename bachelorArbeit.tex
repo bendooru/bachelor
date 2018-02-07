@@ -81,6 +81,9 @@
 
 \newcommand{\Cpp}{C\nolinebreak\texttt{++}}
 
+% TODO? watch out
+\widowpenalty9999
+
 % number a single equation in unnumbered environment
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 \newcommand*\dotcup{\mathbin{\dot{\cup}}}
@@ -118,7 +121,7 @@
 \newtheorem{remark}[definition]{Remark}
 \newtheorem{lemma}[definition]{Lemma}
 \newtheorem{algo}[definition]{Algorithm}
-\newtheorem{thmCorollary}[definition]{Theorem \& Corollaries}
+\newtheorem{corollary}[definition]{Corollary}
 
 % adjust numbering
 \numberwithin{definition}{section}
@@ -1656,22 +1659,48 @@ relative interior will yield a suitable starting cone.
   We now apply this procedure to find a non-trivial point of \dots
 \end{example}
 
-To conclude this section we want study an alternative method of obtaining points in
-neighboring cones. We call a tropical variety $\Trop(I)$ a \emph{tropical curve} if it is
-one dimensional and say it is \emph{combinatorially a curve} if $\Trop(I)/C_0(I)$ is
-one-dimensional. Then, for any $\vec u \in \Trop(I)$ sitting in the relative interior of a
-cell of codimension one, that is, a facet of some maximal cone, we call
-$\Trop(\initial_{\vec u}(I))$ the \emph{tropical link} of $I$ around $\vec u$. This set is
-the support of a polyhedral fan, since it is a tropical variety, and also combinatorially
-a curve which describes $\Trop(I)$ locally around $\vec u$. This was shown in the proof of
-the correctness of \cite[Algorithm~4.10]{compTropVar}. The properties needed for our
-algorithm are as follows, mainly due to \cite{ossTropLift}:
-\todo{reformulate, make definition etc}
+To conclude this section we want to study an alternative method of obtaining points in
+neighboring Gröbner cones. As was hinted at in our brief discussion of
+Algorithm~\ref{alg:tropBasisCurve}, the important ingredient are so-called tropical
+curves, a special form of tropical varieties:
 
-\begin{thmCorollary} \label{thmc:tropInt}
+\begin{definition}
+  A tropical variety is called a \emph{tropical curve} if it is one-dimensional, that is,
+  it is the support of a one-dimensional complex of Gröbner polyhedra. $\Trop(I)$ is
+  called \emph{combinatorially a curve} if $\Trop(I)/C_0(I)$ is one-dimensional.
+\end{definition}
+
+The idea is that, by passing to a facet of a maximal Gröbner cone, we can give a local
+description of all Gröbner cones that are adjacent to this facet. Indeed, by taking any
+$\vec u \in \Trop(I)$ contained in a cell of codimension one, that is, a facet of a
+maximal Gröbner cone of the corresponding polyhedral fan, we consider the \emph{tropical
+link} $\Trop(\initial_{\vec u}(I))$ of $I$ around $\vec u$. This set is the support of a
+polyhedral fan, since it is a tropical variety, and also combinatorially a curve which
+describes $\Trop(I)$ locally around $\vec u$. This was shown in the proof of correctness
+of \cite[Algorithm~4.10]{compTropVar}: Assume $\Trop(I)$ has dimension~$d$ and choose a
+facet $F$ and $\vec u$ in the relative interior of $F$, then $\Trop(\initial_{\vec u}(I))$
+will be $d$-dimensional as well, while $F$ is $d-1$-dimensional. By definition,
+$\initial_{\vec u}(I)$ is homogeneous with respect to all weights in $F$, so
+$C_0(\initial_{\vec u}(I))$ is $d-1$-dimensional. This just means that
+$\Trop(\initial_{\vec u}(I))$ is combinatorially a curve. Further, by
+\cite[Proposition~1.13]{SturmGBCP} we have that
+\[
+  \initial_{\vec v}(\initial_{\vec u}(I)) = \initial_{\vec v + \epsilon \vec u}(I)
+\]
+for all $\vec v$ some some appropriate $\epsilon>0$. Hence $\Trop(\initial_{\vec u}(I))$
+contains relative interior points of all maximal Gröbner cones that have $F$ as a facet,
+yielding the claimed \enquote{local description}. To apply this result in an algorithm,
+the following additional results are required:
+
+\begin{theorem}[{\cite[Theorem~1.1]{ossTropLift}}]
+  \label{thm:tropInt}
   Let $X$ and $X'$ be two affine subvarieties. If the intersection $\Trop(X) \cap
   \Trop(X')$ has codimension $\codim\Trop(X) + \codim\Trop(X')$ in a neighborhood of $\vec
-  w$, then $\vec w \in \Trop(X\cap X')$. In particular:
+  w$, then $\vec w \in \Trop(X\cap X')$.
+\end{theorem}
+
+\begin{corollary} \label{cor:tropInt}
+  In the setting of \ref{thm:tropInt} we in particular obtain:
   \begin{enumerate}
     \item Assume $\Trop(I)$ is combinatorially a curve with $\dim C_0(I) = d$ and
       \[
@@ -1683,16 +1712,16 @@ algorithm are as follows, mainly due to \cite{ossTropLift}:
         x_d-c_d}),
       \]
       and this tropical variety is a tropical curve.
-      \label{thmc:i}
+      \label{cor:i}
     \item If $\Trop(I)$ is a one-dimensional polyhedral fan, then for any $c \in K^* =
       \setT^1$ with $\nu(c)\neq0$ we have
       \[
         \Trop(I) \cap \{\nu(c)\} \times \setR^{n-1} = \Trop(I + \ideal{x_1-c_1})
       \]
       and this tropical variety is zero-dimensional.
-      \label{thmc:ii}
+      \label{cor:ii}
   \end{enumerate}
-\end{thmCorollary}
+\end{corollary}
 
 Finally, the structure of the tropical combinatorial curves $\Trop(\initial_{\vec w}(I))$ together
 with the above corollaries culminate in the following algorithm:
@@ -1736,12 +1765,12 @@ with the above corollaries culminate in the following algorithm:
   \end{algorithmic}
 \end{algo}
 
-Indeed, the steps above are just applying the Corollaries~\ref{thmc:tropInt} for every
+Indeed, the steps above are just applying the Corollary~\ref{cor:tropInt} for every
 remaining dimension: In line~\ref{alg:links:cut} we cut the combinatorial curve down to an
-actual tropical curve by Corollary~\ref{thmc:tropInt}.\ref{thmc:i}. Then in
+actual tropical curve by Corollary~\ref{cor:tropInt}.\ref{cor:i}. Then in
 line~\ref{alg:links:curve} we consider the respective zero-dimensional varieties described
-in \ref{thmc:tropInt}.\ref{thmc:ii}. Note that, since a tropical curve is the support
-of a tropical fan in this setting, it is necessarily a collection of rays. Hence the
+in \ref{cor:tropInt}.\ref{cor:ii}. Note that, since a tropical curve is the support of a
+tropical fan in this setting, it is necessarily a collection of rays. Hence the
 representation as $\bigcup_{w \in W} w\cdot \setR_{\geq0} + C_0(I)$ is justified. This
 algorithm can then be used in line \ref{alg:interiorPoints} of
 Algorithm~\ref{alg:neighbors} as a replacement for the methods concerning prevarieties. As
