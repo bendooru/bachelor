@@ -150,8 +150,6 @@
 
 \subject{Bachelor's Thesis}
 \title{Massively Parallel Computation of Tropical Varieties}
-% TODO needed by Prüfungsordnung?
-\subtitle{Massivparallele Berechnung tropischer Varietäten}
 \author{Dominik Bendle\\{\small Matrikelnr.: 392713}}
 % hacky
 \publishers{%
@@ -833,8 +831,8 @@ $\initial_\prec(I) = \initial_{\vec w}(I)$. Hence we define the corresponding Gr
 to be $C_\prec(I) = C_{\vec w}(I)$.
 
 To conclude this section, we present a result which warrants restricting our algorithms to
-the cases of homogeneous ideals. The proof of the next Proposition uses the equivalent
-condition that for any $f \in I$ all its homogeneous components lie in $I$.
+the cases of homogeneous ideals. The proof of this uses the equivalent condition for
+homogeneity that for any $f \in I$ all its homogeneous components lie in $I$.
 
 \begin{proposition}[{\cite[Proposition~1.12]{SturmGBCP}}]
   \label{prp:grRegion}
@@ -1619,18 +1617,20 @@ neighboring cones.
 Finding non-trivial points on the tropical variety is achieved by intersecting with
 sufficiently generic hyperplanes until the variety is zero-dimensional, allowing us to
 apply Algorithm~\ref{alg:zeroDimTrop}. But when is a point non-trivial? For an ideal $I
-\idealof K[\vec x]$ we define the \emph{homogeneity space} of $I$ to be the linear
-subspace
+\idealof K[\vec x]$ we define the \emph{homogeneity space} of $I$ to be the
+linear\footnote{if $I$ has constant coefficients} subspace
 \[
   C_0(I) = \left\{ \vec w \in \setR^n : \initial_{\vec w}(I) = I \right\}.
 \]
-It can be computed easily from any reduced Gröbner basis for $I$ and is trivially included
-in $\Trop(I)$ if $I$ itself contains no monomial, that is, if $\Trop(I) \neq \varnothing$.
-In fact, $C_0(I)$ is contained in every Gröbner cone which is itself contained in the
-tropical variety, so computing a point in the homogeneity space offers no useful
-information for our algorithms. Hence, we call a point $\vec w \in \Trop(I)$
-\emph{non-trivial} if $\vec w \not\in C_0(I)$. The following proposition formalizes the
-process of intersecting with generic hyperplanes:
+Note that this notation is not a coincidence: If $I$ has constant coefficients, then
+$\initial_0(I) = I$, so $C_0(I) = \overline{C[0]}$. The homogeneity space can be computed
+easily from any reduced Gröbner basis for $I$ and is trivially included in $\Trop(I)$ if
+$I$ itself contains no monomial, that is, if $\Trop(I) \neq \varnothing$. In fact,
+$C_0(I)$ is contained in every Gröbner cone which is itself contained in the tropical
+variety, so computing a point in the homogeneity space offers no useful information for
+our algorithms. Hence, we call a point $\vec w \in \Trop(I)$ \emph{non-trivial} if $\vec w
+\not\in C_0(I)$. The following proposition formalizes the process of intersecting with
+generic hyperplanes:
 
 \begin{proposition}
   Let $I \idealof K[\vec x]$ be an ideal of dimension $\dim I = d$ with algebraically
