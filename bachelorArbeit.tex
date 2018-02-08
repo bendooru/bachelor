@@ -177,6 +177,8 @@
 
 \maketitle
 
+% make sure toc starts on page 3
+\clearpage\null\clearpage
 \tableofcontents
 \newpage
 \listoffigures
@@ -2594,7 +2596,29 @@ and writes the resulting Gröbner cone data into numbered SSI-files \texttt{0.ss
 \texttt{1.ssi} and so on. The token corresponding to this Gröbner cone in the Petri net
 then contains the interior point of the cone as a unique identifier the relative file path
 \texttt{ID/n.ssi} to keep track of the data.
-\todo{write stuff, include some real life code, termination logic?}
+
+To conclude we want to revisit the token counting used to properly terminate our nets
+which was mentioned multiple times. In the final iteration of our net depicted in
+Figure~\ref{fig:refined} this is particularly easy: The transition $n$ consumes a single
+token and creates a single token for each invocation, so it does not change the total
+number of tokens by itself. The same is true for $f$, so the only transitions which change
+the number of tokens representing cones or facets are $iC$ and $i_k, g_k$ for $k=1,2$.
+These changes can be kept track of by adding a counter which is incremented for each
+firing of $iC$, $g_1$ and $g_2$ and decremented for each firing of $i_1$ and $i_2$. If
+this counter drops to zero while both $e_1$ and $e_2$ hold the \texttt{false}-token we
+terminate the net.
+
+In Figure~\ref{fig:full_net} we see our Petri net as it is realized in practice. Note that
+the additional places and transitions described above make this rendition of the net quite
+messy. It further includes a final transition that combines all found cones from their
+files on disk into a single file.
+
+\begin{figure}[htbp]
+  \includegraphics[width=\textwidth]{fig/traversal_net.pdf}
+  \caption{Net from Figure~\ref{fig:refined} with all additions, rendered with GPI-Space
+  utilities}
+  \label{fig:full_net}
+\end{figure}
 
 \section{Performance and Scalability}
 
