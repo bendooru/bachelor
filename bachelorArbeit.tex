@@ -194,15 +194,16 @@ varieties in a combinatorial fashion, reducing algebraic problems to polyhedral 
 the process. In particular, the \emph{tropical varieties} arising in this field are
 sometimes referred to as the \enquote{combinatorial shadow} of their algebraic
 counterpart. The general idea is to pass from classical arithmetic to \emph{tropical
-arithmetic}, where addition is replaced by taking minima and multiplication is replaced by
-addition. This turns the graphs of polynomial functions into piecewise linear object and
-the tropical varieties are the \emph{corner loci} of these objects. An important
-application of tropical geometry include intersection theory which deals with
-intersections between subvarieties of an algebraic variety and is for example used to
-count numbers of solutions to geometric questions \cite{mikhEnum}: Many theorems have
-counter parts in tropical geometry or even carry over entirely. As usual, mathematicians
-are interested in studying concrete examples of tropical varieties -- for instance to gain
-a general intuition behind the combinatorial structures or to find counter examples.
+arithmetic}, where one replaces addition and multiplication with taking minima and
+classical addition, respectively. This turns the graphs of polynomial functions into
+piecewise linear objects and the tropical varieties are the \emph{corner loci} of these
+objects. An important application of tropical geometry includes intersection theory which
+deals with intersections between subvarieties of an algebraic variety and is for example
+used to count numbers of solutions to geometric questions \cite{mikhEnum}: Many theorems
+have counterparts in tropical geometry or even carry over entirely. As usual,
+mathematicians are interested in studying concrete examples of tropical varieties -- for
+instance to gain a general intuition behind the combinatorial structures or to find
+counterexamples
 
 While this process of \emph{tropicalization} yields objects that are far easier to
 describe and compute than their algebraic counterparts, it is not hard to construct
@@ -219,11 +220,11 @@ resources with maximum efficiency.
 
 To this end, one usually considers two kinds of parallelization. On \emph{shared memory
 systems} a single process uses multiple threads while processing shared data, allowing for
-fine-grained parallelism. In this, they are limited by how many processors can access
-shared memory and only work in a local sense. On \emph{distributed} and
+fine-grained parallelism. In this, they are limited by the number of processors that are
+able to access shared memory and only work in a local sense. On \emph{distributed} and
 \emph{multi-process systems} data is processed by different processes which do not share
 memory but instead communicate by message passing or a joint virtual memory layer. This
-only provides coarse-grained parallelism but can in theory scale to arbitrarily large
+only provides coarse-grained parallelism, but can in theory scale to arbitrarily large
 computing configurations.
 
 Our contribution in this thesis is a combination of both of these approaches: We apply the
@@ -231,53 +232,53 @@ latter kind of paralellization method mentioned above to existing methods to com
 tropical varieties. Methods of computing tropical varieties have been studied by Tristram
 Bogart, Anders Jensen, David Speyer, Benrd Sturmfels and Rekha Thomas \cite{compTropVar}
 and further improved by Yue Ren and Tommy Hofmann \cite{tropPointsLinks}. These methods
-constitute the \enquote{lower} level of the final parallel implementation and are
-implemented in the computer algebra system \textsc{Singular} \cite{Singular} which is
-being developed at the University of Kaiserslautern. In particular, tropical computations
-are carried out by methods of the library \texttt{tropicalNewton.lib} \cite{tropNewtLib}
-which relies on Gfan \cite{gfan} for polyhedral computations via the interface library
-\texttt{gfan.lib} \cite{gfanLib}. Instances of \textsc{Singular} processes are then
-managed by the workflow management system GPI-Space \cite{gpispace} at the \enquote{upper}
-level, that is, the coordination layer. GPI-Space is developed by the High Performance
-Computations (HPC) department at Fraunhofer Institute for Industrial Mathematics (ITWM).
+constitute the \enquote{lower} level of the final parallel algorithm and are implemented
+in the computer algebra system \textsc{Singular} \cite{Singular} which is being developed
+at the University of Kaiserslautern. In particular, tropical computations are carried out
+by methods of the library \texttt{tropicalNewton.lib} \cite{tropNewtLib} which relies on
+Gfan \cite{gfan} for polyhedral computations via the interface library \texttt{gfan.lib}
+\cite{gfanLib}. Instances of \textsc{Singular} processes are then managed by the workflow
+management system GPI-Space \cite{gpispace} at the \enquote{upper} level, that is, the
+coordination layer. GPI-Space is developed by the High Performance Computations (HPC)
+department at Fraunhofer Institute for Industrial Mathematics (ITWM).
 
 Our parallelization solution is based on work by Christian Reinbold who used GPI-Space to
-implement a parallel algorithm to compute GIT-fans \cite{reinboldGitFan}, implementing
-algorithms by Janko Böhm, Simon Keicher and Yue Ren \cite{compGitFan}. This, in turn,
-relies on foundational work done by Lukas Ristau in creating interface code to use
-\textsc{Singular} in conjunction with GPI-Space. As tropical varieties admit the structure
-of a polyhedral fan as well, we were able to successfully modify Christian Reinbold's
-implementation to handle computation of tropical varieties instead. The development was
-coordinated in cooperation with the HPC department of Fraunhofer ITWM, in particular with
-the support of Dr.~Mirko Rahn and Christian Reinbold. Additionally, as a side effect we
-accelerated the development of \texttt{puiseux.lib} \cite{puiseuxLib}, which is used to
-compute Puiseux expansions of zero-dimensional ideals as. This is required by the methods
-in \cite{tropPointsLinks} as a special case. Moreover, during our work with
-\textsc{Singular} we were able to identify various bugs, for example memory leaks.
+implement a parallel algorithm to compute GIT-fans \cite{reinboldGitFan}, using algorithms
+by Janko Böhm, Simon Keicher and Yue Ren \cite{compGitFan}. This, in turn, relies on
+foundational work done by Lukas Ristau in creating interface code to use \textsc{Singular}
+in conjunction with GPI-Space. As tropical varieties admit the structure of a polyhedral
+fan as well, we were able to successfully modify Christian Reinbold's implementation to
+handle computation of tropical varieties instead. The development was coordinated in
+cooperation with the HPC department of Fraunhofer ITWM, in particular with the support of
+Dr.~Mirko Rahn and Christian Reinbold. Additionally, as a side effect we accelerated the
+development of \texttt{puiseux.lib} \cite{puiseuxLib}, which is used to compute Puiseux
+expansions of zero-dimensional ideals as. This is required by the methods in
+\cite{tropPointsLinks} as a special case. Moreover, during our work with \textsc{Singular}
+we were able to identify various bugs, for example memory leaks.
 
 Using our parallel algorithm we were able to compute the tropical Grassmannian $\mathcal
-G_{3,8}$ modulo symmetry in its entirety, which was not possible with legacy methods until
-now. Using this as a benchmark, we also found that our algorithm scales favorably for
-large numbers of processor cores. In fact, our algorithm scales well to as many as 56
+G_{3,8}$ modulo symmetry in its entirety, which has not been possible with legacy methods
+until now. Using this as a benchmark, we also found that our algorithm scales favorably
+for large numbers of processor cores. In fact, our algorithm scales well to as many as 56
 compute nodes, which corresponds to 896 processor cores, reducing the running time to
 20\,minutes.
 
-The thesis is structures as follows: In Section~2 we will describe the general setting in
-which we want to compute tropical varieties. For this purpose we introduce various notions
-concerning fields with valuation and convex geometry. We then define tropical varieties
-and study their properties as polyhedral convexes. Finally, we illustrate how to compute
-tropical varieties using methods from \cite{compTropVar} and describe improvements using
-new techniques from \cite{tropPointsLinks}. In the third section we will give an account
-on GPI-Space and the concept of Petri nets which is used in GPI-Space to formulate
-parallelizable workflows. Subsequently we translate our traversal algorithm into such a
-Petri net. In the fourth section we consider the tropical Grassmannians, an important
-class of tropical varieties and give timings for parallel computations of $\mathcal
-G_{3,7}$ and $\mathcal G_{3,8}$.
+The thesis is structures as follows: In Section~\ref{sec:theory} we will describe the
+general setting in which we want to compute tropical varieties. For this purpose, we
+introduce various notions concerning fields with valuation and convex geometry. We then
+define tropical varieties and study their properties as polyhedral convexes. Finally, we
+illustrate how to compute tropical varieties using methods from \cite{compTropVar} and
+describe improvements using new techniques from \cite{tropPointsLinks}. In the third
+section we give an account on GPI-Space and the concept of Petri nets, which is used in
+GPI-Space to formulate parallelizable workflows. Subsequently we translate our traversal
+algorithm into such a Petri net. In the fourth section we consider the tropical
+Grassmannians, an important class of tropical varieties, and give timings for parallel
+computations of $\mathcal G_{3,7}$ and $\mathcal G_{3,8}$.
 
 \subsubsection*{Acknowledgements}
 Firstly I would like to thank Dr.~Janko Böhm for suggesting this topic to me, giving me
 the chance to work at Fraunhofer ITWM and guiding me in understanding tropical varieties
-and their computation. In this vein I thank Dr.~Yue Ren and Dr.~Tommy Hofmann for their
+and their computation. In this vein, I thank Dr.~Yue Ren and Dr.~Tommy Hofmann for their
 support in understanding and adapting their \textsc{Singular} implementation. Special
 thanks goes to Santiago Laplagne, who, during his stay in Kaiserslautern, tirelessly
 implemented and improved a \textsc{Singular} library for computations with general Puiseux
@@ -290,8 +291,10 @@ thank Christian Reinbold for his helpful introduction to his project and providi
 working code base. My final thanks go to the HPC department and Fraunhofer ITWM in general
 for providing access to their massive computation infrastructure, without which this
 thesis would not have been possible.
+\todo{Kasimir}
 
 \section{Computing Tropical Varieties}
+\label{sec:theory}
 
 Tropical geometry is a relatively new field in mathematics that arises from numerous
 contexts and connects various branches of mathematics in exciting and novel ways. We shall
@@ -352,12 +355,12 @@ element for both operations: For all $x\in \setR\cup \{\infty\}$ it is true that
 As in proper rings, the neutral element of $\oplus$ has the annihilating property with
 respect to $\odot$, i.e.\ $x\odot \infty = \infty$. An important property of this set is
 that, while elements in $\setR$ admit a multiplicative $\odot$-inverse (the traditional
-additive inverse), there is in general no additive $\oplus$-inverse. For example the
-equation $4\oplus x = 5$ clearly has no solution. In this setting all ring axioms except
+additive inverse), there is in general no additive $\oplus$-inverse. For example, the
+equation $4\oplus x = 5$ clearly has no solution. In this setting, all ring axioms except
 the existence of an additive inverse are satisfied: Sets like this are called
 \emph{semirings}, hence we call $(\setR\cup \{\infty\}, \oplus, \odot)$ the \emph{tropical
 semiring} which is sometimes also referred to a as the \emph{min-plus algebra}. By
-replacing taking minima with maxima, we obtain the isomorphic max-plus algebra which is
+replacing taking minima with maxima, we obtain the isomorphic max-plus algebra which, is
 also used as the underlying structure in tropical geometry by some authors. These special
 operations of addition and multiplication naturally lead to the notion of polynomials over
 the tropical semiring.
@@ -426,11 +429,11 @@ elements in $\setR^k$ yields a function
 \]
 which is continuous, piecewise linear with finitely many pieces and concave, meaning that
 for any $a,b \in \setR^k$ the equality $p(\frac12(a+b)) \geq \frac12(p(a)+p(a))$ holds.
-Consider for example the polynomial $p = x^2 \oplus 2\odot x \oplus 5$ in the single
+Consider, for example, the polynomial $p = x^2 \oplus 2\odot x \oplus 5$ in the single
 variable $x$. As we see in Figure~\ref{fig:tropPolyPlot}, each monomial of $p$ corresponds
 to a linear piece of the graph and the function $p$ is in fact concave.
 
-With the newly established notion of tropical polynomials the next step towards defining
+With the newly established notion of tropical polynomials, the next step towards defining
 tropical varieties is to consider special sets $X \subseteq \setR^k$ induced by tropical
 polynomials. Whereas the main object of study in classical algebraic geometry are the
 roots or vanishing loci of polynomials and -- more generally -- polynomial ideals,
@@ -457,10 +460,10 @@ following set:
   interpretation in mind, the set $V(p)$ is also called the \emph{corner locus} of $p$.
 \end{definition}
 
-Again looking at the tropical polynomial $p$ plotted in Figure~\ref{fig:tropPolyPlot} we
+Again, looking at the tropical polynomial $p$ plotted in Figure~\ref{fig:tropPolyPlot}, we
 see that $p$ is not linear at precisely the points $V(p) = \{ 2, 3 \}$. An interesting
-property is that by this definition the tropical hypersurface given by a monomial contains
-no points whatsoever. This will become important later on.
+property is that, by this definition, the tropical hypersurface given by a monomial
+contains no points whatsoever. This will become important later on.
 
 \begin{figure}[tbh]
   \centering
@@ -503,8 +506,8 @@ tropical quadrics and cubics respectively. For instance, in Figure~\ref{fig:trop
 see the tropical line $V(x \oplus y \oplus 0)$. The tropical quadric on the right is the
 corner locus of $1\otimes x^2 \oplus xy \oplus x \oplus x \oplus 1$ and will be mentioned
 again later on. As a final note, since tropical division is well-defined for non-infinite
-elements we may also consider tropical polynomials in negative exponents later on, in
-particular to make sense of the tropicalization of Laurent polynomials.
+elements we may also consider tropical polynomials in negative exponents, in particular to
+make sense of the tropicalization of Laurent polynomials.
 
 \subsection{Valuations and Puiseux Series}
 
@@ -593,8 +596,8 @@ term of $f$, i.e.\ $a_1$ in \eqref{eq:puiseux1} and $k_0/N$ in \eqref{eq:puiseux
 
 In our applications later on we often want to take elements in our field and
 \enquote{uniformize} them to elements in the ring $R_{\nu}$ which may then define classes
-in $\mathfrak K$. Using that $\nu : K^* \to (\setR, +)$ is a group homomorphism the
-following lemma shows that there always are elements of suitable valuation to achieve
+in $\mathfrak K$. Using the fact that $\nu : K^* \to (\setR, +)$ is a group homomorphism,
+the following lemma shows that there always are elements of suitable valuation to achieve
 this.
 
 % also need this
@@ -608,16 +611,16 @@ this.
 
 We will denote the elements $\phi(w) \in K^*$ by $t^w$ which is motivated by our focus on
 Puiseux series. In the case $K = \CCt$ we have $\Gamma_\nu = \setQ$ and $\phi(w) = t^w$.
-While working in polynomial rings over $\CCt$ or similar fields with valuation mainly
-provides theoretical benefits like using Newton polygons to determine valuations of roots
-as in Lemma~\ref{lem:newtPolyRoots}, the iterative method used to prove
-Theorem~\ref{thm:puisuexalgclosed} will provide a fall-back method of computing
-zero-dimensional affine varieties. To this end we usually consider elements of $\setQ(t)$
+Working in polynomial rings over $\CCt$ or similar fields with valuation mainly provides
+theoretical benefits like using Newton polygons to determine valuations of roots as in
+Lemma~\ref{lem:newtPolyRoots}. However, the iterative method used to prove
+Theorem~\ref{thm:puisuexalgclosed} also provides a fall-back method of computing
+zero-dimensional affine varieties. To this end, we usually consider elements of $\setQ(t)$
 as finite approximations of Puiseux series. Methods for Puiseux expansion computations are
 implemented in the \textsc{Singular} library \texttt{puiseux.lib} \cite{puiseuxLib}.
 
 \begin{example}[$p$-adic Valuation] \label{ex:pAdic}
-  On a closing note we want to take a look at another important class of fields with
+  On a closing note, we want to take a look at another important class of fields with
   valuation. Let $K = \setQ$ be the rational numbers and $p\in \setN$ be a prime number.
   Then for any $z \in \setQ$ there are $m, k \in \setZ$, $n \in \setN_{>0}$ such that $z =
   p^k \frac mn$ where $p$ does not divide $m$ and $n$. The integer $k$ is unique so we
@@ -653,16 +656,16 @@ and polyhedral cones:
   \label{def:polyhedralCone}
   Recall that a set of the form $C = \{ \vec x \in \setR^n : A\vec x \leq \vec b \}$ for
   some matrix $A \in \Mat(m\times n, \setR)$ and $\vec b \in \setR^m$ is called a
-  polyhedron and if additionally $C$ is bounded it is called a polytope. If on the other
-  hand $\vec b = \vec 0$ then $C$ is called a \emph{polyhedral cone}. Equivalently, a
+  polyhedron and if additionally $C$ is bounded it is called a polytope. If, on the other
+  hand, $\vec b = 0$ then $C$ is called a \emph{polyhedral cone}. Equivalently, a
   polyhedral cone $C$ is the positive span of finitely many vectors in $\setR^n$.
 \end{definition}
 
 Note that, using linear programming, it is possible to assign a unique \emph{canonical}
 set of defining equations and inequalities to a polyhedral cone. This is important to
 quickly compare and uniquely identify polyhedral cones, especially in computational
-contexts. This is usually achieved via the \emph{double description method}, see for
-instance \cite{fuDD}.
+contexts and is -- for instance -- achieved via the \emph{double description method}, see
+for instance \cite{fuDD}.
 
 For a polyhedron $P \subseteq \setR^n$ we further define its dimension as the dimension of
 the smallest affine linear space containing $P$. Consider now an element $\vec w \in
@@ -701,10 +704,10 @@ a polyhedral complex define a representation.
 \begin{example}\
   \begin{enumerate}
     \item For any $n \in \setN_{>0}$ we have $\setR^n = \{ \vec x \in \setR^n : 0 \cdot
-      \vec x \leq 0 \}$, so the entire ambient space is a polyhedral cone. Furthermore it
+      \vec x \leq 0 \}$, so the entire ambient space is a polyhedral cone. Furthermore, it
       is clear that $\face_{\vec w}(\setR^n) = \varnothing$ for any $0\neq\vec w \in
       \setR^n$, so the only faces of $\setR^n$ are $\varnothing$ and the whole space
-      itself. Thus $\{ \varnothing, \setR^n\}$ is a pure and complete polyhedral fan,
+      itself. Thus, $\{ \varnothing, \setR^n\}$ is a pure and complete polyhedral fan,
       albeit an uninteresting one.
     \item Consider the four quadrants
       \begin{align*}
@@ -769,7 +772,7 @@ description. The idea is to represent term orderings by weight vectors:
 Note that initial ideals of this form need not be monomial ideals -- in fact the weight
 vectors for which this is not the case will be of interest later on. If necessary, this
 can be fixed by introducing a \enquote{tie breaker} ordering: Given any total term
-ordering $\prec$ and any weight vector $\vec w\in\setR^n$ with non-negative components we
+ordering $\prec$ and any weight vector $\vec w\in\setR^n$ with non-negative components, we
 may define a new term ordering $\prec_{\vec w}$ by
 \[
   \vec x^\alpha \prec_{\vec w} \vec x^\beta
@@ -784,7 +787,7 @@ may define a new term ordering $\prec_{\vec w}$ by
 \]
 where the non-negativity constraint is required to ensure that $\prec_{\vec w}$ is also a
 total ordering, meaning that 1 will be smaller than any other monomial with respect to
-$\prec_{\vec w}$. Among some other nice properties, the most important result obtained
+$\prec_{\vec w}$. Among some other useful properties, the most important result obtained
 from these constructions is the following:
 
 \begin{proposition}[{\cite[Proposition~1.11]{SturmGBCP}}]
@@ -803,7 +806,7 @@ defines an equivalence relation. Denoting the corresponding equivalence classes 
     \vec w' \in \setR^n : \initial_{\vec w'}(I) = \initial_{\vec w}(I)
   \right\},
 \]
-In \cite[Section~2]{compGrobFan} it is shown that, if an equivalence class $C[\vec w]$
+In \cite[Section~2]{compGrobFan}, it is shown that, if an equivalence class $C[\vec w]$
 contains a strictly positive vector then it is a relatively open convex polyhedral cone.
 This immediately leads to the following definition:
 
@@ -819,7 +822,7 @@ This immediately leads to the following definition:
 In \cite[Theorem~2.19]{compGrobFan} it is shown that the Gröbner fan is in fact a fan. Its
 support $\GR(I) = \{ \vec w \in \setR^n : \exists \vec w' \in \setR^n_{\geq0} :
 \initial_{\vec w}(I) = \initial_{\vec w'}(I)\}$ is called the \emph{Gröbner region}
-of~$I$. In \cite{SturmGBCP} Sturmfels introduces Newton polytopes as a means to compute
+of~$I$. In \cite{SturmGBCP}, Sturmfels introduces Newton polytopes as a means to compute
 the Gröbner fan of an ideal which work similarly to the polygons we will introduce in
 Definition~\ref{def:newtonPoly}, but serve a different purpose. The connection to tropical
 varieties will be drawn in the next section. We may also occasionally need Gröbner cones
@@ -862,7 +865,7 @@ class with respect to a homogeneous ideal $I$.
 \subsection{Tropical Varieties}
 \label{sec:tropVar}
 
-After this light introduction to tropical arithmetic and some convex geometry we now shift
+After this light introduction to tropical arithmetic and some convex geometry, we now shift
 our focus to more general polynomials and ideals. The idea is to combine the fan structure
 of the Gröbner fan we derived in Section~\ref{sec:grobFan} with our knowledge on tropical
 hypersurfaces from Section~\ref{sec:tropIntro}. Here we will introduce the general
@@ -874,7 +877,7 @@ We fix a field $K$ which usually admits a non-trivial valuation $\nu : K \to \se
 x^{\pm1}] = K[x_1^{\pm1}, \dots, x_n^{\pm1}]$ -- the ring of polynomials in $x_1, \dots,
 x_n$ with integral but not necessarily non-negative exponents. Ideals and polynomials in
 this ring define zero loci much in the same manner as for standard polynomial rings,
-however as monomials are now invertible, evaluation at zero is no longer well-defined. As
+however, as monomials are now invertible, evaluation at zero is no longer well-defined. As
 such, we consider the \emph{very affine variety}\footnote{This name is mainly used in
 \cite{sturmMacTrop} and does not appear to be standard nomenclature.} of an ideal $I
 \idealof K[\vec x^{\pm1}]$ as a subset of the \emph{algebraic torus} $\setT^n = {(K^*)}^n
@@ -942,8 +945,8 @@ we redefine $\prec_{\vec w}$ to be the ordering $\prec_{-\vec w}$ as introduced 
 Section~\ref{sec:grobFan}. This ensures that, if the valuation $\nu$ is trivial,
 $\initial_{\vec w}(f)$ and $\initial_{\prec_{\vec w}}(f)$ agree if the former is a
 monomial, and in general the latter will always be the maximal term of the latter with
-respect to $\prec$. This would not be true in general for the original definition as it
-maximizes the linear form $\vec w$.
+respect to $\prec$. \todo{This sentence is garbage} This would not be true in general for
+the original definition as it maximizes the linear form $\vec w$.
 
 With these potential inconsistencies out of the way, we are now finally able to define
 tropical varieties, the main object of study of this thesis:
@@ -1056,7 +1059,7 @@ a standard polynomial ring $K[\vec x]$ as these rings are more suited for Gröbn
 computations. In fact, starting with an $I \idealof K[\vec x]$,
 Definition~\ref{def:tropicalVariety} and Theorem~\ref{thm:fundamentalThm} work in exactly
 the same way. Considering the ideal $I' \idealof K[\vec x^{\pm1}]$ generated by the
-elements of $I$ it is easy to see that $\Trop(I) = \Trop(I')$: If $\vec w \not\in
+elements of~$I$, it is easy to see that $\Trop(I) = \Trop(I')$: If $\vec w \not\in
 \Trop(I')$ then there is a polynomial $f \in I'$ such that $\initial_{\vec w}(f)$ is a
 monomial. Then there is a monomial $m \in K[\vec x]$ such that $mf \in I$ and
 $\initial_{\vec w}(mf)$ is a monomial as well, so $\vec w \not\in \Trop(I)$, see also the
@@ -1081,7 +1084,7 @@ polyhedral methods:
 More generally, if $I \idealof K[\vec x^{\pm1}]$ is prime, respectively its variety $V(I)$
 is irreducible, then we call $\Trop(I)$ irreducible as well. Note again that, if we start
 with a prime ideal $I \idealof K[\vec x]$ then the ideal generated over $K[\vec x^{\pm1}]$
-will also be prime. Hence the above theorem is still applicable if we start in $K[\vec
+will also be prime. Hence, the above theorem is still applicable if we start in $K[\vec
 x]$. It is important to note the fan structure imposed on a tropical variety in this way
 is not unique, but for our purposes the most suitable. Moreover, \enquote{connected in
 codimension one} means that for any two maximal polyhedra $P, Q$ in the corresponding
@@ -1108,15 +1111,15 @@ ones.
 Theorem~\ref{thm:tropComplexConn} states that a tropical variety is the support of a
 polyhedral complex which in general contains both bounded and unbounded faces. As
 Example~\ref{ex:notFan} illustrates $\Trop(f)$ is not the support of a polyhedral fan, as
-$(1,1) \in \Trop(f)$ but $(2,2) \not\in \Trop(f)$. Hence any cone containing $(1,1)$ must
+$(1,1) \in \Trop(f)$ but $(2,2) \not\in \Trop(f)$. Hence, any cone containing $(1,1)$ must
 also contain $(2,2)$ and is thus not contained in $\Trop(f)$. However, for computational
-reasons it is favorable to work with cones and polyhedral fans. In our case where $K =
-\CCt$ there are two ways to amend this issue depending on our input ideal:
+reasons it is favorable to work with cones and polyhedral fans. In our case, where $K =
+\CCt$, there are two ways to amend this issue depending on our input ideal:
 \begin{enumerate}[label=\arabic*.]
   \item If we already start out in the \emph{constant coefficient case}, that is, the
     ideal $I \idealof \CCt[\vec x]$ is generated by elements of $\setC[\vec x]$, then for
     $f \in I$ the initial form $\initial_{\vec w}(f)$ will be just the minimal terms with
-    respect to $\vec w$. As in Section~\ref{sec:grobFan} this ensures that $\Trop(I)$ is
+    respect to $\vec w$. As in Section~\ref{sec:grobFan}, this ensures that $\Trop(I)$ is
     the support of a subfan of the Gröbner fan. See also
     \cite[Remark~2.5.11]{sturmMacTrop} on the connection between general Gröbner complexes
     and fans. Note that the current implementation in \texttt{tropicalNewton.lib}
