@@ -58,7 +58,6 @@
   }
 }
 % FIXME REMOVE LATER
-%\usepackage[displaymath,mathlines]{lineno}
 \usepackage[textsize=footnotesize]{todonotes}
 % FIXME END
 
@@ -99,7 +98,6 @@
 
 \newcommand{\Cpp}{C\nolinebreak\texttt{++}}
 
-% TODO? watch out
 \widowpenalty9999
 
 % number a single equation in unnumbered environment
@@ -189,8 +187,6 @@
 \pagestyle{headings}
 \addtokomafont{section}{\clearpage}
 
-% FIXME REMOVE LATER
-%\linenumbers
 \section{Introduction}
 
 Tropical geometry is a relatively new field in mathematics that studies algebraic
@@ -1729,7 +1725,7 @@ facet $F$ and $\vec u$ in the relative interior of $F$, then $\Trop(\initial_{\v
 will be $d$-dimensional as well, while $F$ is $d-1$-dimensional. By definition,
 $\initial_{\vec u}(I)$ is homogeneous with respect to all weights in $F$, so
 $C_0(\initial_{\vec u}(I))$ is $d-1$-dimensional. This just means that
-$\Trop(\initial_{\vec u}(I))$ is combinatorially a curve. Further, by
+$\Trop(\initial_{\vec u}(I))$ is combinatorially a curve. Furthermore, by
 \cite[Proposition~1.13]{SturmGBCP} we have that
 \[
   \initial_{\vec v}(\initial_{\vec u}(I)) = \initial_{\vec v + \epsilon \vec u}(I)
@@ -1812,14 +1808,14 @@ with the above corollaries culminate in the following algorithm:
   \end{algorithmic}
 \end{algo}
 
-Indeed, the steps above are just applying the Corollary~\ref{cor:tropInt} for every
-remaining dimension: In line~\ref{alg:links:cut} we cut the combinatorial curve down to an
-actual tropical curve by Corollary~\ref{cor:tropInt}.\ref{cor:i}. Then in
+Indeed, the steps above are just applying Corollary~\ref{cor:tropInt} for every remaining
+dimension: In line~\ref{alg:links:cut} we cut the combinatorial curve down to an actual
+tropical curve by Corollary~\ref{cor:tropInt}.\ref{cor:i}. Then in
 line~\ref{alg:links:curve} we consider the respective zero-dimensional varieties described
 in \ref{cor:tropInt}.\ref{cor:ii}. Note that, since a tropical curve is the support of a
 tropical fan in this setting, it is necessarily a collection of rays. Hence the
-representation as $\bigcup_{w \in W} w\cdot \setR_{\geq0} + C_0(I)$ is justified. This
-algorithm can then be used in line \ref{alg:interiorPoints} of
+representation as $\bigcup_{\vec w \in W} \vec w\cdot \setR_{\geq0} + C_0(I)$ is
+justified. This algorithm can then be used in line \ref{alg:interiorPoints} of
 Algorithm~\ref{alg:neighbors} as a replacement for the methods concerning prevarieties. As
 the timings in \cite{tropPointsLinks} show, this yields a considerable speedup in general.
 
@@ -2633,10 +2629,11 @@ firing of $iC$, $g_1$ and $g_2$ and decremented for each firing of $i_1$ and $i_
 this counter drops to zero while both $e_1$ and $e_2$ hold the \texttt{false}-token we
 terminate the net.
 
-In Figure~\ref{fig:full_net} we see our Petri net as it is realized in practice. Note that
-the additional places and transitions described above make this rendition of the net quite
-messy. It further includes a final transition that combines all found cones from their
-files on disk into a single file.
+In Figure~\ref{fig:full_net} we included a rendition of our Petri net as it is realized in
+practice to illustrate the complexity of the final product. We see\footnote{by using a
+magnifying glass} that the additional places and transitions described above make this net
+quite messy. It further includes a final transition that combines all found cones from
+their files on disk into a single file.
 
 \begin{figure}[htbp]
   \includegraphics[width=\textwidth]{fig/traversal_net.pdf}
