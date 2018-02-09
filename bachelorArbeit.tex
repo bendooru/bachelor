@@ -1233,11 +1233,11 @@ Gröbner cone. In fact, we use a modified lift algorithm given in
       u}}(\initial_{\vec u}(I))$ where $\vec u \in C_{\prec}(I)\cap C_{\prec'}(I)$ for
       some term orders $\prec$ and $\prec'$.
     \Ensure Reduced Gröbner basis $\mathcal G_{\prec_{\vec u}}(I)$.
-    \For $f \in \mathcal G_{\prec_{\vec u}}(\initial_{\vec u}(I))$
+    \For{$f \in \mathcal G_{\prec_{\vec u}}(\initial_{\vec u}(I))$}
       \State Compute the remainder $f^G$ of dividing $f$ by $G =  \mathcal G_{\prec'}(I)$.
     \EndFor
     \State Set $G' = \{ f-f^G : f \in \mathcal G_{\prec_{\vec u}}(\initial_{\vec u}(I)) \}$.
-    \For $f \in G'$
+    \For{$f \in G'$}
       \State Reduce $f := f^{G'\setminus\{f\}}$ as defined above.
     \EndFor
     \State \textbf{return} $G'$.
