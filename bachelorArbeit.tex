@@ -942,11 +942,11 @@ Definition~\ref{def:initialId}.
 
 To make our notion of a weight ordering $\prec_{\vec w}$ consistent with this convention,
 we redefine $\prec_{\vec w}$ to be the ordering $\prec_{-\vec w}$ as introduced in
-Section~\ref{sec:grobFan}. This ensures that, if the valuation $\nu$ is trivial,
-$\initial_{\vec w}(f)$ and $\initial_{\prec_{\vec w}}(f)$ agree if the former is a
-monomial, and in general the latter will always be the maximal term of the latter with
-respect to $\prec$. \todo{This sentence is garbage} This would not be true in general for
-the original definition as it maximizes the linear form $\vec w$.
+Section~\ref{sec:grobFan}. In the case where $\nu$ is trivial, this ensures matching
+behavior: If $\initial_{\vec w}(f)$ is a monomial for some polynomial $f$, then
+$\initial_{\prec_{\vec w}}(f) = \initial_{\vec w}(f)$ and otherwise $\initial_{\prec_{\vec
+w}}(f)$ is the maximal term of $\initial_{\vec w}(f)$ with respect to $\prec$. This is not
+true in general for the original definition as it maximizes the linear form~$\vec w$.
 
 With these potential inconsistencies out of the way, we are now finally able to define
 tropical varieties, the main object of study of this thesis:
@@ -1223,25 +1223,34 @@ interior of an adjacent cone. However, the following \emph{lift} algorithm great
 simplifies this procedure as we already know the reduced Gröbner bases in the original
 Gröbner cone. It is a step in the \emph{Gröbner walk} \cite{groebWalk}, which transforms a
 Gröbner basis with respect to a given ordering to a basis of of an ordering of an adjacent
-Gröbner cone.
+Gröbner cone. In fact, we use a modified lift algorithm given in
+\cite[Proposition~3.2]{genericWalk}.
 
 \begin{algo}[Lift]\
   \label{alg:lift}
   \begin{algorithmic}[1]
     \Require Reduced Gröbner bases $\mathcal G_{\prec'}(I)$ and $\mathcal G_{\prec_{\vec
-      w}}(\initial_{\vec w}(I))$ where $\vec w \in C_{\prec'}(I)$ for some term orders
-      $\prec$ and $\prec'$.
-    \Ensure Reduced Gröbner basis $\mathcal G_{\prec_{\vec w}}(I)$.
-    \todo{actually formulate the algorithm if possible}
+      u}}(\initial_{\vec u}(I))$ where $\vec u \in C_{\prec}(I)\cap C_{\prec'}(I)$ for
+      some term orders $\prec$ and $\prec'$.
+    \Ensure Reduced Gröbner basis $\mathcal G_{\prec_{\vec u}}(I)$.
+    \For $f \in \mathcal G_{\prec_{\vec u}}(\initial_{\vec u}(I))$
+      \State Compute the remainder $f^G$ of dividing $f$ by $G =  \mathcal G_{\prec'}(I)$.
+    \EndFor
+    \State Set $G' = \{ f-f^G : f \in \mathcal G_{\prec_{\vec u}}(\initial_{\vec u}(I)) \}$.
+    \For $f \in G'$
+      \State Reduce $f := f^{G'\setminus\{f\}}$ as defined above.
+    \EndFor
+    \State \textbf{return} $G'$.
   \end{algorithmic}
 \end{algo}
 
-As we will see later again the tropical curves $\Trop(\initial_{\vec w}(I))$ for weights
-$\vec w$ in the relative interior of some facet $F$ provide local descriptions of the full
-tropical variety $\Trop(I)$, with each ray pointing towards a maximal Gröbner cone which
-has $F$ as a facet. Combining this fact with the lift algorithm yields the following
-algorithm to determine all neighboring maximal Gröbner cones of some given cone in the
-tropical variety:
+The correctness of this algorithm is proved in \cite[Proposition~3.2]{genericWalk} as
+well. As we will see later again the tropical curves $\Trop(\initial_{\vec w}(I))$ for
+weights $\vec w$ in the relative interior of some facet $F$ provide local descriptions of
+the full tropical variety $\Trop(I)$, with each ray pointing towards a maximal Gröbner
+cone which has $F$ as a facet. Combining this fact with the lift algorithm yields the
+following algorithm to determine all neighboring maximal Gröbner cones of some given cone
+in the tropical variety:
 
 \begin{algo}[Neighbors, {\cite[Algorithm~4.10]{compTropVar}}]\
   \label{alg:neighbors}
@@ -1430,7 +1439,7 @@ compute the tropical variety of any zero-dimensional ideal by applying the algor
 each set in the triangular decomposition:
 
 \begin{algo}[Zero-dimensional tropical varieties,
-  {\cite[Algorithm~2.10]{tropPointsLinks}}] $ $
+  {\cite[Algorithm~2.10]{tropPointsLinks}}]\
   \begin{algorithmic}[1]
     \Require a triangular set $F = \{f_1, \dots, f_n\} \subseteq K[x_1, \dots, x_n]$ with
     zero-dimensional affine variety $V(F) \subseteq \setT^n$.
