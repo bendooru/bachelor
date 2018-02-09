@@ -262,7 +262,7 @@ large numbers of processor cores. In fact, our algorithm scales well to as many 
 compute nodes, which corresponds to 896 processor cores, reducing the running time to
 20\,minutes.
 
-The thesis is structures as follows: In section~2 we will describe the general setting in
+The thesis is structures as follows: In Section~2 we will describe the general setting in
 which we want to compute tropical varieties. For this purpose we introduce various notions
 concerning fields with valuation and convex geometry. We then define tropical varieties
 and study their properties as polyhedral convexes. Finally, we illustrate how to compute
@@ -864,8 +864,8 @@ class with respect to a homogeneous ideal $I$.
 
 After this light introduction to tropical arithmetic and some convex geometry we now shift
 our focus to more general polynomials and ideals. The idea is to combine the fan structure
-of the Gröbner fan we derived in section~\ref{sec:grobFan} with our knowledge on tropical
-hypersurfaces from section~\ref{sec:tropIntro}. Here we will introduce the general
+of the Gröbner fan we derived in Section~\ref{sec:grobFan} with our knowledge on tropical
+hypersurfaces from Section~\ref{sec:tropIntro}. Here we will introduce the general
 procedure of computing a tropical variety by computing cones in the corresponding fan and
 finding its neighbor cones.
 
@@ -939,7 +939,7 @@ Definition~\ref{def:initialId}.
 
 To make our notion of a weight ordering $\prec_{\vec w}$ consistent with this convention,
 we redefine $\prec_{\vec w}$ to be the ordering $\prec_{-\vec w}$ as introduced in
-section~\ref{sec:grobFan}. This ensures that, if the valuation $\nu$ is trivial,
+Section~\ref{sec:grobFan}. This ensures that, if the valuation $\nu$ is trivial,
 $\initial_{\vec w}(f)$ and $\initial_{\prec_{\vec w}}(f)$ agree if the former is a
 monomial, and in general the latter will always be the maximal term of the latter with
 respect to $\prec$. This would not be true in general for the original definition as it
@@ -1306,7 +1306,7 @@ all neighbors of all unprocessed cones until we do not obtain any more new neigh
 This algorithm suffices to illustrate the method of traversing the tropical variety. In
 the next section we will look at new algorithms to improve our Neighbor-algorithm and
 introduce an algorithm to compute a starting Gröbner cone. In
-section~\ref{sec:traverseParal} we will come back to this traversal algorithm and make it
+Section~\ref{sec:traverseParal} we will come back to this traversal algorithm and make it
 more suitable for our parallelization purposes.
 
 \subsection{Newton Polygon Method}
@@ -1314,7 +1314,7 @@ more suitable for our parallelization purposes.
 
 We focus on a new approach introduced by Yue Ren and Tommy Hofmann which uses Newton
 polygons to compute zero-dimensional tropical varieties \cite{tropPointsLinks}. While the
-general traversal procedures are given in section~\ref{sec:tropVar}, we now want to study
+general traversal procedures are given in Section~\ref{sec:tropVar}, we now want to study
 different methods for computing non-trivial points in the tropical variety and links
 between cones in it, which allows us to generate a starting and neighbor cones more
 efficiently. In particular, Ren and Hofmann's methods provide local optimizations to the
@@ -1688,7 +1688,7 @@ relative interior will yield a suitable starting cone.
     \bigr\rangle \idealof K[x_{1,2}, \dots, x_{4,5}]
   \end{align*}
   which describes the Grassmannian $\Grass(2,5)$ in the Plücker embedding, see
-  section~\ref{sec:grass}. This ideal is 7-dimensional and has maximal independent set
+  Section~\ref{sec:grass}. This ideal is 7-dimensional and has maximal independent set
   $\{x_{1,2}, \dots, x_{2,5} \}$. In the first step we must intersect with suitable
   hyperplanes in $x_{1, 2}, \dots, x_{2,5}$. By intersecting with, for instance,
   $(c_{1,2}, \dots, c_{3,4}) = (2,4,6,8,7,5,3)$ and computing a Gröbner basis of $I_c
@@ -1947,7 +1947,7 @@ V_2$ of the node set such that $E \subseteq (V_1 \times V_2) \cup (V_2 \times V_
 meaning no arc connects nodes lying in the same set $V_i$. But by definition of the Petri
 net $(P,T,F)$ this clearly holds for the graph $G = (P \cup T, F)$ where we interpret
 places and transitions as nodes and their flow relations as arcs. This will be illustrated
-in the upcoming examples, see for instance figures~\ref{fig:firing} and \ref{fig:petriEx}.
+in the upcoming examples, see for instance Figures~\ref{fig:firing} and \ref{fig:petriEx}.
 Usually, places will be represented by circles and transitions as boxes, while tokens held
 by places will be drawn as points in the corresponding place. We will also mark places or
 transitions with letters if necessary.
@@ -2971,10 +2971,11 @@ in efficiency. We can imagine two reasons for this:
   \item More importantly, the computation of a starting cone via
     Algorithm~\ref{alg:tropicalPoint} and execution orders of simultaneously enabled
     transitions in GPI-Space are randomized, leading to different program flows for each
-    invocation. This is further amplified by the computation modulo symmetry: For
-    different starting cones we will come across different representatives for the cone
-    orbits. Also, computations in \texttt{puiseux.lib} are comparatively time-expensive
-    compared to the Newton-method described in Section~\ref{sec:newtonMethod}.
+    invocation. This is further amplified by computations modulo symmetry: For different
+    starting cones we will come across different representatives for the cone orbits.
+    Also, computations in \texttt{puiseux.lib} are more time-expensive compared to the
+    Newton-method described in Section~\ref{sec:newtonMethod} and their occurrence
+    frequency varies greatly depending on the starting cone.
 \end{itemize}
 
 \begin{figure}[htbp]
