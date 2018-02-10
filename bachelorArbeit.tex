@@ -2959,11 +2959,13 @@ $\mathcal G_{3,8}$ modulo $S_8$ has $f$-vector
   (0,0,0,0,0,0,0,0,1,95,1098,6671,24196,53648,70557,50125,14763),
 \]
 however the recombination into the full fan has proven to be too memory intensive even for
-the high-memory compute servers in the mathematics department of TU Kaiserslautern. Having
-obtained a full solution, we started benchmarking this example. Timings of these runs are
-given in \ref{tab:g38}. In contrast to $\mathcal G_{3,8}$, computations of $\mathcal
-G_{3,8}$ are done in steps of whole compute nodes where all 16 processor cores are
-utilized. The timings, taken as averages over at least 8 runs, are plotted in
+the high-memory compute servers in the mathematics department of TU
+Kaiserslautern.\footnote{Computing the full $f$-vector from orbit representatives
+\emph{efficiently} could be a research topic in and on itself.} Having obtained a full
+solution, we started benchmarking this example. Timings of these runs are given in
+\ref{tab:g38}. In contrast to $\mathcal G_{3,7}$, computations of $\mathcal G_{3,8}$ are
+done in steps of whole compute nodes where all 16 processor cores are utilized. The
+timings, taken as averages over at least 8 runs, are plotted in
 Figure~\ref{fig:g38scaling}. Note that for 16 and 32 cores we only did five and four runs
 each due to time constraints.
 
