@@ -171,12 +171,13 @@
 
 \begin{document}
 \numberwithin{lstlisting}{section}
-\pagestyle{plain}
 
+\pagestyle{empty}
 \maketitle
 
 % make sure toc starts on page 3
 \clearpage\null\clearpage
+\pagestyle{plain}
 \tableofcontents
 \newpage
 \listoffigures
@@ -1135,21 +1136,22 @@ reasons it is favorable to work with cones and polyhedral fans. In our case, whe
     us to transform our problems accordingly and to restrict our algorithms to working
     with polyhedral cones and fans.
 \end{enumerate}
-In addition to this, we are also allowed to only consider tropical varieties given by
-homogeneous ideals. Fix an ideal $I\idealof K[x_1, \dots, x_n]$ and a weight $\vec w \in
-\setR^n$, then we consider the \emph{homogenization} $I^h \idealof K[x_0, \dots, x_n]$ of
-$I$. Then \cite[Lemma~2.2]{compTropVar} states that the initial ideal $\initial_{\vec
-w}(I)$ contains a monomial if and only if $\initial_{(0,\vec w)}(^hI)$ contains a
-monomial. This restriction allows us to utilize techniques specialized to homogeneous
-ideals, which are -- in some sense -- nicer than their general counterparts. Also, as
-shown in Proposition~\ref{prp:grRegion}, there are no restrictions on the Gröbner region
-of $I$. Hence, for the following algorithms we will assume that every ideal $I \idealof
-K[\vec x]$ has constant coefficients and is homogeneous.
+In addition to this, we are also allowed to restrict our theory and methods to tropical
+varieties given by homogeneous ideals: We fix $I\idealof K[x_1, \dots, x_n]$ and a weight
+$\vec w \in \setR^n$, and then consider the \emph{homogenization} $I^h \idealof K[x_0,
+\dots, x_n]$ of $I$. Then \cite[Lemma~2.2]{compTropVar} states that the initial ideal
+$\initial_{\vec w}(I)$ contains a monomial if and only if $\initial_{(0,\vec w)}(^hI)$
+contains a monomial. This restriction allows us to utilize techniques specialized to
+homogeneous ideals, which have been studied to great detail and are usually easier to do
+calculations with. Also, as shown in Proposition~\ref{prp:grRegion}, there are no
+restrictions on the Gröbner region of $I$. Hence, for the following algorithms we will
+assume that every ideal $I \idealof K[\vec x]$ has constant coefficients and is
+homogeneous.
 
-With these simplifications in mind it is clear that a tropical variety is the support of a
-subfan of the Gröbner fan from Definition~\ref{def:groebnerConeFan}. We thus want to
-establish the connection between the Gröbner cones contained in the tropical varieties and
-the Gröbner bases they define. Fixing a total monomial ordering $\prec$ as a \enquote{tie
+With these simplifications in mind, it is clear that a tropical variety is the support of
+a subfan of the Gröbner fan from Definition~\ref{def:groebnerConeFan}. We thus want to
+establish the connection between the Gröbner cones contained in a tropical variety and the
+Gröbner bases they define. Fixing a total monomial ordering $\prec$ as a \enquote{tie
 breaker}, we usually represent a Gröbner cone $C_{\vec w}(I)$ by the pair $(\mathcal
 G_{\prec_{\vec w}}(\initial_{\vec w}), \mathcal G_{\prec_{\vec w}}(I))$ of reduced Gröbner
 bases where $\vec w$ is some weight in the relative interior of the cone $C_{\vec w}(I)$.
@@ -1168,18 +1170,19 @@ we can deduce defining equations for the Gröbner cone from the Gröbner bases t
   \]
 \end{lemma}
 
-We now come to the main algorithms needed to compute tropical varieties. While needed by
-Algorithms~\ref{alg:neighbors} and \ref{alg:traversal} as formulated in
-\cite{compTropVar}, our modifications presented in Section~\ref{sec:newtonMethod} will not
-involve intersections of polyhedral fans and cones. Still, we want to give a short account
-on obtaining such intersections: Given two tropical varieties represented by fans
-$\mathcal F_1, \mathcal F_2$ we define their \emph{common refinement} to be $\mathcal F_1
-\wedge \mathcal F_2 = \{ C_1 \cap C_2 : C_1 \in \mathcal F_1, C_2 \in \mathcal F_2 \}$.
-This is again a fan and clearly the support of $\mathcal F_1 \wedge \mathcal F_2$ is the
-intersection of the supports of $\mathcal F_1$ and $\mathcal F_2$ respectively. Also, by
-considering representations of the respective fans we obtain a representation of the
-common refinement in the following way, and note that in practice we canonicalize the
-resulting intersection cones, allowing us to easily check for duplicates:
+We now come to the main algorithms needed to compute tropical varieties. While
+intersections of tropical hypersurfaces are required in Algorithms~\ref{alg:neighbors} and
+\ref{alg:traversal} as they are formulated in \cite[Section~4]{compTropVar}, our
+modifications presented in Section~\ref{sec:newtonMethod} will eliminate the dependency on
+performing such intersections. Still, we want to give a short account on the general idea
+behind this: Given two tropical varieties represented by fans $\mathcal F_1, \mathcal F_2$
+we define their \emph{common refinement} to be $\mathcal F_1 \wedge \mathcal F_2 = \{ C_1
+\cap C_2 : C_1 \in \mathcal F_1, C_2 \in \mathcal F_2 \}$. This is again a fan and clearly
+the support of $\mathcal F_1 \wedge \mathcal F_2$ is the intersection of the supports of
+$\mathcal F_1$ and $\mathcal F_2$. Also, by considering representations of the respective
+fans we obtain a representation of the common refinement in the following way. Note that,
+in practice, we canonicalize the resulting intersection cones, allowing us to easily check
+for duplicates:
 
 \begin{algo}[Common Refinement, {\cite[Algorithm~4.4]{compTropVar}}]\
   \label{alg:fanRefinement}
@@ -1216,14 +1219,13 @@ provided as a \enquote{blackbox} for context.
   \end{algorithmic}
 \end{algo}
 
-Another important step needed to compute neighbouring cones is computing Gröbner bases in
-these adjacent Gröbner cones. Generally speaking, it would be possible to compute these
-from scratch if we only have access to our ideal $I$ and a weight $\vec w$ in the relative
-interior of an adjacent cone. However, the following \emph{lift} algorithm greatly
-simplifies this procedure as we already know the reduced Gröbner bases in the original
-Gröbner cone. It is a step in the \emph{Gröbner walk} \cite{groebWalk}, which transforms a
-Gröbner basis with respect to a given ordering to a basis of of an ordering of an adjacent
-Gröbner cone. In fact, we use a modified lift algorithm given in
+Another important step needed to compute neighbouring maximal Gröbner cones is computing
+Gröbner bases corresponding to said cones. Obviously, it is possible to simply compute
+these from scratch. However, the following \emph{lift} algorithm greatly simplifies this
+procedure, as reduced Gröbner bases in the original Gröbner cone are already known. It is
+a step in the \emph{Gröbner walk} \cite{groebWalk}, which transforms a Gröbner basis with
+respect to a given ordering to a basis of of an ordering of an adjacent Gröbner cone. In
+fact, we use a modified version of this, which is based on the results in
 \cite[Proposition~3.2]{genericWalk}.
 
 \begin{algo}[Lift]\
@@ -1244,13 +1246,13 @@ Gröbner cone. In fact, we use a modified lift algorithm given in
   \end{algorithmic}
 \end{algo}
 
-The correctness of this algorithm is proved in \cite[Proposition~3.2]{genericWalk} as
-well. As we will see later again the tropical curves $\Trop(\initial_{\vec w}(I))$ for
-weights $\vec w$ in the relative interior of some facet $F$ provide local descriptions of
-the full tropical variety $\Trop(I)$, with each ray pointing towards a maximal Gröbner
-cone which has $F$ as a facet. Combining this fact with the lift algorithm yields the
-following algorithm to determine all neighboring maximal Gröbner cones of some given cone
-in the tropical variety:
+The proof of \cite[Proposition~3.2]{genericWalk} automatically proves the correctness of
+this algorithm. As we will see later on the tropical curves $\Trop(\initial_{\vec w}(I))$,
+where $\vec w$ are weights in the relative interior of some facet $F$, provide local
+descriptions of the full tropical variety $\Trop(I)$, with each ray pointing towards a
+maximal Gröbner cone containing $F$. Combining this fact with the lift algorithm yields
+the following method to determine all neighboring maximal Gröbner cones of some given
+maximal cone in the tropical variety:
 
 \begin{algo}[Neighbors, {\cite[Algorithm~4.10]{compTropVar}}]\
   \label{alg:neighbors}
@@ -1290,9 +1292,11 @@ in the tropical variety:
 
 We now have a method to determine neighboring maximal cones of a given Gröbner cone and
 know by Theorem~\ref{thm:tropComplexConn} that the tropical variety of a prime ideal is
-connected in codimension one, so the method of traversing it becomes painfully obvious. If
-we can determine a maximal starting cone in the tropical variety, then we simply compute
-all neighbors of all unprocessed cones until we do not obtain any more new neighbors.
+connected in codimension one. Thus, it is painfully obvious how to combine our results
+into a full \emph{traversal} of the tropical variety: If we can determine a maximal
+starting cone, then we simply compute all neighbors of all known cones until we no longer
+obtain any new neighbors. Clearly, this procedure is applicable to any polyhedral fan
+connected in codimension one:
 
 \begin{algo}[Traversal of an Irreducible Tropical Variety]\
   \label{alg:traversal}
@@ -1315,11 +1319,11 @@ all neighbors of all unprocessed cones until we do not obtain any more new neigh
   \end{algorithmic}
 \end{algo}
 
-This algorithm suffices to illustrate the method of traversing the tropical variety. In
-the next section we will look at new algorithms to improve our Neighbor-algorithm and
-introduce an algorithm to compute a starting Gröbner cone. In
-Section~\ref{sec:traverseParal} we will come back to this traversal algorithm and make it
-more suitable for our parallelization purposes.
+This formulation suffices to illustrate the method of traversing a tropical variety for
+now. In the next section we will look at new algorithms to improve our Neighbor-algorithm
+and introduce an algorithm to compute a starting Gröbner cone. In
+Section~\ref{sec:traverseParal} we will revisit the traversal algorithm and make it more
+suitable for our parallelization purposes.
 
 \subsection{Newton Polygon Method}
 \label{sec:newtonMethod}
