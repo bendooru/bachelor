@@ -820,11 +820,11 @@ immediately leads to the following definition:
 
 \begin{definition}[Gröbner Cones and Fans]
   \label{def:groebnerConeFan}
-  Fix an ideal $I \idealof K[\vec x]$. For a weight $\vec w \in \setR^n$ with $C[\vec w]
-  \cap \setR^n_{>0} \neq \varnothing$ we call the Euclidean closure $C_{\vec w}(I) =
-  \overline{C[\vec w]}$ the \emph{Gröbner cone} of~$I$ with respect to $\vec w$. The
-  collection of all these cones $\GF(I) = \{ C_{\vec w}(I) : \vec w \in \setR^n_{\geq0}
-  \}$ is called the \emph{Gröbner fan} of $I$.
+  Fix an ideal $I \idealof K[\vec x]$. For a weight vector $\vec w \in \setR^n$ with
+  $C[\vec w] \cap \setR^n_{>0} \neq \varnothing$ we call the Euclidean closure $C_{\vec
+  w}(I) = \overline{C[\vec w]}$ the \emph{Gröbner cone} of~$I$ with respect to $\vec w$.
+  The collection of all these cones $\GF(I) = \{ C_{\vec w}(I) : \vec w \in
+  \setR^n_{\geq0} \}$ is called the \emph{Gröbner fan} of $I$.
 \end{definition}
 
 In \cite[Theorem~2.19]{compGrobFan} it is shown that the Gröbner fan is in fact a fan. Its
@@ -2797,10 +2797,10 @@ leads to the following definition:
   Suppose we work over $K = \setC$ as a subfield of $\CCt$, hence our algorithms work with
   polyhedral fans as was remarked before.
   \begin{enumerate}
-    \item As we clearly have $\Grass(0,n) \cong \Grass(n,n) \cong \{0\}$ and $\Grass(1,n)
-      \cong \Grass(n-1, n) \cong \setP_K^{n-1}$, the first \enquote{non-trivial}
-      Grassmannian is $\Grass(2,4)$. By the process described above one easily finds that
-      $\Grass(2,4)$ is given by the ideal
+    \item Clearly, $\Grass(0,n) \cong \Grass(n,n) \cong \{0\}$ and $\Grass(1,n) \cong
+      \Grass(n-1, n) \cong \setP_K^{n-1}$, so the first \enquote{non-trivial} Grassmannian
+      is $\Grass(2,4)$. By the process described above one easily finds that $\Grass(2,4)$
+      is given by the ideal
       \[
         I_{2,4} = \ideal{ x_{i,j} \phi : 1 \leq i < j \leq 4 }
         \idealof K[x_{1,2}, \dots, x_{3,4}].
