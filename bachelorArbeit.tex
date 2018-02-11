@@ -67,10 +67,14 @@
   backend=biber,
   style=alphabetic,
   maxnames=10,
+  minalphanames=3,
   maxalphanames=5,
   isbn=false
 ]{biblatex}
 \addbibresource{bachelor.bib}
+\defbibheading{head}[References]{
+  \section*{#1}\markboth{#1}{#1}
+}
 
 % serif > sans-serif
 \setkomafont{sectioning}{\rmfamily\bfseries\boldmath}
@@ -3022,7 +3026,7 @@ geometry with the methods provided by GPI-Space is a worthwhile endeavor and off
 tremendous speed-up.
 
 \clearpage
-\printbibliography
+\printbibliography[heading=head]
 
 \end{document}
 % vim: spell spelllang=en
