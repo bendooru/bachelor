@@ -301,7 +301,7 @@ would not have been possible.
 
 Tropical geometry is a relatively new field in mathematics that arises from numerous
 contexts and connects various branches of mathematics in exciting and novel ways. We shall
-provide a basic introduction to this topic while focusing on the computational aspects
+provide a basic introduction to this topic while focusing on the computational aspects,
 which will lead to the main interest of this thesis -- the recently developed techniques
 using Newton polygons and valuations.
 
@@ -2934,16 +2934,16 @@ the minimal representative of a interior point.
   \begin{tabular}{r|r||r|r}
     \textbf{nodes} & \textbf{cores} & \textbf{run time [s]} & \textbf{efficiency} \\
     \hline
-     1 &  16 & 98771.000 & 0.587 \\
+     1 &  16 & 98926.120 & 0.586 \\
      2 &  32 & 37398.740 & 0.775 \\
      4 &  64 & 14486.337 & 1     \\
      8 & 128 &  6597.369 & 1.098 \\
-    16 & 256 &  3300.084 & 1.097 \\
+    16 & 256 &  3297.911 & 1.098 \\
     24 & 384 &  2506.033 & 0.963 \\
     32 & 512 &  2001.769 & 0.904 \\
-    40 & 640 &  1830.740 & 0.791 \\ % FIXME watch out for bad data
+    40 & 640 &  1509.658 & 0.959 \\
     48 & 768 &  1267.394 & 0.952 \\
-    56 & 896 &  1188.226 & 0.871
+    56 & 896 &  1188.226 & 0.959
   \end{tabular}
   \caption{Timings of computing $\mathcal G_{3,8}$, using all 16 cores per node}
   \label{tab:g38}
@@ -2966,8 +2966,8 @@ solution, we started benchmarking this example. Timings of these runs are given 
 \ref{tab:g38}. In contrast to $\mathcal G_{3,7}$, computations of $\mathcal G_{3,8}$ are
 done in steps of whole compute nodes where all 16 processor cores are utilized. The
 timings, taken as averages over at least 8 runs, are plotted in
-Figure~\ref{fig:g38scaling}. Note that for 16 and 32 cores we only did five and four runs
-each due to time constraints.
+Figure~\ref{fig:g38scaling}. Note that for 16 and 32 cores we only did five runs each due
+to time constraints.
 
 \begin{figure}[htb]
   \begin{center}
@@ -2984,11 +2984,11 @@ interesting behavior: Firstly, the algorithm shows super-linear speed-up when pa
 16 to 64 -- in particular running on 64 cores is 6.8 times faster than running on 16 cores
 while only using four times as many processor cores. This is quite counterintuitive:
 possible explanations include memory and storage latencies on fewer machines.\todo{clarify}{}
-Secondly, while we observe the expected degradation of parallelization efficiency
-after 128 cores, we also see some erratic behavior of the resulting graph. In particular
-the runs for 40 nodes, that is, 640 cores, show a significant increase in total
-computation time, that is, the combined running time of all individual processes, and drop
-in efficiency. We can imagine two reasons for this:
+Secondly, while we observe the expected degradation of parallelization efficiency after
+128 cores, we also see some erratic behavior of the resulting graph. In particular the
+runs for 32 nodes, that is, 512 cores, show an increase in total computation time, that
+is, the combined running time of all individual processes, and drop in efficiency. We can
+imagine two reasons for this:
 \begin{itemize}
   \item As the sample size of runs is rather small, disturbances in the computing cluster
     can have significant impact on the average timings.
@@ -3010,11 +3010,12 @@ in efficiency. We can imagine two reasons for this:
   \label{fig:g38scaling}
 \end{figure}
 
-Despite the uncharacteristic drops in efficiency we still see that this algorithm scales
+Despite the uncharacteristic form of the graph we still see that this algorithm scales
 quite favorably, even for up to 896 processor cores, far exceeding our initial
-expectations. In particular, scaled to 16 cores our efficiency values all lie above 1.
-We can conclude that parallelizing algorithms for algebraic geometry with the methods
-provided by GPI-Space is a worthwhile endeavor and offers tremendous speed-up.
+expectations. In particular, even when scaled to 64 cores our efficiency values all lie
+above $0{.}9$ (on average). We can conclude that parallelizing algorithms for algebraic
+geometry with the methods provided by GPI-Space is a worthwhile endeavor and offers
+tremendous speed-up.
 
 \clearpage
 \printbibliography
