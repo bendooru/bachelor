@@ -84,6 +84,9 @@
 \setlist[enumerate,1]{label=(\roman*)}
 \setlist[itemize,2]{label=$\circ$}
 
+% Listings header
+\renewcommand*{\lstlistlistingname}{List of Listings}
+
 % use mathds instead of mathbb
 \newcommand*\setZ{\mathds{Z}}
 \newcommand*\setR{\mathds{R}}
@@ -190,21 +193,21 @@
 
 \section{Introduction}
 
-Tropical geometry is a relatively new field in mathematics that studies algebraic
-varieties in a combinatorial fashion, reducing algebraic problems to polyhedral ones in
-the process. In particular, the \emph{tropical varieties} arising in this field are
-sometimes referred to as the \enquote{combinatorial shadow} of their algebraic
-counterpart. The general idea is to pass from classical arithmetic to \emph{tropical
-arithmetic}, where one replaces addition and multiplication with taking minima and
-classical addition, respectively. This turns the graphs of polynomial functions into
-piecewise linear objects and the tropical varieties are the \emph{corner loci} of these
-objects. An important application of tropical geometry includes intersection theory which
-deals with intersections between subvarieties of an algebraic variety and is for example
-used to count numbers of solutions to geometric questions \cite{mikhEnum}: Many theorems
-have counterparts in tropical geometry or even carry over entirely. As usual,
-mathematicians are interested in studying concrete examples of tropical varieties -- for
-instance to gain a general intuition behind the combinatorial structures or to find
-counterexamples
+Tropical geometry is a relatively new branch of algebraic geometry, a field in
+mathematics, that studies algebraic varieties in a combinatorial fashion, reducing
+algebraic problems to polyhedral ones in the process. In particular, the \emph{tropical
+varieties} arising in this field are sometimes referred to as the \enquote{combinatorial
+shadow} of their algebraic counterpart. The general idea is to pass from classical
+arithmetic to \emph{tropical arithmetic}, where one replaces addition and multiplication
+with taking minima and classical addition, respectively. This turns the graphs of
+polynomial functions into piecewise linear objects and the tropical varieties are the
+\emph{corner loci} of these objects. An important application of tropical geometry
+includes intersection theory which deals with intersections between subvarieties of an
+algebraic variety and is for example used to count numbers of solutions to geometric
+questions \cite{mikhEnum}: Many theorems have counterparts in tropical geometry or even
+carry over entirely. As usual, mathematicians are interested in studying concrete examples
+of tropical varieties -- for instance to gain a general intuition behind the combinatorial
+structures or to find counterexamples.
 
 While this process of \emph{tropicalization} yields objects that are far easier to
 describe and compute than their algebraic counterparts, it is not hard to construct
@@ -230,18 +233,18 @@ computing configurations.
 
 Our contribution in this thesis is a combination of both of these approaches: We apply the
 latter kind of paralellization method mentioned above to existing methods to compute
-tropical varieties. Methods of computing tropical varieties have been studied by Tristram
-Bogart, Anders Jensen, David Speyer, Benrd Sturmfels and Rekha Thomas \cite{compTropVar}
-and further improved by Yue Ren and Tommy Hofmann \cite{tropPointsLinks}. These methods
-constitute the \enquote{lower} level of the final parallel algorithm and are implemented
-in the computer algebra system \textsc{Singular} \cite{Singular} which is being developed
-at the University of Kaiserslautern. In particular, tropical computations are carried out
-by methods of the library \texttt{tropicalNewton.lib} \cite{tropNewtLib} which relies on
-Gfan \cite{gfan} for polyhedral computations via the interface library \texttt{gfan.lib}
-\cite{gfanLib}. Instances of \textsc{Singular} processes are then managed by the workflow
-management system GPI-Space \cite{gpispace} at the \enquote{upper} level, that is, the
-coordination layer. GPI-Space is developed by the High Performance Computations (HPC)
-department at Fraunhofer Institute for Industrial Mathematics (ITWM).
+tropical varieties. Such methods have been studied by Tristram Bogart, Anders Jensen,
+David Speyer, Bernd Sturmfels and Rekha Thomas \cite{compTropVar} and further improved by
+Yue Ren and Tommy Hofmann \cite{tropPointsLinks}. These methods constitute the
+\enquote{lower} level of the final parallel algorithm and are implemented in the computer
+algebra system \textsc{Singular} \cite{Singular}, which is being developed at the
+University of Kaiserslautern. In particular, tropical computations are carried out by
+methods of the library \texttt{tropicalNewton.lib} \cite{tropNewtLib} which relies on
+\texttt{gfanlib} \cite{gfan} for polyhedral computations via the interface library
+\texttt{gfan.lib} \cite{gfanLib}. Instances of \textsc{Singular} processes are then
+managed by the workflow management system GPI-Space \cite{gpispace} at the \enquote{upper}
+level, that is, the coordination layer. GPI-Space is developed by the High Performance
+Computations (HPC) department at Fraunhofer Institute for Industrial Mathematics (ITWM).
 
 Our parallelization solution is based on work by Christian Reinbold who used GPI-Space to
 implement a parallel algorithm to compute GIT-fans \cite{reinboldGitFan}, using algorithms
@@ -253,18 +256,18 @@ handle computation of tropical varieties instead. The development was coordinate
 cooperation with the HPC department of Fraunhofer ITWM, in particular with the support of
 Dr.~Mirko Rahn and Christian Reinbold. Additionally, as a side effect we accelerated the
 development of \texttt{puiseux.lib} \cite{puiseuxLib}, which is used to compute Puiseux
-expansions of zero-dimensional ideals as. This is required by the methods in
-\cite{tropPointsLinks} as a special case. Moreover, during our work with \textsc{Singular}
-we were able to identify various bugs, for example memory leaks.
+expansions of zero-dimensional ideals over Puiseux series rings. This is required by the
+methods in \cite{tropPointsLinks} as a special case. Moreover, during our work with
+\textsc{Singular} we were able to identify various bugs, for example memory leaks.
 
 Using our parallel algorithm we were able to compute the tropical Grassmannian $\mathcal
-G_{3,8}$ modulo symmetry in its entirety, which has not been possible with legacy methods
-until now. Using this as a benchmark, we also found that our algorithm scales favorably
-for large numbers of processor cores. In fact, our algorithm scales well to as many as 56
-compute nodes, which corresponds to 896 processor cores, reducing the running time to
-20\,minutes.
+G_{3,8}$ modulo symmetry in its entirety, which has not been possible until now using
+legacy methods mentioned above. Using this as a benchmark, we also found that our
+algorithm scales favorably for large numbers of processor cores. In fact, our algorithm
+scales well to as many as 56 compute nodes, which corresponds to 896 processor cores,
+reducing the running time to 20\,minutes.
 
-The thesis is structures as follows: In Section~\ref{sec:theory} we will describe the
+The thesis is structured as follows: In Section~\ref{sec:theory} we will describe the
 general setting in which we want to compute tropical varieties. For this purpose, we
 introduce various notions concerning fields with valuation and convex geometry. We then
 define tropical varieties and study their properties as polyhedral convexes. Finally, we
@@ -287,7 +290,8 @@ series expansions. Similarly, I thank Dr.~Hans Schönemann who quickly provided
 fixes to some annoying bugs we found in \text{Singular}.
 
 I thank my friend Kasimir for helping proofread this thesis and providing his
-linguistic assistance while having to deal with this \enquote{mathematical nonsense}.
+linguistic assistance. I commend his efforts in reading through this without having any
+mathematical background whatsoever.
 
 In addition, I thank Dr.~Mirko Rahn from the High Performance Computing (HPC) department
 at Fraunhofer ITWM for his guidance and help during my work there. I further thank
